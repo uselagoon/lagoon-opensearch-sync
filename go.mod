@@ -1,4 +1,4 @@
-module github.com/smlx/go-cli-github
+module github.com/uselagoon/lagoon-opensearch-sync
 
 go 1.19
 

@@ -3,7 +3,7 @@ package server_test
 import (
 	"testing"
 
-	"github.com/smlx/go-cli-github/internal/server"
+	"github.com/uselagoon/lagoon-opensearch-sync/internal/server"
 )
 
 func TestServe(t *testing.T) {

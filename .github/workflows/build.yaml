@@ -33,7 +33,7 @@ jobs:
     strategy:
       matrix:
         binary:
-        - go-cli-github
+        - lagoon-opensearch-sync
     needs: build
     runs-on: ubuntu-latest
     steps:
