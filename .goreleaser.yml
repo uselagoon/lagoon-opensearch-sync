@@ -1,5 +1,5 @@
 builds:
-- main: ./cmd/go-cli-github
+- main: ./cmd/lagoon-opensearch-sync
   ldflags:
   - >
     -s -w

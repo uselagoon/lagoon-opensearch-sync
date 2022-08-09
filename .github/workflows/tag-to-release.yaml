@@ -33,7 +33,7 @@ jobs:
     strategy:
       matrix:
         binary:
-        - go-cli-github
+        - lagoon-opensearch-sync
     needs:
     - tag
     - release

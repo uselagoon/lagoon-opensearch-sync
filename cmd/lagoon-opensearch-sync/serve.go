@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/smlx/go-cli-github/internal/server"
+	"github.com/uselagoon/lagoon-opensearch-sync/internal/server"
 )
 
 // ServeCmd represents the `serve` command.
