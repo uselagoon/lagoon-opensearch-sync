@@ -10,3 +10,7 @@ builds:
     -X "main.version={{.Version}}"
   env:
   - CGO_ENABLED=0
+  goarch:
+  - amd64
+  goos:
+  - linux
