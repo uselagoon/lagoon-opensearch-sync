@@ -14,8 +14,8 @@ var (
 
 // CLI represents the command-line interface.
 type CLI struct {
-	Version VersionCmd `kong:"cmd,help='Print version information'"`
-	Serve   ServeCmd   `kong:"cmd,help='Example serve command'"`
+	Version      VersionCmd      `kong:"cmd,help='Print version information'"`
+	DumpProjects DumpProjectsCmd `kong:"cmd,help='Print Lagoon Projects JSON to standard out'"`
 }
 
 func main() {
