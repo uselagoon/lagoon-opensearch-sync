@@ -22,7 +22,7 @@ type DumpProjectsCmd struct {
 	KeycloakClientSecret string `kong:"required,env='KEYCLOAK_SERVICE_API_CLIENT_SECRET',help='Keycloak OAuth2 Client Secret'"`
 }
 
-// Run the serve command.
+// Run the dump-projects command.
 func (cmd *DumpProjectsCmd) Run() error {
 	// get main process context, which cancels on SIGTERM
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGTERM)

@@ -1,0 +1,353 @@
+[
+  {
+    "attributes": {
+      "group-lagoon-project-ids": [
+        "{\"drupal-example\":[31,36,34,25,35]}"
+      ],
+      "lagoon-projects": [
+        "31,36,34,25,35"
+      ]
+    },
+    "clientRoles": {},
+    "id": "f6697da3-016a-43cd-ba9f-3f5b91b45302",
+    "name": "drupal-example",
+    "path": "/drupal-example",
+    "realmRoles": [],
+    "subGroups": [
+      {
+        "attributes": {
+          "type": [
+            "role-subgroup"
+          ]
+        },
+        "clientRoles": {},
+        "id": "87974fea-26f5-4097-af57-faa2cf61d0c6",
+        "name": "drupal-example-maintainer",
+        "path": "/drupal-example/drupal-example-maintainer",
+        "realmRoles": [
+          "maintainer"
+        ],
+        "subGroups": []
+      },
+      {
+        "attributes": {
+          "type": [
+            "role-subgroup"
+          ]
+        },
+        "clientRoles": {},
+        "id": "677b7f5e-efcb-40a7-a700-7eb3f41b4922",
+        "name": "drupal-example-owner",
+        "path": "/drupal-example/drupal-example-owner",
+        "realmRoles": [
+          "owner"
+        ],
+        "subGroups": []
+      }
+    ]
+  },
+  {
+    "attributes": {
+      "group-lagoon-project-ids": [
+        "{\"internaltest\":[34,33,25,36,11]}"
+      ],
+      "lagoon-projects": [
+        "34,33,25,36,11"
+      ]
+    },
+    "clientRoles": {},
+    "id": "9772ddcc-01ea-470a-9c6a-9729fb755ea2",
+    "name": "internaltest",
+    "path": "/internaltest",
+    "realmRoles": [],
+    "subGroups": [
+      {
+        "attributes": {
+          "type": [
+            "role-subgroup"
+          ]
+        },
+        "clientRoles": {},
+        "id": "2fb4bbef-00b0-4365-94ae-c5b366fb0946",
+        "name": "internaltest-guest",
+        "path": "/internaltest/internaltest-guest",
+        "realmRoles": [
+          "guest"
+        ],
+        "subGroups": []
+      },
+      {
+        "attributes": {
+          "type": [
+            "role-subgroup"
+          ]
+        },
+        "clientRoles": {},
+        "id": "d7d838c6-066c-42ac-82a4-bc54ad8ca742",
+        "name": "internaltest-maintainer",
+        "path": "/internaltest/internaltest-maintainer",
+        "realmRoles": [
+          "maintainer"
+        ],
+        "subGroups": []
+      },
+      {
+        "attributes": {
+          "type": [
+            "role-subgroup"
+          ]
+        },
+        "clientRoles": {},
+        "id": "d9298617-22e4-4dd3-b729-65beb15b7faf",
+        "name": "internaltest-owner",
+        "path": "/internaltest/internaltest-owner",
+        "realmRoles": [
+          "owner"
+        ],
+        "subGroups": []
+      },
+      {
+        "attributes": {
+          "type": [
+            "role-subgroup"
+          ]
+        },
+        "clientRoles": {},
+        "id": "013e4b5c-f38f-41f2-b406-22d65d0418d0",
+        "name": "internaltest-developer",
+        "path": "/internaltest/internaltest-developer",
+        "realmRoles": [
+          "developer"
+        ],
+        "subGroups": []
+      }
+    ]
+  },
+  {
+    "attributes": {
+      "lagoon-projects": [
+        "27"
+      ],
+      "type": [
+        "project-default-group"
+      ]
+    },
+    "clientRoles": {},
+    "id": "3fc60c90-b72d-4704-8a57-80438adac98d",
+    "name": "project-beta-ui",
+    "path": "/project-beta-ui",
+    "realmRoles": [],
+    "subGroups": [
+      {
+        "attributes": {
+          "type": [
+            "role-subgroup"
+          ]
+        },
+        "clientRoles": {},
+        "id": "938303e4-eac4-4a4a-919b-cea25e516ffc",
+        "name": "project-beta-ui-maintainer",
+        "path": "/project-beta-ui/project-beta-ui-maintainer",
+        "realmRoles": [
+          "maintainer"
+        ],
+        "subGroups": []
+      }
+    ]
+  },
+  {
+    "attributes": {
+      "lagoon-projects": [
+        "11"
+      ],
+      "type": [
+        "project-default-group"
+      ]
+    },
+    "clientRoles": {},
+    "id": "8fb9508c-a7e6-445b-a8bb-f28bb0b6eb2d",
+    "name": "project-drupal-example",
+    "path": "/project-drupal-example",
+    "realmRoles": [],
+    "subGroups": [
+      {
+        "attributes": {
+          "type": [
+            "role-subgroup"
+          ]
+        },
+        "clientRoles": {},
+        "id": "bdf09fe9-f3b6-4aba-a733-55d2d31817d2",
+        "name": "project-drupal-example-maintainer",
+        "path": "/project-drupal-example/project-drupal-example-maintainer",
+        "realmRoles": [
+          "maintainer"
+        ],
+        "subGroups": []
+      }
+    ]
+  },
+  {
+    "attributes": {
+      "lagoon-projects": [
+        "31"
+      ],
+      "type": [
+        "project-default-group"
+      ]
+    },
+    "clientRoles": {},
+    "id": "7d5f5769-6904-42cd-9418-d01a1daae6b5",
+    "name": "project-drupal9-base",
+    "path": "/project-drupal9-base",
+    "realmRoles": [],
+    "subGroups": [
+      {
+        "attributes": {
+          "type": [
+            "role-subgroup"
+          ]
+        },
+        "clientRoles": {},
+        "id": "4cc0ea5d-2d38-41b7-b0e6-9b69a101d8f6",
+        "name": "project-drupal9-base-maintainer",
+        "path": "/project-drupal9-base/project-drupal9-base-maintainer",
+        "realmRoles": [
+          "maintainer"
+        ],
+        "subGroups": []
+      }
+    ]
+  },
+  {
+    "attributes": {
+      "lagoon-projects": [
+        "34"
+      ],
+      "type": [
+        "project-default-group"
+      ]
+    },
+    "clientRoles": {},
+    "id": "372b0aae-40f1-4af2-b9dd-a4af1d21c845",
+    "name": "project-drupal9-solr",
+    "path": "/project-drupal9-solr",
+    "realmRoles": [],
+    "subGroups": [
+      {
+        "attributes": {
+          "type": [
+            "role-subgroup"
+          ]
+        },
+        "clientRoles": {},
+        "id": "448865dc-5e7a-4b71-a73e-ac13279f23db",
+        "name": "project-drupal9-solr-maintainer",
+        "path": "/project-drupal9-solr/project-drupal9-solr-maintainer",
+        "realmRoles": [
+          "maintainer"
+        ],
+        "subGroups": []
+      }
+    ]
+  },
+  {
+    "attributes": {
+      "group-lagoon-project-ids": [
+        "{\"project-example-ruby-on-rails\":[38]}"
+      ],
+      "lagoon-projects": [
+        "38"
+      ],
+      "type": [
+        "project-default-group"
+      ]
+    },
+    "clientRoles": {},
+    "id": "9e49d864-d78c-4875-ae46-57daa7151ebe",
+    "name": "project-example-ruby-on-rails",
+    "path": "/project-example-ruby-on-rails",
+    "realmRoles": [],
+    "subGroups": [
+      {
+        "attributes": {
+          "type": [
+            "role-subgroup"
+          ]
+        },
+        "clientRoles": {},
+        "id": "fcfe3df3-ca2a-4757-a7ca-c2fe717985d1",
+        "name": "project-example-ruby-on-rails-maintainer",
+        "path": "/project-example-ruby-on-rails/project-example-ruby-on-rails-maintainer",
+        "realmRoles": [
+          "maintainer"
+        ],
+        "subGroups": []
+      }
+    ]
+  },
+  {
+    "attributes": {
+      "lagoon-projects": [
+        "23"
+      ],
+      "type": [
+        "project-default-group"
+      ]
+    },
+    "clientRoles": {},
+    "id": "0a442bdd-e89d-4871-8552-80fcc386e236",
+    "name": "project-lagoon-website",
+    "path": "/project-lagoon-website",
+    "realmRoles": [],
+    "subGroups": [
+      {
+        "attributes": {
+          "type": [
+            "role-subgroup"
+          ]
+        },
+        "clientRoles": {},
+        "id": "55aac212-062a-49d3-a1cf-23dd53fd356d",
+        "name": "project-lagoon-website-maintainer",
+        "path": "/project-lagoon-website/project-lagoon-website-maintainer",
+        "realmRoles": [
+          "maintainer"
+        ],
+        "subGroups": []
+      }
+    ]
+  },
+  {
+    "attributes": {
+      "lagoon-projects": [
+        "33"
+      ],
+      "type": [
+        "project-default-group"
+      ]
+    },
+    "clientRoles": {},
+    "id": "7cd0cca1-ab32-442f-ba85-adc83d6d6d1a",
+    "name": "project-react-example",
+    "path": "/project-react-example",
+    "realmRoles": [],
+    "subGroups": [
+      {
+        "attributes": {
+          "type": [
+            "role-subgroup"
+          ]
+        },
+        "clientRoles": {},
+        "id": "d0f98f3d-2ec9-4e3c-a49d-c9245bd88c03",
+        "name": "project-react-example-maintainer",
+        "path": "/project-react-example/project-react-example-maintainer",
+        "realmRoles": [
+          "maintainer"
+        ],
+        "subGroups": []
+      }
+    ]
+  }
+]
