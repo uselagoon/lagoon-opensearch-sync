@@ -1,6 +1,8 @@
 package opensearch
 
 import (
+	"crypto/tls"
+	"crypto/x509"
 	"net/http"
 )
 
@@ -18,13 +20,20 @@ func (art *AuthenticatedRoundTripper) RoundTrip(req *http.Request) (*http.Respon
 	return art.roundTripper.RoundTrip(req)
 }
 
-func httpClient(username, password string) *http.Client {
-	// wrap the token in a *http.Client
+// ca is the PEM encoded CA certificate
+func httpClient(username, password string, ca *x509.Certificate) *http.Client {
+	cp := x509.NewCertPool()
+	cp.AddCert(ca)
+	// construct http.Client with custom CA and automatic basic auth
 	return &http.Client{
 		Transport: &AuthenticatedRoundTripper{
-			roundTripper: http.DefaultTransport,
-			username:     username,
-			password:     password,
+			roundTripper: &http.Transport{
+				TLSClientConfig: &tls.Config{
+					RootCAs: cp,
+				},
+			},
+			username: username,
+			password: password,
 		},
 	}
 }
