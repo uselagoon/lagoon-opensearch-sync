@@ -8,7 +8,6 @@ import (
 	"syscall"
 
 	"github.com/uselagoon/lagoon-opensearch-sync/internal/keycloak"
-	"go.uber.org/zap"
 )
 
 // DumpGroupsCmd represents the `dump-groups` command.
@@ -19,7 +18,7 @@ type DumpGroupsCmd struct {
 }
 
 // Run the dump-groups command.
-func (cmd *DumpGroupsCmd) Run(log *zap.Logger) error {
+func (cmd *DumpGroupsCmd) Run() error {
 	// get main process context, which cancels on SIGTERM
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGTERM)
 	defer stop()
