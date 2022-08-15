@@ -1,0 +1,849 @@
+{
+  "alerting_crud_alerts": {
+    "cluster_permissions": [],
+    "hidden": false,
+    "index_permissions": [
+      {
+        "allowed_actions": [
+          "crud"
+        ],
+        "fls": [],
+        "index_patterns": [
+          ".opendistro-alerting-alert*"
+        ],
+        "masked_fields": []
+      }
+    ],
+    "reserved": true,
+    "static": false,
+    "tenant_permissions": []
+  },
+  "alerting_full_access": {
+    "cluster_permissions": [],
+    "hidden": false,
+    "index_permissions": [
+      {
+        "allowed_actions": [
+          "crud"
+        ],
+        "fls": [],
+        "index_patterns": [
+          ".opendistro-alerting-config",
+          ".opendistro-alerting-alert*"
+        ],
+        "masked_fields": []
+      }
+    ],
+    "reserved": true,
+    "static": false,
+    "tenant_permissions": []
+  },
+  "alerting_view_alerts": {
+    "cluster_permissions": [],
+    "hidden": false,
+    "index_permissions": [
+      {
+        "allowed_actions": [
+          "read"
+        ],
+        "fls": [],
+        "index_patterns": [
+          ".opendistro-alerting-alert*"
+        ],
+        "masked_fields": []
+      }
+    ],
+    "reserved": true,
+    "static": false,
+    "tenant_permissions": []
+  },
+  "all_access": {
+    "cluster_permissions": [
+      "*"
+    ],
+    "description": "Allow full access to all indices and all cluster APIs",
+    "hidden": false,
+    "index_permissions": [
+      {
+        "allowed_actions": [
+          "*"
+        ],
+        "fls": [],
+        "index_patterns": [
+          "*"
+        ],
+        "masked_fields": []
+      }
+    ],
+    "reserved": true,
+    "static": true,
+    "tenant_permissions": [
+      {
+        "allowed_actions": [
+          "kibana_all_write"
+        ],
+        "tenant_patterns": [
+          "*"
+        ]
+      }
+    ]
+  },
+  "amazee.io internal": {
+    "cluster_permissions": [
+      "cluster:admin/opendistro/reports/menu/download"
+    ],
+    "hidden": false,
+    "index_permissions": [
+      {
+        "allowed_actions": [
+          "read",
+          "indices:monitor/settings/get"
+        ],
+        "fls": [],
+        "index_patterns": [],
+        "masked_fields": []
+      }
+    ],
+    "reserved": false,
+    "static": false,
+    "tenant_permissions": [
+      {
+        "allowed_actions": [
+          "kibana_all_write"
+        ],
+        "tenant_patterns": [
+          "amazee.io internal"
+        ]
+      }
+    ]
+  },
+  "drupal-example": {
+    "cluster_permissions": [
+      "cluster:admin/opendistro/reports/menu/download"
+    ],
+    "hidden": false,
+    "index_permissions": [
+      {
+        "allowed_actions": [
+          "read",
+          "indices:monitor/settings/get"
+        ],
+        "fls": [],
+        "index_patterns": [
+          "/^(application|container|lagoon|router)-logs-drupal9-base-_-.+/",
+          "/^(application|container|lagoon|router)-logs-drupal10-prerelease-_-.+/",
+          "/^(application|container|lagoon|router)-logs-drupal9-solr-_-.+/"
+        ],
+        "masked_fields": []
+      }
+    ],
+    "reserved": false,
+    "static": false,
+    "tenant_permissions": [
+      {
+        "allowed_actions": [
+          "kibana_all_write"
+        ],
+        "tenant_patterns": [
+          "drupal-example"
+        ]
+      }
+    ]
+  },
+  "internaltest": {
+    "cluster_permissions": [
+      "cluster:admin/opendistro/reports/menu/download"
+    ],
+    "hidden": false,
+    "index_permissions": [
+      {
+        "allowed_actions": [
+          "read",
+          "indices:monitor/settings/get"
+        ],
+        "fls": [],
+        "index_patterns": [
+          "/^(application|container|lagoon|router)-logs-drupal9-solr-_-.+/",
+          "/^(application|container|lagoon|router)-logs-react-example-_-.+/",
+          "/^(application|container|lagoon|router)-logs-drupal10-prerelease-_-.+/",
+          "/^(application|container|lagoon|router)-logs-drupal-example-_-.+/"
+        ],
+        "masked_fields": []
+      }
+    ],
+    "reserved": false,
+    "static": false,
+    "tenant_permissions": [
+      {
+        "allowed_actions": [
+          "kibana_all_write"
+        ],
+        "tenant_patterns": [
+          "internaltest"
+        ]
+      }
+    ]
+  },
+  "kibana_read_only": {
+    "cluster_permissions": [],
+    "hidden": false,
+    "index_permissions": [],
+    "reserved": true,
+    "static": false,
+    "tenant_permissions": []
+  },
+  "kibana_server": {
+    "cluster_permissions": [
+      "cluster_monitor",
+      "cluster_composite_ops",
+      "indices:admin/template*",
+      "indices:data/read/scroll*"
+    ],
+    "description": "Provide the minimum permissions for the Kibana server",
+    "hidden": false,
+    "index_permissions": [
+      {
+        "allowed_actions": [
+          "indices_all"
+        ],
+        "fls": [],
+        "index_patterns": [
+          ".kibana",
+          ".opensearch_dashboards"
+        ],
+        "masked_fields": []
+      },
+      {
+        "allowed_actions": [
+          "indices_all"
+        ],
+        "fls": [],
+        "index_patterns": [
+          ".kibana-6",
+          ".opensearch_dashboards-6"
+        ],
+        "masked_fields": []
+      },
+      {
+        "allowed_actions": [
+          "indices_all"
+        ],
+        "fls": [],
+        "index_patterns": [
+          ".kibana_*",
+          ".opensearch_dashboards_*"
+        ],
+        "masked_fields": []
+      },
+      {
+        "allowed_actions": [
+          "indices_all"
+        ],
+        "fls": [],
+        "index_patterns": [
+          ".tasks"
+        ],
+        "masked_fields": []
+      },
+      {
+        "allowed_actions": [
+          "indices_all"
+        ],
+        "fls": [],
+        "index_patterns": [
+          ".management-beats*"
+        ],
+        "masked_fields": []
+      },
+      {
+        "allowed_actions": [
+          "indices:admin/aliases*"
+        ],
+        "fls": [],
+        "index_patterns": [
+          "*"
+        ],
+        "masked_fields": []
+      }
+    ],
+    "reserved": true,
+    "static": true,
+    "tenant_permissions": []
+  },
+  "kibana_user": {
+    "cluster_permissions": [
+      "cluster_composite_ops"
+    ],
+    "description": "Provide the minimum permissions for a kibana user",
+    "hidden": false,
+    "index_permissions": [
+      {
+        "allowed_actions": [
+          "read",
+          "delete",
+          "manage",
+          "index"
+        ],
+        "fls": [],
+        "index_patterns": [
+          ".kibana",
+          ".kibana-6",
+          ".kibana_*",
+          ".opensearch_dashboards",
+          ".opensearch_dashboards-6",
+          ".opensearch_dashboards_*"
+        ],
+        "masked_fields": []
+      },
+      {
+        "allowed_actions": [
+          "indices_all"
+        ],
+        "fls": [],
+        "index_patterns": [
+          ".tasks",
+          ".management-beats",
+          "*:.tasks",
+          "*:.management-beats"
+        ],
+        "masked_fields": []
+      }
+    ],
+    "reserved": true,
+    "static": true,
+    "tenant_permissions": []
+  },
+  "lagoonadmin": {
+    "cluster_permissions": [
+      "cluster:admin/opendistro/reports/menu/download"
+    ],
+    "hidden": false,
+    "index_permissions": [
+      {
+        "allowed_actions": [
+          "read",
+          "indices:monitor/settings/get"
+        ],
+        "fls": [],
+        "index_patterns": [
+          "lagoonadmin-has-no-project"
+        ],
+        "masked_fields": []
+      }
+    ],
+    "reserved": false,
+    "static": false,
+    "tenant_permissions": [
+      {
+        "allowed_actions": [
+          "kibana_all_write"
+        ],
+        "tenant_patterns": [
+          "lagoonadmin"
+        ]
+      }
+    ]
+  },
+  "logstash": {
+    "cluster_permissions": [
+      "cluster_monitor",
+      "cluster_composite_ops",
+      "indices:admin/template/get",
+      "indices:admin/template/put",
+      "cluster:admin/ingest/pipeline/put",
+      "cluster:admin/ingest/pipeline/get"
+    ],
+    "description": "Provide the minimum permissions for logstash and beats",
+    "hidden": false,
+    "index_permissions": [
+      {
+        "allowed_actions": [
+          "crud",
+          "create_index"
+        ],
+        "fls": [],
+        "index_patterns": [
+          "logstash-*"
+        ],
+        "masked_fields": []
+      },
+      {
+        "allowed_actions": [
+          "crud",
+          "create_index"
+        ],
+        "fls": [],
+        "index_patterns": [
+          "*beat*"
+        ],
+        "masked_fields": []
+      }
+    ],
+    "reserved": true,
+    "static": true,
+    "tenant_permissions": []
+  },
+  "manage_snapshots": {
+    "cluster_permissions": [
+      "manage_snapshots"
+    ],
+    "description": "Provide the minimum permissions for managing snapshots",
+    "hidden": false,
+    "index_permissions": [
+      {
+        "allowed_actions": [
+          "indices:data/write/index",
+          "indices:admin/create"
+        ],
+        "fls": [],
+        "index_patterns": [
+          "*"
+        ],
+        "masked_fields": []
+      }
+    ],
+    "reserved": true,
+    "static": true,
+    "tenant_permissions": []
+  },
+  "own_index": {
+    "cluster_permissions": [
+      "cluster_composite_ops"
+    ],
+    "description": "Allow all for indices named like the current user",
+    "hidden": false,
+    "index_permissions": [
+      {
+        "allowed_actions": [
+          "indices_all"
+        ],
+        "fls": [],
+        "index_patterns": [
+          ""
+        ],
+        "masked_fields": []
+      }
+    ],
+    "reserved": true,
+    "static": true,
+    "tenant_permissions": []
+  },
+  "p11": {
+    "cluster_permissions": [
+      "cluster:admin/opendistro/reports/menu/download"
+    ],
+    "hidden": false,
+    "index_permissions": [
+      {
+        "allowed_actions": [
+          "read",
+          "indices:monitor/settings/get"
+        ],
+        "fls": [],
+        "index_patterns": [
+          "/^(application|container|lagoon|router)-logs-drupal-example-_-.+/"
+        ],
+        "masked_fields": []
+      }
+    ],
+    "reserved": false,
+    "static": false,
+    "tenant_permissions": [
+      {
+        "allowed_actions": [
+          "kibana_all_read"
+        ],
+        "tenant_patterns": [
+          "global_tenant"
+        ]
+      }
+    ]
+  },
+  "p23": {
+    "cluster_permissions": [
+      "cluster:admin/opendistro/reports/menu/download"
+    ],
+    "hidden": false,
+    "index_permissions": [
+      {
+        "allowed_actions": [
+          "read",
+          "indices:monitor/settings/get"
+        ],
+        "fls": [],
+        "index_patterns": [
+          "/^(application|container|lagoon|router)-logs-lagoon-website-_-.+/"
+        ],
+        "masked_fields": []
+      }
+    ],
+    "reserved": false,
+    "static": false,
+    "tenant_permissions": [
+      {
+        "allowed_actions": [
+          "kibana_all_read"
+        ],
+        "tenant_patterns": [
+          "global_tenant"
+        ]
+      }
+    ]
+  },
+  "p24": {
+    "cluster_permissions": [
+      "cluster:admin/opendistro/reports/menu/download"
+    ],
+    "hidden": false,
+    "index_permissions": [
+      {
+        "allowed_actions": [
+          "read",
+          "indices:monitor/settings/get"
+        ],
+        "fls": [],
+        "index_patterns": [
+          "/^(application|container|lagoon|router)-logs-ckan-lagoon-_-.+/"
+        ],
+        "masked_fields": []
+      }
+    ],
+    "reserved": false,
+    "static": false,
+    "tenant_permissions": [
+      {
+        "allowed_actions": [
+          "kibana_all_read"
+        ],
+        "tenant_patterns": [
+          "global_tenant"
+        ]
+      }
+    ]
+  },
+  "p27": {
+    "cluster_permissions": [
+      "cluster:admin/opendistro/reports/menu/download"
+    ],
+    "hidden": false,
+    "index_permissions": [
+      {
+        "allowed_actions": [
+          "read",
+          "indices:monitor/settings/get"
+        ],
+        "fls": [],
+        "index_patterns": [
+          "/^(application|container|lagoon|router)-logs-beta-ui-_-.+/"
+        ],
+        "masked_fields": []
+      }
+    ],
+    "reserved": false,
+    "static": false,
+    "tenant_permissions": [
+      {
+        "allowed_actions": [
+          "kibana_all_read"
+        ],
+        "tenant_patterns": [
+          "global_tenant"
+        ]
+      }
+    ]
+  },
+  "p29": {
+    "cluster_permissions": [
+      "cluster:admin/opendistro/reports/menu/download"
+    ],
+    "hidden": false,
+    "index_permissions": [
+      {
+        "allowed_actions": [
+          "read",
+          "indices:monitor/settings/get"
+        ],
+        "fls": [],
+        "index_patterns": [
+          "/^(application|container|lagoon|router)-logs-fastly-controller-testing-_-.+/"
+        ],
+        "masked_fields": []
+      }
+    ],
+    "reserved": false,
+    "static": false,
+    "tenant_permissions": [
+      {
+        "allowed_actions": [
+          "kibana_all_read"
+        ],
+        "tenant_patterns": [
+          "global_tenant"
+        ]
+      }
+    ]
+  },
+  "p31": {
+    "cluster_permissions": [
+      "cluster:admin/opendistro/reports/menu/download"
+    ],
+    "hidden": false,
+    "index_permissions": [
+      {
+        "allowed_actions": [
+          "read",
+          "indices:monitor/settings/get"
+        ],
+        "fls": [],
+        "index_patterns": [
+          "/^(application|container|lagoon|router)-logs-drupal9-base-_-.+/"
+        ],
+        "masked_fields": []
+      }
+    ],
+    "reserved": false,
+    "static": false,
+    "tenant_permissions": [
+      {
+        "allowed_actions": [
+          "kibana_all_read"
+        ],
+        "tenant_patterns": [
+          "global_tenant"
+        ]
+      }
+    ]
+  },
+  "p33": {
+    "cluster_permissions": [
+      "cluster:admin/opendistro/reports/menu/download"
+    ],
+    "hidden": false,
+    "index_permissions": [
+      {
+        "allowed_actions": [
+          "read",
+          "indices:monitor/settings/get"
+        ],
+        "fls": [],
+        "index_patterns": [
+          "/^(application|container|lagoon|router)-logs-react-example-_-.+/"
+        ],
+        "masked_fields": []
+      }
+    ],
+    "reserved": false,
+    "static": false,
+    "tenant_permissions": [
+      {
+        "allowed_actions": [
+          "kibana_all_read"
+        ],
+        "tenant_patterns": [
+          "global_tenant"
+        ]
+      }
+    ]
+  },
+  "p34": {
+    "cluster_permissions": [
+      "cluster:admin/opendistro/reports/menu/download"
+    ],
+    "hidden": false,
+    "index_permissions": [
+      {
+        "allowed_actions": [
+          "read",
+          "indices:monitor/settings/get"
+        ],
+        "fls": [],
+        "index_patterns": [
+          "/^(application|container|lagoon|router)-logs-drupal9-solr-_-.+/"
+        ],
+        "masked_fields": []
+      }
+    ],
+    "reserved": false,
+    "static": false,
+    "tenant_permissions": [
+      {
+        "allowed_actions": [
+          "kibana_all_read"
+        ],
+        "tenant_patterns": [
+          "global_tenant"
+        ]
+      }
+    ]
+  },
+  "p36": {
+    "cluster_permissions": [
+      "cluster:admin/opendistro/reports/menu/download"
+    ],
+    "hidden": false,
+    "index_permissions": [
+      {
+        "allowed_actions": [
+          "read",
+          "indices:monitor/settings/get"
+        ],
+        "fls": [],
+        "index_patterns": [
+          "/^(application|container|lagoon|router)-logs-drupal10-prerelease-_-.+/"
+        ],
+        "masked_fields": []
+      }
+    ],
+    "reserved": false,
+    "static": false,
+    "tenant_permissions": [
+      {
+        "allowed_actions": [
+          "kibana_all_read"
+        ],
+        "tenant_patterns": [
+          "global_tenant"
+        ]
+      }
+    ]
+  },
+  "p37": {
+    "cluster_permissions": [
+      "cluster:admin/opendistro/reports/menu/download"
+    ],
+    "hidden": false,
+    "index_permissions": [
+      {
+        "allowed_actions": [
+          "read",
+          "indices:monitor/settings/get"
+        ],
+        "fls": [],
+        "index_patterns": [
+          "/^(application|container|lagoon|router)-logs-test6-drupal-example-simple-_-.+/"
+        ],
+        "masked_fields": []
+      }
+    ],
+    "reserved": false,
+    "static": false,
+    "tenant_permissions": [
+      {
+        "allowed_actions": [
+          "kibana_all_read"
+        ],
+        "tenant_patterns": [
+          "global_tenant"
+        ]
+      }
+    ]
+  },
+  "p38": {
+    "cluster_permissions": [
+      "cluster:admin/opendistro/reports/menu/download"
+    ],
+    "hidden": false,
+    "index_permissions": [
+      {
+        "allowed_actions": [
+          "read",
+          "indices:monitor/settings/get"
+        ],
+        "fls": [],
+        "index_patterns": [
+          "/^(application|container|lagoon|router)-logs-example-ruby-on-rails-_-.+/"
+        ],
+        "masked_fields": []
+      }
+    ],
+    "reserved": false,
+    "static": false,
+    "tenant_permissions": [
+      {
+        "allowed_actions": [
+          "kibana_all_read"
+        ],
+        "tenant_patterns": [
+          "global_tenant"
+        ]
+      }
+    ]
+  },
+  "prometheus_exporter": {
+    "cluster_permissions": [
+      "cluster_monitor",
+      "cluster:admin/snapshot/status",
+      "cluster:admin/repository/get"
+    ],
+    "hidden": false,
+    "index_permissions": [
+      {
+        "allowed_actions": [
+          "indices_monitor",
+          "indices:admin/mappings/get"
+        ],
+        "fls": [],
+        "index_patterns": [
+          "*"
+        ],
+        "masked_fields": []
+      }
+    ],
+    "reserved": true,
+    "static": false,
+    "tenant_permissions": []
+  },
+  "readall": {
+    "cluster_permissions": [
+      "cluster_composite_ops_ro"
+    ],
+    "description": "Provide the minimum permissions for to readall indices",
+    "hidden": false,
+    "index_permissions": [
+      {
+        "allowed_actions": [
+          "read"
+        ],
+        "fls": [],
+        "index_patterns": [
+          "*"
+        ],
+        "masked_fields": []
+      }
+    ],
+    "reserved": true,
+    "static": true,
+    "tenant_permissions": []
+  },
+  "readall_and_monitor": {
+    "cluster_permissions": [
+      "cluster_monitor",
+      "cluster_composite_ops_ro"
+    ],
+    "description": "Provide the minimum permissions for to readall indices and monitor the cluster",
+    "hidden": false,
+    "index_permissions": [
+      {
+        "allowed_actions": [
+          "read"
+        ],
+        "fls": [],
+        "index_patterns": [
+          "*"
+        ],
+        "masked_fields": []
+      }
+    ],
+    "reserved": true,
+    "static": true,
+    "tenant_permissions": []
+  },
+  "security_rest_api_access": {
+    "cluster_permissions": [],
+    "hidden": false,
+    "index_permissions": [],
+    "reserved": true,
+    "static": false,
+    "tenant_permissions": []
+  }
+}
