@@ -21,6 +21,7 @@ type CLI struct {
 	DumpGroups       DumpGroupsCmd       `kong:"cmd,help='Print Keycloak Groups JSON to standard out'"`
 	DumpRoles        DumpRolesCmd        `kong:"cmd,help='Print Opensearch Roles JSON to standard out'"`
 	DumpRolesmapping DumpRolesmappingCmd `kong:"cmd,help='Print Opensearch Rolesmapping JSON to standard out'"`
+	DumpTenants      DumpTenantsCmd      `kong:"cmd,help='Print Opensearch Tenants JSON to standard out'"`
 }
 
 func main() {
