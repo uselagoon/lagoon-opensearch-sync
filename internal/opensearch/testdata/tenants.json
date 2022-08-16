@@ -1,0 +1,38 @@
+{
+  "admin_tenant": {
+    "description": "Tenant for admin user",
+    "hidden": false,
+    "reserved": false,
+    "static": false
+  },
+  "amazee.io internal": {
+    "description": "amazee.io internal",
+    "hidden": false,
+    "reserved": false,
+    "static": false
+  },
+  "drupal-example": {
+    "description": "drupal-example",
+    "hidden": false,
+    "reserved": false,
+    "static": false
+  },
+  "global_tenant": {
+    "description": "Global tenant",
+    "hidden": false,
+    "reserved": true,
+    "static": true
+  },
+  "internaltest": {
+    "description": "internaltest",
+    "hidden": false,
+    "reserved": false,
+    "static": false
+  },
+  "lagoonadmin": {
+    "description": "lagoonadmin",
+    "hidden": false,
+    "reserved": false,
+    "static": false
+  }
+}
