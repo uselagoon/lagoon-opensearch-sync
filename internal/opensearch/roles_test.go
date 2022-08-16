@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"os"
 	"reflect"
-	"sort"
 	"testing"
 
 	"github.com/davecgh/go-spew/spew"
@@ -15,13 +14,12 @@ import (
 func TestRolesUnmarshal(t *testing.T) {
 	var testCases = map[string]struct {
 		input  string
-		expect opensearch.RoleSlice
+		expect map[string]opensearch.Role
 	}{
 		"unmarshal roles": {
 			input: "testdata/roles.json",
-			expect: opensearch.RoleSlice{
-				{
-					Name:               "alerting_crud_alerts",
+			expect: map[string]opensearch.Role{
+				"alerting_crud_alerts": {
 					ClusterPermissions: []string{},
 					IndexPermissions: []opensearch.IndexPermission{
 						{
@@ -34,8 +32,7 @@ func TestRolesUnmarshal(t *testing.T) {
 					Reserved:          true,
 					TenantPermissions: []opensearch.TenantPermission{},
 				},
-				{
-					Name:               "alerting_full_access",
+				"alerting_full_access": {
 					ClusterPermissions: []string{},
 					IndexPermissions: []opensearch.IndexPermission{
 						{
@@ -51,8 +48,7 @@ func TestRolesUnmarshal(t *testing.T) {
 					Reserved:          true,
 					TenantPermissions: []opensearch.TenantPermission{},
 				},
-				{
-					Name:               "alerting_view_alerts",
+				"alerting_view_alerts": {
 					ClusterPermissions: []string{},
 					IndexPermissions: []opensearch.IndexPermission{
 						{
@@ -65,8 +61,7 @@ func TestRolesUnmarshal(t *testing.T) {
 					Reserved:          true,
 					TenantPermissions: []opensearch.TenantPermission{},
 				},
-				{
-					Name:               "all_access",
+				"all_access": {
 					ClusterPermissions: []string{"*"},
 					Description:        "Allow full access to all indices and all cluster APIs",
 					IndexPermissions: []opensearch.IndexPermission{
@@ -86,8 +81,7 @@ func TestRolesUnmarshal(t *testing.T) {
 						},
 					},
 				},
-				{
-					Name:               "amazee.io internal",
+				"amazee.io internal": {
 					ClusterPermissions: []string{"cluster:admin/opendistro/reports/menu/download"},
 					IndexPermissions: []opensearch.IndexPermission{
 						{
@@ -107,8 +101,7 @@ func TestRolesUnmarshal(t *testing.T) {
 						},
 					},
 				},
-				{
-					Name:               "drupal-example",
+				"drupal-example": {
 					ClusterPermissions: []string{"cluster:admin/opendistro/reports/menu/download"},
 					IndexPermissions: []opensearch.IndexPermission{
 						{
@@ -132,8 +125,7 @@ func TestRolesUnmarshal(t *testing.T) {
 						},
 					},
 				},
-				{
-					Name:               "internaltest",
+				"internaltest": {
 					ClusterPermissions: []string{"cluster:admin/opendistro/reports/menu/download"},
 					IndexPermissions: []opensearch.IndexPermission{
 						{
@@ -158,15 +150,13 @@ func TestRolesUnmarshal(t *testing.T) {
 						},
 					},
 				},
-				{
-					Name:               "kibana_read_only",
+				"kibana_read_only": {
 					ClusterPermissions: []string{},
 					IndexPermissions:   []opensearch.IndexPermission{},
 					Reserved:           true,
 					TenantPermissions:  []opensearch.TenantPermission{},
 				},
-				{
-					Name: "kibana_server",
+				"kibana_server": {
 					ClusterPermissions: []string{
 						"cluster_monitor",
 						"cluster_composite_ops",
@@ -243,8 +233,7 @@ func TestRolesUnmarshal(t *testing.T) {
 					Static:            true,
 					TenantPermissions: []opensearch.TenantPermission{},
 				},
-				{
-					Name:               "kibana_user",
+				"kibana_user": {
 					ClusterPermissions: []string{"cluster_composite_ops"},
 					Description:        "Provide the minimum permissions for a kibana user",
 					IndexPermissions: []opensearch.IndexPermission{
@@ -284,8 +273,7 @@ func TestRolesUnmarshal(t *testing.T) {
 					Static:            true,
 					TenantPermissions: []opensearch.TenantPermission{},
 				},
-				{
-					Name: "lagoonadmin",
+				"lagoonadmin": {
 					ClusterPermissions: []string{
 						"cluster:admin/opendistro/reports/menu/download",
 					},
@@ -309,8 +297,7 @@ func TestRolesUnmarshal(t *testing.T) {
 						},
 					},
 				},
-				{
-					Name: "logstash",
+				"logstash": {
 					ClusterPermissions: []string{
 						"cluster_monitor",
 						"cluster_composite_ops",
@@ -348,8 +335,7 @@ func TestRolesUnmarshal(t *testing.T) {
 					Static:            true,
 					TenantPermissions: []opensearch.TenantPermission{},
 				},
-				{
-					Name: "manage_snapshots",
+				"manage_snapshots": {
 					ClusterPermissions: []string{
 						"manage_snapshots",
 					},
@@ -371,8 +357,7 @@ func TestRolesUnmarshal(t *testing.T) {
 					Static:            true,
 					TenantPermissions: []opensearch.TenantPermission{},
 				},
-				{
-					Name: "own_index",
+				"own_index": {
 					ClusterPermissions: []string{
 						"cluster_composite_ops",
 					},
@@ -393,8 +378,7 @@ func TestRolesUnmarshal(t *testing.T) {
 					Static:            true,
 					TenantPermissions: []opensearch.TenantPermission{},
 				},
-				{
-					Name: "p11",
+				"p11": {
 					ClusterPermissions: []string{
 						"cluster:admin/opendistro/reports/menu/download",
 					},
@@ -418,8 +402,7 @@ func TestRolesUnmarshal(t *testing.T) {
 						},
 					},
 				},
-				{
-					Name: "p23",
+				"p23": {
 					ClusterPermissions: []string{
 						"cluster:admin/opendistro/reports/menu/download",
 					},
@@ -443,8 +426,7 @@ func TestRolesUnmarshal(t *testing.T) {
 						},
 					},
 				},
-				{
-					Name: "p24",
+				"p24": {
 					ClusterPermissions: []string{
 						"cluster:admin/opendistro/reports/menu/download",
 					},
@@ -468,8 +450,7 @@ func TestRolesUnmarshal(t *testing.T) {
 						},
 					},
 				},
-				{
-					Name: "p27",
+				"p27": {
 					ClusterPermissions: []string{
 						"cluster:admin/opendistro/reports/menu/download",
 					},
@@ -493,8 +474,7 @@ func TestRolesUnmarshal(t *testing.T) {
 						},
 					},
 				},
-				{
-					Name: "p29",
+				"p29": {
 					ClusterPermissions: []string{
 						"cluster:admin/opendistro/reports/menu/download",
 					},
@@ -518,8 +498,7 @@ func TestRolesUnmarshal(t *testing.T) {
 						},
 					},
 				},
-				{
-					Name: "p31",
+				"p31": {
 					ClusterPermissions: []string{
 						"cluster:admin/opendistro/reports/menu/download",
 					},
@@ -543,8 +522,7 @@ func TestRolesUnmarshal(t *testing.T) {
 						},
 					},
 				},
-				{
-					Name: "p33",
+				"p33": {
 					ClusterPermissions: []string{
 						"cluster:admin/opendistro/reports/menu/download",
 					},
@@ -568,8 +546,7 @@ func TestRolesUnmarshal(t *testing.T) {
 						},
 					},
 				},
-				{
-					Name: "p34",
+				"p34": {
 					ClusterPermissions: []string{
 						"cluster:admin/opendistro/reports/menu/download",
 					},
@@ -593,8 +570,7 @@ func TestRolesUnmarshal(t *testing.T) {
 						},
 					},
 				},
-				{
-					Name: "p36",
+				"p36": {
 					ClusterPermissions: []string{
 						"cluster:admin/opendistro/reports/menu/download",
 					},
@@ -618,8 +594,7 @@ func TestRolesUnmarshal(t *testing.T) {
 						},
 					},
 				},
-				{
-					Name: "p37",
+				"p37": {
 					ClusterPermissions: []string{
 						"cluster:admin/opendistro/reports/menu/download",
 					},
@@ -643,8 +618,7 @@ func TestRolesUnmarshal(t *testing.T) {
 						},
 					},
 				},
-				{
-					Name: "p38",
+				"p38": {
 					ClusterPermissions: []string{
 						"cluster:admin/opendistro/reports/menu/download",
 					},
@@ -668,8 +642,7 @@ func TestRolesUnmarshal(t *testing.T) {
 						},
 					},
 				},
-				{
-					Name: "prometheus_exporter",
+				"prometheus_exporter": {
 					ClusterPermissions: []string{
 						"cluster_monitor",
 						"cluster:admin/snapshot/status",
@@ -691,8 +664,7 @@ func TestRolesUnmarshal(t *testing.T) {
 					Reserved:          true,
 					TenantPermissions: []opensearch.TenantPermission{},
 				},
-				{
-					Name: "readall",
+				"readall": {
 					ClusterPermissions: []string{
 						"cluster_composite_ops_ro",
 					},
@@ -713,8 +685,7 @@ func TestRolesUnmarshal(t *testing.T) {
 					Static:            true,
 					TenantPermissions: []opensearch.TenantPermission{},
 				},
-				{
-					Name: "readall_and_monitor",
+				"readall_and_monitor": {
 					ClusterPermissions: []string{
 						"cluster_monitor",
 						"cluster_composite_ops_ro",
@@ -736,8 +707,7 @@ func TestRolesUnmarshal(t *testing.T) {
 					Static:            true,
 					TenantPermissions: []opensearch.TenantPermission{},
 				},
-				{
-					Name:               "security_rest_api_access",
+				"security_rest_api_access": {
 					ClusterPermissions: []string{},
 					IndexPermissions:   []opensearch.IndexPermission{},
 					Reserved:           true,
@@ -759,82 +729,9 @@ func TestRolesUnmarshal(t *testing.T) {
 			if err = decoder.Decode(&roles); err != nil {
 				tt.Fatal(err)
 			}
-			// check for RoleSlice unmarshalling
-			var roleSlice opensearch.RoleSlice
-			if err = json.Unmarshal(jb, &roleSlice); err != nil {
-				tt.Fatal(err)
-			}
-			// Sort is required since the raw JSON is an object, which is not
-			// sortable. RoleSlice converts the object to a slice, but order is not
-			// defined.
-			sort.Sort(roleSlice)
-			if !reflect.DeepEqual(tc.expect, roleSlice) {
+			if !reflect.DeepEqual(tc.expect, roles) {
 				tt.Fatalf("expected:\n%s\ngot\n%s\n",
-					spew.Sdump(tc.expect), spew.Sdump(roleSlice))
-			}
-		})
-	}
-}
-
-func TestRolesMarshal(t *testing.T) {
-	var testCases = map[string]struct {
-		input  opensearch.RoleSlice
-		expect string
-	}{
-		"simple marshal": {
-			input: opensearch.RoleSlice{
-				{
-					Name:               "alerting_crud_alerts",
-					ClusterPermissions: []string{},
-					IndexPermissions: []opensearch.IndexPermission{
-						{
-							AllowedActions: []string{"crud"},
-							FLS:            []string{},
-							IndexPatterns:  []string{".opendistro-alerting-alert*"},
-							MaskedFields:   []string{},
-						},
-					},
-					Reserved:          true,
-					TenantPermissions: []opensearch.TenantPermission{},
-				},
-				{
-					Name:               "alerting_full_access",
-					ClusterPermissions: []string{},
-					IndexPermissions: []opensearch.IndexPermission{
-						{
-							AllowedActions: []string{"crud"},
-							FLS:            []string{},
-							IndexPatterns: []string{
-								".opendistro-alerting-config",
-								".opendistro-alerting-alert*",
-							},
-							MaskedFields: []string{},
-						},
-					},
-					Reserved:          true,
-					TenantPermissions: []opensearch.TenantPermission{},
-				},
-			},
-			expect: `{"alerting_crud_alerts":{"cluster_permissions":[],` +
-				`"hidden":false,"index_permissions":[{"allowed_actions":["crud"],` +
-				`"fls":[],"index_patterns":[".opendistro-alerting-alert*"],` +
-				`"masked_fields":[]}],"reserved":true,"static":false,` +
-				`"tenant_permissions":[]},` +
-				`"alerting_full_access":{"cluster_permissions":[],` +
-				`"hidden":false,"index_permissions":[{"allowed_actions":["crud"],` +
-				`"fls":[],"index_patterns":[".opendistro-alerting-config",` +
-				`".opendistro-alerting-alert*"],"masked_fields":[]}],"reserved":true,` +
-				`"static":false,"tenant_permissions":[]}}`,
-		},
-	}
-	for name, tc := range testCases {
-		t.Run(name, func(tt *testing.T) {
-			j, err := json.Marshal(tc.input)
-			if err != nil {
-				tt.Fatal(err)
-			}
-			if string(j) != tc.expect {
-				tt.Fatalf("expected:\n%s\ngot:\n%s\n", tc.expect, j)
+					spew.Sdump(tc.expect), spew.Sdump(roles))
 			}
 		})
 	}

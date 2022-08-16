@@ -56,11 +56,11 @@ func (c *Client) rawRoles(ctx context.Context) ([]byte, error) {
 }
 
 // Roles returns all Opensearch Roles.
-func (c *Client) Roles(ctx context.Context) (RoleSlice, error) {
+func (c *Client) Roles(ctx context.Context) (map[string]Role, error) {
 	rawRoles, err := c.rawRoles(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("couldn't get roles from Opensearch API: %v", err)
 	}
-	var roles RoleSlice
+	var roles map[string]Role
 	return roles, json.Unmarshal(rawRoles, &roles)
 }
