@@ -1,0 +1,363 @@
+{
+  "all_access": {
+    "and_backend_roles": [],
+    "backend_roles": [
+      "admin",
+      "platform-owner"
+    ],
+    "hidden": false,
+    "hosts": [],
+    "reserved": false,
+    "users": []
+  },
+  "amazee.io internal": {
+    "and_backend_roles": [],
+    "backend_roles": [
+      "amazee.io internal"
+    ],
+    "hidden": false,
+    "hosts": [],
+    "reserved": false,
+    "users": []
+  },
+  "drupal-example": {
+    "and_backend_roles": [],
+    "backend_roles": [
+      "drupal-example"
+    ],
+    "hidden": false,
+    "hosts": [],
+    "reserved": false,
+    "users": []
+  },
+  "internaltest": {
+    "and_backend_roles": [],
+    "backend_roles": [
+      "internaltest"
+    ],
+    "hidden": false,
+    "hosts": [],
+    "reserved": false,
+    "users": []
+  },
+  "kibana_server": {
+    "and_backend_roles": [],
+    "backend_roles": [],
+    "hidden": false,
+    "hosts": [],
+    "reserved": true,
+    "users": [
+      "kibanaserver"
+    ]
+  },
+  "kibana_user": {
+    "and_backend_roles": [],
+    "backend_roles": [],
+    "hidden": false,
+    "hosts": [],
+    "reserved": false,
+    "users": [
+      "*"
+    ]
+  },
+  "lagoonadmin": {
+    "and_backend_roles": [],
+    "backend_roles": [
+      "lagoonadmin"
+    ],
+    "hidden": false,
+    "hosts": [],
+    "reserved": false,
+    "users": []
+  },
+  "p11": {
+    "and_backend_roles": [],
+    "backend_roles": [
+      "p11"
+    ],
+    "hidden": false,
+    "hosts": [],
+    "reserved": false,
+    "users": []
+  },
+  "p12": {
+    "and_backend_roles": [],
+    "backend_roles": [
+      "p12"
+    ],
+    "hidden": false,
+    "hosts": [],
+    "reserved": false,
+    "users": []
+  },
+  "p13": {
+    "and_backend_roles": [],
+    "backend_roles": [
+      "p13"
+    ],
+    "hidden": false,
+    "hosts": [],
+    "reserved": false,
+    "users": []
+  },
+  "p14": {
+    "and_backend_roles": [],
+    "backend_roles": [
+      "p14"
+    ],
+    "hidden": false,
+    "hosts": [],
+    "reserved": false,
+    "users": []
+  },
+  "p15": {
+    "and_backend_roles": [],
+    "backend_roles": [
+      "p15"
+    ],
+    "hidden": false,
+    "hosts": [],
+    "reserved": false,
+    "users": []
+  },
+  "p16": {
+    "and_backend_roles": [],
+    "backend_roles": [
+      "p16"
+    ],
+    "hidden": false,
+    "hosts": [],
+    "reserved": false,
+    "users": []
+  },
+  "p17": {
+    "and_backend_roles": [],
+    "backend_roles": [
+      "p17"
+    ],
+    "hidden": false,
+    "hosts": [],
+    "reserved": false,
+    "users": []
+  },
+  "p18": {
+    "and_backend_roles": [],
+    "backend_roles": [
+      "p18"
+    ],
+    "hidden": false,
+    "hosts": [],
+    "reserved": false,
+    "users": []
+  },
+  "p19": {
+    "and_backend_roles": [],
+    "backend_roles": [
+      "p19"
+    ],
+    "hidden": false,
+    "hosts": [],
+    "reserved": false,
+    "users": []
+  },
+  "p20": {
+    "and_backend_roles": [],
+    "backend_roles": [
+      "p20"
+    ],
+    "hidden": false,
+    "hosts": [],
+    "reserved": false,
+    "users": []
+  },
+  "p21": {
+    "and_backend_roles": [],
+    "backend_roles": [
+      "p21"
+    ],
+    "hidden": false,
+    "hosts": [],
+    "reserved": false,
+    "users": []
+  },
+  "p22": {
+    "and_backend_roles": [],
+    "backend_roles": [
+      "p22"
+    ],
+    "hidden": false,
+    "hosts": [],
+    "reserved": false,
+    "users": []
+  },
+  "p23": {
+    "and_backend_roles": [],
+    "backend_roles": [
+      "p23"
+    ],
+    "hidden": false,
+    "hosts": [],
+    "reserved": false,
+    "users": []
+  },
+  "p24": {
+    "and_backend_roles": [],
+    "backend_roles": [
+      "p24"
+    ],
+    "hidden": false,
+    "hosts": [],
+    "reserved": false,
+    "users": []
+  },
+  "p25": {
+    "and_backend_roles": [],
+    "backend_roles": [
+      "p25"
+    ],
+    "hidden": false,
+    "hosts": [],
+    "reserved": false,
+    "users": []
+  },
+  "p27": {
+    "and_backend_roles": [],
+    "backend_roles": [
+      "p27"
+    ],
+    "hidden": false,
+    "hosts": [],
+    "reserved": false,
+    "users": []
+  },
+  "p29": {
+    "and_backend_roles": [],
+    "backend_roles": [
+      "p29"
+    ],
+    "hidden": false,
+    "hosts": [],
+    "reserved": false,
+    "users": []
+  },
+  "p30": {
+    "and_backend_roles": [],
+    "backend_roles": [
+      "p30"
+    ],
+    "hidden": false,
+    "hosts": [],
+    "reserved": false,
+    "users": []
+  },
+  "p31": {
+    "and_backend_roles": [],
+    "backend_roles": [
+      "p31"
+    ],
+    "hidden": false,
+    "hosts": [],
+    "reserved": false,
+    "users": []
+  },
+  "p33": {
+    "and_backend_roles": [],
+    "backend_roles": [
+      "p33"
+    ],
+    "hidden": false,
+    "hosts": [],
+    "reserved": false,
+    "users": []
+  },
+  "p34": {
+    "and_backend_roles": [],
+    "backend_roles": [
+      "p34"
+    ],
+    "hidden": false,
+    "hosts": [],
+    "reserved": false,
+    "users": []
+  },
+  "p35": {
+    "and_backend_roles": [],
+    "backend_roles": [
+      "p35"
+    ],
+    "hidden": false,
+    "hosts": [],
+    "reserved": false,
+    "users": []
+  },
+  "p36": {
+    "and_backend_roles": [],
+    "backend_roles": [
+      "p36"
+    ],
+    "hidden": false,
+    "hosts": [],
+    "reserved": false,
+    "users": []
+  },
+  "p37": {
+    "and_backend_roles": [],
+    "backend_roles": [
+      "p37"
+    ],
+    "hidden": false,
+    "hosts": [],
+    "reserved": false,
+    "users": []
+  },
+  "p38": {
+    "and_backend_roles": [],
+    "backend_roles": [
+      "p38"
+    ],
+    "hidden": false,
+    "hosts": [],
+    "reserved": false,
+    "users": []
+  },
+  "p39": {
+    "and_backend_roles": [],
+    "backend_roles": [
+      "p39"
+    ],
+    "hidden": false,
+    "hosts": [],
+    "reserved": false,
+    "users": []
+  },
+  "p40": {
+    "and_backend_roles": [],
+    "backend_roles": [
+      "p40"
+    ],
+    "hidden": false,
+    "hosts": [],
+    "reserved": false,
+    "users": []
+  },
+  "p41": {
+    "and_backend_roles": [],
+    "backend_roles": [
+      "p41"
+    ],
+    "hidden": false,
+    "hosts": [],
+    "reserved": false,
+    "users": []
+  },
+  "prometheus_exporter": {
+    "and_backend_roles": [],
+    "backend_roles": [],
+    "hidden": false,
+    "hosts": [],
+    "reserved": true,
+    "users": [
+      "prometheusexporter"
+    ]
+  }
+}

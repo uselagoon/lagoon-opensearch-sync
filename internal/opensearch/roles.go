@@ -43,17 +43,14 @@ func (c *Client) rawRoles(ctx context.Context) ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("couldn't construct roles request: %v", err)
 	}
-	// q := req.URL.Query()
-	// q.Add("briefRepresentation", "false")
-	// req.URL.RawQuery = q.Encode()
 	res, err := c.httpClient.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("couldn't get groups: %v", err)
+		return nil, fmt.Errorf("couldn't get roles: %v", err)
 	}
 	defer res.Body.Close()
 	if res.StatusCode > 299 {
 		body, _ := io.ReadAll(res.Body)
-		return nil, fmt.Errorf("bad groups response: %d\n%s", res.StatusCode, body)
+		return nil, fmt.Errorf("bad roles response: %d\n%s", res.StatusCode, body)
 	}
 	return io.ReadAll(res.Body)
 }
