@@ -13,13 +13,10 @@ import (
 
 // DumpProjectsCmd represents the `dump-projects` command.
 type DumpProjectsCmd struct {
-	APIDBAddress         string `kong:"required,env='API_DB_ADDRESS',help='Lagoon API DB Address (host[:port])'"`
-	APIDBDatabase        string `kong:"default='infrastructure',env='API_DB_DATABASE',help='Lagoon API DB Database Name'"`
-	APIDBPassword        string `kong:"required,env='API_DB_PASSWORD',help='Lagoon API DB Password'"`
-	APIDBUsername        string `kong:"default='api',env='API_DB_USERNAME',help='Lagoon API DB Username'"`
-	KeycloakBaseURL      string `kong:"required,env='KEYCLOAK_BASE_URL',help='Keycloak Base URL'"`
-	KeycloakClientID     string `kong:"default='service-api',env='KEYCLOAK_SERVICE_API_CLIENT_ID',help='Keycloak OAuth2 Client ID'"`
-	KeycloakClientSecret string `kong:"required,env='KEYCLOAK_SERVICE_API_CLIENT_SECRET',help='Keycloak OAuth2 Client Secret'"`
+	APIDBAddress  string `kong:"required,env='API_DB_ADDRESS',help='Lagoon API DB Address (host[:port])'"`
+	APIDBDatabase string `kong:"default='infrastructure',env='API_DB_DATABASE',help='Lagoon API DB Database Name'"`
+	APIDBPassword string `kong:"required,env='API_DB_PASSWORD',help='Lagoon API DB Password'"`
+	APIDBUsername string `kong:"default='api',env='API_DB_USERNAME',help='Lagoon API DB Username'"`
 }
 
 // Run the dump-projects command.
