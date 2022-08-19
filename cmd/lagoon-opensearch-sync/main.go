@@ -23,6 +23,7 @@ type CLI struct {
 	DumpRolesmapping   DumpRolesmappingCmd   `kong:"cmd,help='Print Opensearch Rolesmapping JSON to standard out'"`
 	DumpTenants        DumpTenantsCmd        `kong:"cmd,help='Print Opensearch Tenants JSON to standard out'"`
 	DumpIndexTemplates DumpIndexTemplatesCmd `kong:"cmd,help='Print Opensearch Index Templates JSON to standard out'"`
+	Sync               SyncCmd               `kong:"cmd,help='Synchronise Opensearch roles, rolesmapping, tenants, and index templates with Lagoon'"`
 }
 
 func main() {
@@ -33,14 +34,10 @@ func main() {
 	)
 	// init logger
 	var log *zap.Logger
-	var err error
 	if cli.Debug {
-		log, err = zap.NewDevelopment(zap.AddStacktrace(zap.ErrorLevel))
+		log = zap.Must(zap.NewDevelopment(zap.AddStacktrace(zap.ErrorLevel)))
 	} else {
-		log, err = zap.NewProduction()
-	}
-	if err != nil {
-		panic(err)
+		log = zap.Must(zap.NewProduction())
 	}
 	defer log.Sync() //nolint:errcheck
 	// execute CLI

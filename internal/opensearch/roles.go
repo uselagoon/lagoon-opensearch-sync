@@ -1,6 +1,7 @@
 package opensearch
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -25,7 +26,6 @@ type IndexPermission struct {
 
 // Role represents an Opensearch Role.
 type Role struct {
-	Name               string             `json:"-"` // ignore in marshaling
 	ClusterPermissions []string           `json:"cluster_permissions"`
 	Description        string             `json:"description,omitempty"`
 	Hidden             bool               `json:"hidden"`
@@ -63,4 +63,57 @@ func (c *Client) Roles(ctx context.Context) (map[string]Role, error) {
 	}
 	var roles map[string]Role
 	return roles, json.Unmarshal(rawRoles, &roles)
+}
+
+// CreateRole creates the given role in Opensearch.
+func (c *Client) CreateRole(ctx context.Context, name string,
+	role *Role) error {
+	// marshal payload
+	var buf bytes.Buffer
+	enc := json.NewEncoder(&buf)
+	if err := enc.Encode(role); err != nil {
+		return fmt.Errorf("couldn't marshal role: %v", err)
+	}
+	// construct request
+	rolesURL := *c.baseURL
+	rolesURL.Path = path.Join(c.baseURL.Path,
+		"/_plugins/_security/api/roles/", name)
+	req, err := http.NewRequestWithContext(ctx, "PUT", rolesURL.String(), &buf)
+	if err != nil {
+		return fmt.Errorf("couldn't construct create role request: %v", err)
+	}
+	// make request
+	res, err := c.httpClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("couldn't create role: %v", err)
+	}
+	defer res.Body.Close()
+	if res.StatusCode > 299 {
+		body, _ := io.ReadAll(res.Body)
+		return fmt.Errorf("bad create role response: %d\n%s", res.StatusCode, body)
+	}
+	return nil
+}
+
+// DeleteRole deletes the named role from Opensearch.
+func (c *Client) DeleteRole(ctx context.Context, name string) error {
+	// construct request
+	rolesURL := *c.baseURL
+	rolesURL.Path = path.Join(c.baseURL.Path,
+		"/_plugins/_security/api/roles/", name)
+	req, err := http.NewRequestWithContext(ctx, "DELETE", rolesURL.String(), nil)
+	if err != nil {
+		return fmt.Errorf("couldn't construct delete role request: %v", err)
+	}
+	// make request
+	res, err := c.httpClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("couldn't delete role: %v", err)
+	}
+	defer res.Body.Close()
+	if res.StatusCode > 299 {
+		body, _ := io.ReadAll(res.Body)
+		return fmt.Errorf("bad delete role response: %d\n%s", res.StatusCode, body)
+	}
+	return nil
 }
