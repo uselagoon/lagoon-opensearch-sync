@@ -71,17 +71,21 @@ func generateRolesMapping(log *zap.Logger,
 					zap.String("group name", group.Name))
 			}
 			rolesmapping[name] = opensearch.RoleMapping{
-				BackendRoles:    []string{name},
-				AndBackendRoles: []string{},
-				Hosts:           []string{},
-				Users:           []string{},
+				RoleMappingPermissions: opensearch.RoleMappingPermissions{
+					BackendRoles:    []string{name},
+					AndBackendRoles: []string{},
+					Hosts:           []string{},
+					Users:           []string{},
+				},
 			}
 		} else {
 			rolesmapping[group.Name] = opensearch.RoleMapping{
-				BackendRoles:    []string{group.Name},
-				AndBackendRoles: []string{},
-				Hosts:           []string{},
-				Users:           []string{},
+				RoleMappingPermissions: opensearch.RoleMappingPermissions{
+					BackendRoles:    []string{group.Name},
+					AndBackendRoles: []string{},
+					Hosts:           []string{},
+					Users:           []string{},
+				},
 			}
 		}
 	}

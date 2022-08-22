@@ -12,11 +12,19 @@ import (
 
 // RoleMapping represents an Opensearch RoleMapping.
 type RoleMapping struct {
+	Hidden   bool `json:"hidden"`
+	Reserved bool `json:"reserved"`
+	RoleMappingPermissions
+}
+
+// RoleMappingPermissions contain only the permissions of the rolemapping.
+// This subtype, which is embedded in RoleMapping, exists so that a valid PUT
+// request can be easily made to the Opensearch API. This requires omitting the
+// Hidden and Reserved fields.
+type RoleMappingPermissions struct {
 	AndBackendRoles []string `json:"and_backend_roles"`
 	BackendRoles    []string `json:"backend_roles"`
-	Hidden          bool     `json:"hidden"`
 	Hosts           []string `json:"hosts"`
-	Reserved        bool     `json:"reserved"`
 	Users           []string `json:"users"`
 }
 
@@ -60,7 +68,9 @@ func (c *Client) CreateRoleMapping(ctx context.Context, name string,
 	rm *RoleMapping) error {
 	var buf bytes.Buffer
 	enc := json.NewEncoder(&buf)
-	if err := enc.Encode(rm); err != nil {
+	// Marshal payload. Payload only consists of RoleMappingPermissions because
+	// the visibility fields are not writable.
+	if err := enc.Encode(rm.RoleMappingPermissions); err != nil {
 		return fmt.Errorf("couldn't marshal rolemapping: %v", err)
 	}
 	// construct request
