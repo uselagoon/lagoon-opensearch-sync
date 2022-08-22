@@ -261,7 +261,6 @@ func syncRoles(ctx context.Context, log *zap.Logger, groups []keycloak.Group,
 	required := generateRoles(log, groups, projectNames)
 	// calculate roles to add/remove
 	toCreate, toDelete := calculateRoleDiff(existing, required)
-	// remove any extraneous roles
 	for _, name := range toDelete {
 		if dryRun {
 			log.Info("dry run mode: not deleting role",
