@@ -26,12 +26,20 @@ type IndexPermission struct {
 
 // Role represents an Opensearch Role.
 type Role struct {
+	Hidden   bool `json:"hidden"`
+	Reserved bool `json:"reserved"`
+	Static   bool `json:"static"`
+	RolePermissions
+}
+
+// RolePermissions contain only the permissions and description of the role.
+// This subtype, which is embedded in Role, exists so that a valid PUT request
+// can be easily made to the Opensearch API. This requires omitting the Hidden,
+// Reserved, and Static fields.
+type RolePermissions struct {
 	ClusterPermissions []string           `json:"cluster_permissions"`
 	Description        string             `json:"description,omitempty"`
-	Hidden             bool               `json:"hidden"`
 	IndexPermissions   []IndexPermission  `json:"index_permissions"`
-	Reserved           bool               `json:"reserved"`
-	Static             bool               `json:"static"`
 	TenantPermissions  []TenantPermission `json:"tenant_permissions"`
 }
 
@@ -68,20 +76,22 @@ func (c *Client) Roles(ctx context.Context) (map[string]Role, error) {
 // CreateRole creates the given role in Opensearch.
 func (c *Client) CreateRole(ctx context.Context, name string,
 	role *Role) error {
-	// marshal payload
+	// Marshal payload. Payload only consists of RolePermissions because the
+	// visibility fields are not writable.
 	var buf bytes.Buffer
 	enc := json.NewEncoder(&buf)
-	if err := enc.Encode(role); err != nil {
+	if err := enc.Encode(role.RolePermissions); err != nil {
 		return fmt.Errorf("couldn't marshal role: %v", err)
 	}
 	// construct request
-	rolesURL := *c.baseURL
-	rolesURL.Path = path.Join(c.baseURL.Path,
+	url := *c.baseURL
+	url.Path = path.Join(c.baseURL.Path,
 		"/_plugins/_security/api/roles/", name)
-	req, err := http.NewRequestWithContext(ctx, "PUT", rolesURL.String(), &buf)
+	req, err := http.NewRequestWithContext(ctx, "PUT", url.String(), &buf)
 	if err != nil {
 		return fmt.Errorf("couldn't construct create role request: %v", err)
 	}
+	req.Header.Set("Content-Type", "application/json")
 	// make request
 	res, err := c.httpClient.Do(req)
 	if err != nil {
@@ -98,10 +108,10 @@ func (c *Client) CreateRole(ctx context.Context, name string,
 // DeleteRole deletes the named role from Opensearch.
 func (c *Client) DeleteRole(ctx context.Context, name string) error {
 	// construct request
-	rolesURL := *c.baseURL
-	rolesURL.Path = path.Join(c.baseURL.Path,
+	url := *c.baseURL
+	url.Path = path.Join(c.baseURL.Path,
 		"/_plugins/_security/api/roles/", name)
-	req, err := http.NewRequestWithContext(ctx, "DELETE", rolesURL.String(), nil)
+	req, err := http.NewRequestWithContext(ctx, "DELETE", url.String(), nil)
 	if err != nil {
 		return fmt.Errorf("couldn't construct delete role request: %v", err)
 	}

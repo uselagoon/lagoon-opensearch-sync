@@ -126,27 +126,29 @@ func TestGenerateRoles(t *testing.T) {
 			expect: generateRolesOutput{
 				roles: map[string]opensearch.Role{
 					"drupal-example": {
-						ClusterPermissions: []string{
-							"cluster:admin/opendistro/reports/menu/download",
-						},
-						IndexPermissions: []opensearch.IndexPermission{
-							{
-								AllowedActions: []string{
-									"read",
-									"indices:monitor/settings/get",
-								},
-								IndexPatterns: []string{
-									"/^(application|container|lagoon|router)-logs-drupal9-base-_-.+/",
-									"/^(application|container|lagoon|router)-logs-delta-backend-_-.+/",
-									"/^(application|container|lagoon|router)-logs-somelongerprojectname-_-.+/",
-									"/^(application|container|lagoon|router)-logs-drupal10-prerelease-_-.+/",
+						RolePermissions: opensearch.RolePermissions{
+							ClusterPermissions: []string{
+								"cluster:admin/opendistro/reports/menu/download",
+							},
+							IndexPermissions: []opensearch.IndexPermission{
+								{
+									AllowedActions: []string{
+										"read",
+										"indices:monitor/settings/get",
+									},
+									IndexPatterns: []string{
+										"/^(application|container|lagoon|router)-logs-drupal9-base-_-.+/",
+										"/^(application|container|lagoon|router)-logs-delta-backend-_-.+/",
+										"/^(application|container|lagoon|router)-logs-somelongerprojectname-_-.+/",
+										"/^(application|container|lagoon|router)-logs-drupal10-prerelease-_-.+/",
+									},
 								},
 							},
-						},
-						TenantPermissions: []opensearch.TenantPermission{
-							{
-								AllowedActions: []string{"kibana_all_write"},
-								TenantPatterns: []string{"drupal-example"},
+							TenantPermissions: []opensearch.TenantPermission{
+								{
+									AllowedActions: []string{"kibana_all_write"},
+									TenantPatterns: []string{"drupal-example"},
+								},
 							},
 						},
 					},
@@ -176,24 +178,26 @@ func TestGenerateRoles(t *testing.T) {
 			expect: generateRolesOutput{
 				roles: map[string]opensearch.Role{
 					"p27": {
-						ClusterPermissions: []string{
-							"cluster:admin/opendistro/reports/menu/download",
-						},
-						IndexPermissions: []opensearch.IndexPermission{
-							{
-								AllowedActions: []string{
-									"read",
-									"indices:monitor/settings/get",
-								},
-								IndexPatterns: []string{
-									"/^(application|container|lagoon|router)-logs-beta-ui-_-.+/",
+						RolePermissions: opensearch.RolePermissions{
+							ClusterPermissions: []string{
+								"cluster:admin/opendistro/reports/menu/download",
+							},
+							IndexPermissions: []opensearch.IndexPermission{
+								{
+									AllowedActions: []string{
+										"read",
+										"indices:monitor/settings/get",
+									},
+									IndexPatterns: []string{
+										"/^(application|container|lagoon|router)-logs-beta-ui-_-.+/",
+									},
 								},
 							},
-						},
-						TenantPermissions: []opensearch.TenantPermission{
-							{
-								AllowedActions: []string{"kibana_all_read"},
-								TenantPatterns: []string{"global_tenant"},
+							TenantPermissions: []opensearch.TenantPermission{
+								{
+									AllowedActions: []string{"kibana_all_read"},
+									TenantPatterns: []string{"global_tenant"},
+								},
 							},
 						},
 					},
@@ -231,159 +235,173 @@ func TestCalculateRoleDiff(t *testing.T) {
 			input: calculateRoleDiffInput{
 				existing: map[string]opensearch.Role{
 					"drupal-example": {
-						ClusterPermissions: []string{"cluster:admin/opendistro/reports/menu/download"},
-						IndexPermissions: []opensearch.IndexPermission{
-							{
-								AllowedActions: []string{
-									"read",
-									"indices:monitor/settings/get",
-								},
-								IndexPatterns: []string{
-									"/^(application|container|lagoon|router)-logs-drupal9-base-_-.+/",
-									"/^(application|container|lagoon|router)-logs-drupal10-prerelease-_-.+/",
-									"/^(application|container|lagoon|router)-logs-drupal9-solr-_-.+/",
+						RolePermissions: opensearch.RolePermissions{
+							ClusterPermissions: []string{"cluster:admin/opendistro/reports/menu/download"},
+							IndexPermissions: []opensearch.IndexPermission{
+								{
+									AllowedActions: []string{
+										"read",
+										"indices:monitor/settings/get",
+									},
+									IndexPatterns: []string{
+										"/^(application|container|lagoon|router)-logs-drupal9-base-_-.+/",
+										"/^(application|container|lagoon|router)-logs-drupal10-prerelease-_-.+/",
+										"/^(application|container|lagoon|router)-logs-drupal9-solr-_-.+/",
+									},
 								},
 							},
-						},
-						TenantPermissions: []opensearch.TenantPermission{
-							{
-								AllowedActions: []string{"kibana_all_write"},
-								TenantPatterns: []string{"drupal-example"},
+							TenantPermissions: []opensearch.TenantPermission{
+								{
+									AllowedActions: []string{"kibana_all_write"},
+									TenantPatterns: []string{"drupal-example"},
+								},
 							},
 						},
 					},
 					"drupal-example2": {
-						ClusterPermissions: []string{"cluster:admin/opendistro/reports/menu/download"},
-						IndexPermissions: []opensearch.IndexPermission{
-							{
-								AllowedActions: []string{
-									"read",
-									"indices:monitor/settings/get",
-								},
-								IndexPatterns: []string{
-									"/^(application|container|lagoon|router)-logs-drupal8-base-_-.+/",
-									"/^(application|container|lagoon|router)-logs-drupal8-prerelease-_-.+/",
-									"/^(application|container|lagoon|router)-logs-drupal7-solr-_-.+/",
+						RolePermissions: opensearch.RolePermissions{
+							ClusterPermissions: []string{"cluster:admin/opendistro/reports/menu/download"},
+							IndexPermissions: []opensearch.IndexPermission{
+								{
+									AllowedActions: []string{
+										"read",
+										"indices:monitor/settings/get",
+									},
+									IndexPatterns: []string{
+										"/^(application|container|lagoon|router)-logs-drupal8-base-_-.+/",
+										"/^(application|container|lagoon|router)-logs-drupal8-prerelease-_-.+/",
+										"/^(application|container|lagoon|router)-logs-drupal7-solr-_-.+/",
+									},
 								},
 							},
-						},
-						TenantPermissions: []opensearch.TenantPermission{
-							{
-								AllowedActions: []string{"kibana_all_write"},
-								TenantPatterns: []string{"drupal-example"},
+							TenantPermissions: []opensearch.TenantPermission{
+								{
+									AllowedActions: []string{"kibana_all_write"},
+									TenantPatterns: []string{"drupal-example"},
+								},
 							},
 						},
 					},
 					"p11": {
-						ClusterPermissions: []string{
-							"cluster:admin/opendistro/reports/menu/download",
-						},
-						IndexPermissions: []opensearch.IndexPermission{
-							{
-								AllowedActions: []string{
-									"read",
-									"indices:monitor/settings/get",
-								},
-								IndexPatterns: []string{
-									"/^(application|container|lagoon|router)-logs-drupal-example-_-.+/",
+						RolePermissions: opensearch.RolePermissions{
+							ClusterPermissions: []string{
+								"cluster:admin/opendistro/reports/menu/download",
+							},
+							IndexPermissions: []opensearch.IndexPermission{
+								{
+									AllowedActions: []string{
+										"read",
+										"indices:monitor/settings/get",
+									},
+									IndexPatterns: []string{
+										"/^(application|container|lagoon|router)-logs-drupal-example-_-.+/",
+									},
 								},
 							},
-						},
-						TenantPermissions: []opensearch.TenantPermission{
-							{
-								AllowedActions: []string{"kibana_all_read"},
-								TenantPatterns: []string{"global_tenant"},
+							TenantPermissions: []opensearch.TenantPermission{
+								{
+									AllowedActions: []string{"kibana_all_read"},
+									TenantPatterns: []string{"global_tenant"},
+								},
 							},
 						},
 					},
 				},
 				required: map[string]opensearch.Role{
 					"drupal-example": {
-						ClusterPermissions: []string{"cluster:admin/opendistro/reports/menu/download"},
-						IndexPermissions: []opensearch.IndexPermission{
-							{
-								AllowedActions: []string{
-									"read",
-									"indices:monitor/settings/get",
-								},
-								IndexPatterns: []string{
-									"/^(application|container|lagoon|router)-logs-drupal9-base-_-.+/",
-									"/^(application|container|lagoon|router)-logs-drupal10-prerelease-_-.+/",
-									"/^(application|container|lagoon|router)-logs-drupal9-solr-_-.+/",
+						RolePermissions: opensearch.RolePermissions{
+							ClusterPermissions: []string{"cluster:admin/opendistro/reports/menu/download"},
+							IndexPermissions: []opensearch.IndexPermission{
+								{
+									AllowedActions: []string{
+										"read",
+										"indices:monitor/settings/get",
+									},
+									IndexPatterns: []string{
+										"/^(application|container|lagoon|router)-logs-drupal9-base-_-.+/",
+										"/^(application|container|lagoon|router)-logs-drupal10-prerelease-_-.+/",
+										"/^(application|container|lagoon|router)-logs-drupal9-solr-_-.+/",
+									},
 								},
 							},
-						},
-						TenantPermissions: []opensearch.TenantPermission{
-							{
-								AllowedActions: []string{"kibana_all_write"},
-								TenantPatterns: []string{"drupal-example"},
+							TenantPermissions: []opensearch.TenantPermission{
+								{
+									AllowedActions: []string{"kibana_all_write"},
+									TenantPatterns: []string{"drupal-example"},
+								},
 							},
 						},
 					},
 					"internaltest": {
-						ClusterPermissions: []string{"cluster:admin/opendistro/reports/menu/download"},
-						IndexPermissions: []opensearch.IndexPermission{
-							{
-								AllowedActions: []string{
-									"read",
-									"indices:monitor/settings/get",
-								},
-								IndexPatterns: []string{
-									"/^(application|container|lagoon|router)-logs-drupal9-solr-_-.+/",
-									"/^(application|container|lagoon|router)-logs-react-example-_-.+/",
-									"/^(application|container|lagoon|router)-logs-drupal10-prerelease-_-.+/",
-									"/^(application|container|lagoon|router)-logs-drupal-example-_-.+/",
+						RolePermissions: opensearch.RolePermissions{
+							ClusterPermissions: []string{"cluster:admin/opendistro/reports/menu/download"},
+							IndexPermissions: []opensearch.IndexPermission{
+								{
+									AllowedActions: []string{
+										"read",
+										"indices:monitor/settings/get",
+									},
+									IndexPatterns: []string{
+										"/^(application|container|lagoon|router)-logs-drupal9-solr-_-.+/",
+										"/^(application|container|lagoon|router)-logs-react-example-_-.+/",
+										"/^(application|container|lagoon|router)-logs-drupal10-prerelease-_-.+/",
+										"/^(application|container|lagoon|router)-logs-drupal-example-_-.+/",
+									},
 								},
 							},
-						},
-						TenantPermissions: []opensearch.TenantPermission{
-							{
-								AllowedActions: []string{"kibana_all_write"},
-								TenantPatterns: []string{"internaltest"},
+							TenantPermissions: []opensearch.TenantPermission{
+								{
+									AllowedActions: []string{"kibana_all_write"},
+									TenantPatterns: []string{"internaltest"},
+								},
 							},
 						},
 					},
 					"p11": {
-						ClusterPermissions: []string{
-							"cluster:admin/opendistro/reports/menu/download",
-						},
-						IndexPermissions: []opensearch.IndexPermission{
-							{
-								AllowedActions: []string{
-									"read",
-									"indices:monitor/settings/get",
-								},
-								IndexPatterns: []string{
-									"/^(application|container|lagoon|router)-logs-drupal-example-_-.+/",
+						RolePermissions: opensearch.RolePermissions{
+							ClusterPermissions: []string{
+								"cluster:admin/opendistro/reports/menu/download",
+							},
+							IndexPermissions: []opensearch.IndexPermission{
+								{
+									AllowedActions: []string{
+										"read",
+										"indices:monitor/settings/get",
+									},
+									IndexPatterns: []string{
+										"/^(application|container|lagoon|router)-logs-drupal-example-_-.+/",
+									},
 								},
 							},
-						},
-						TenantPermissions: []opensearch.TenantPermission{
-							{
-								AllowedActions: []string{"kibana_all_read"},
-								TenantPatterns: []string{"global_tenant"},
+							TenantPermissions: []opensearch.TenantPermission{
+								{
+									AllowedActions: []string{"kibana_all_read"},
+									TenantPatterns: []string{"global_tenant"},
+								},
 							},
 						},
 					},
 					"p23": {
-						ClusterPermissions: []string{
-							"cluster:admin/opendistro/reports/menu/download",
-						},
-						IndexPermissions: []opensearch.IndexPermission{
-							{
-								AllowedActions: []string{
-									"read",
-									"indices:monitor/settings/get",
-								},
-								IndexPatterns: []string{
-									"/^(application|container|lagoon|router)-logs-lagoon-website-_-.+/",
+						RolePermissions: opensearch.RolePermissions{
+							ClusterPermissions: []string{
+								"cluster:admin/opendistro/reports/menu/download",
+							},
+							IndexPermissions: []opensearch.IndexPermission{
+								{
+									AllowedActions: []string{
+										"read",
+										"indices:monitor/settings/get",
+									},
+									IndexPatterns: []string{
+										"/^(application|container|lagoon|router)-logs-lagoon-website-_-.+/",
+									},
 								},
 							},
-						},
-						TenantPermissions: []opensearch.TenantPermission{
-							{
-								AllowedActions: []string{"kibana_all_read"},
-								TenantPatterns: []string{"global_tenant"},
+							TenantPermissions: []opensearch.TenantPermission{
+								{
+									AllowedActions: []string{"kibana_all_read"},
+									TenantPatterns: []string{"global_tenant"},
+								},
 							},
 						},
 					},
@@ -392,47 +410,51 @@ func TestCalculateRoleDiff(t *testing.T) {
 			expect: calculateRoleDiffOutput{
 				toCreate: map[string]opensearch.Role{
 					"internaltest": {
-						ClusterPermissions: []string{"cluster:admin/opendistro/reports/menu/download"},
-						IndexPermissions: []opensearch.IndexPermission{
-							{
-								AllowedActions: []string{
-									"read",
-									"indices:monitor/settings/get",
-								},
-								IndexPatterns: []string{
-									"/^(application|container|lagoon|router)-logs-drupal9-solr-_-.+/",
-									"/^(application|container|lagoon|router)-logs-react-example-_-.+/",
-									"/^(application|container|lagoon|router)-logs-drupal10-prerelease-_-.+/",
-									"/^(application|container|lagoon|router)-logs-drupal-example-_-.+/",
+						RolePermissions: opensearch.RolePermissions{
+							ClusterPermissions: []string{"cluster:admin/opendistro/reports/menu/download"},
+							IndexPermissions: []opensearch.IndexPermission{
+								{
+									AllowedActions: []string{
+										"read",
+										"indices:monitor/settings/get",
+									},
+									IndexPatterns: []string{
+										"/^(application|container|lagoon|router)-logs-drupal9-solr-_-.+/",
+										"/^(application|container|lagoon|router)-logs-react-example-_-.+/",
+										"/^(application|container|lagoon|router)-logs-drupal10-prerelease-_-.+/",
+										"/^(application|container|lagoon|router)-logs-drupal-example-_-.+/",
+									},
 								},
 							},
-						},
-						TenantPermissions: []opensearch.TenantPermission{
-							{
-								AllowedActions: []string{"kibana_all_write"},
-								TenantPatterns: []string{"internaltest"},
+							TenantPermissions: []opensearch.TenantPermission{
+								{
+									AllowedActions: []string{"kibana_all_write"},
+									TenantPatterns: []string{"internaltest"},
+								},
 							},
 						},
 					},
 					"p23": {
-						ClusterPermissions: []string{
-							"cluster:admin/opendistro/reports/menu/download",
-						},
-						IndexPermissions: []opensearch.IndexPermission{
-							{
-								AllowedActions: []string{
-									"read",
-									"indices:monitor/settings/get",
-								},
-								IndexPatterns: []string{
-									"/^(application|container|lagoon|router)-logs-lagoon-website-_-.+/",
+						RolePermissions: opensearch.RolePermissions{
+							ClusterPermissions: []string{
+								"cluster:admin/opendistro/reports/menu/download",
+							},
+							IndexPermissions: []opensearch.IndexPermission{
+								{
+									AllowedActions: []string{
+										"read",
+										"indices:monitor/settings/get",
+									},
+									IndexPatterns: []string{
+										"/^(application|container|lagoon|router)-logs-lagoon-website-_-.+/",
+									},
 								},
 							},
-						},
-						TenantPermissions: []opensearch.TenantPermission{
-							{
-								AllowedActions: []string{"kibana_all_read"},
-								TenantPatterns: []string{"global_tenant"},
+							TenantPermissions: []opensearch.TenantPermission{
+								{
+									AllowedActions: []string{"kibana_all_read"},
+									TenantPatterns: []string{"global_tenant"},
+								},
 							},
 						},
 					},
@@ -444,95 +466,103 @@ func TestCalculateRoleDiff(t *testing.T) {
 			input: calculateRoleDiffInput{
 				existing: map[string]opensearch.Role{
 					"internaltest": {
-						ClusterPermissions: []string{"cluster:admin/opendistro/reports/menu/download"},
-						IndexPermissions: []opensearch.IndexPermission{
-							{
-								AllowedActions: []string{
-									"read",
-									"indices:monitor/settings/get",
-								},
-								IndexPatterns: []string{
-									"/^(application|container|lagoon|router)-logs-drupal9-solr-_-.+/",
-									"/^(application|container|lagoon|router)-logs-react-example-_-.+/",
-									"/^(application|container|lagoon|router)-logs-drupal10-prerelease-_-.+/",
-									"/^(application|container|lagoon|router)-logs-nolongerexists-_-.+/",
-									"/^(application|container|lagoon|router)-logs-drupal-example-_-.+/",
+						RolePermissions: opensearch.RolePermissions{
+							ClusterPermissions: []string{"cluster:admin/opendistro/reports/menu/download"},
+							IndexPermissions: []opensearch.IndexPermission{
+								{
+									AllowedActions: []string{
+										"read",
+										"indices:monitor/settings/get",
+									},
+									IndexPatterns: []string{
+										"/^(application|container|lagoon|router)-logs-drupal9-solr-_-.+/",
+										"/^(application|container|lagoon|router)-logs-react-example-_-.+/",
+										"/^(application|container|lagoon|router)-logs-drupal10-prerelease-_-.+/",
+										"/^(application|container|lagoon|router)-logs-nolongerexists-_-.+/",
+										"/^(application|container|lagoon|router)-logs-drupal-example-_-.+/",
+									},
 								},
 							},
-						},
-						TenantPermissions: []opensearch.TenantPermission{
-							{
-								AllowedActions: []string{"kibana_all_write"},
-								TenantPatterns: []string{"internaltest"},
+							TenantPermissions: []opensearch.TenantPermission{
+								{
+									AllowedActions: []string{"kibana_all_write"},
+									TenantPatterns: []string{"internaltest"},
+								},
 							},
 						},
 					},
 					"p11": {
-						ClusterPermissions: []string{
-							"cluster:admin/opendistro/reports/menu/download",
-						},
-						IndexPermissions: []opensearch.IndexPermission{
-							{
-								AllowedActions: []string{
-									"read",
-									"indices:monitor/settings/get",
-								},
-								IndexPatterns: []string{
-									"/^(application|container|lagoon|router)-logs-drupal-example-_-.+/",
+						RolePermissions: opensearch.RolePermissions{
+							ClusterPermissions: []string{
+								"cluster:admin/opendistro/reports/menu/download",
+							},
+							IndexPermissions: []opensearch.IndexPermission{
+								{
+									AllowedActions: []string{
+										"read",
+										"indices:monitor/settings/get",
+									},
+									IndexPatterns: []string{
+										"/^(application|container|lagoon|router)-logs-drupal-example-_-.+/",
+									},
 								},
 							},
-						},
-						TenantPermissions: []opensearch.TenantPermission{
-							{
-								AllowedActions: []string{"kibana_all_read"},
-								TenantPatterns: []string{"global_tenant"},
+							TenantPermissions: []opensearch.TenantPermission{
+								{
+									AllowedActions: []string{"kibana_all_read"},
+									TenantPatterns: []string{"global_tenant"},
+								},
 							},
 						},
 					},
 				},
 				required: map[string]opensearch.Role{
 					"internaltest": {
-						ClusterPermissions: []string{"cluster:admin/opendistro/reports/menu/download"},
-						IndexPermissions: []opensearch.IndexPermission{
-							{
-								AllowedActions: []string{
-									"read",
-									"indices:monitor/settings/get",
-								},
-								IndexPatterns: []string{
-									"/^(application|container|lagoon|router)-logs-drupal9-solr-_-.+/",
-									"/^(application|container|lagoon|router)-logs-react-example-_-.+/",
-									"/^(application|container|lagoon|router)-logs-drupal10-prerelease-_-.+/",
-									"/^(application|container|lagoon|router)-logs-drupal-example-_-.+/",
+						RolePermissions: opensearch.RolePermissions{
+							ClusterPermissions: []string{"cluster:admin/opendistro/reports/menu/download"},
+							IndexPermissions: []opensearch.IndexPermission{
+								{
+									AllowedActions: []string{
+										"read",
+										"indices:monitor/settings/get",
+									},
+									IndexPatterns: []string{
+										"/^(application|container|lagoon|router)-logs-drupal9-solr-_-.+/",
+										"/^(application|container|lagoon|router)-logs-react-example-_-.+/",
+										"/^(application|container|lagoon|router)-logs-drupal10-prerelease-_-.+/",
+										"/^(application|container|lagoon|router)-logs-drupal-example-_-.+/",
+									},
 								},
 							},
-						},
-						TenantPermissions: []opensearch.TenantPermission{
-							{
-								AllowedActions: []string{"kibana_all_write"},
-								TenantPatterns: []string{"internaltest"},
+							TenantPermissions: []opensearch.TenantPermission{
+								{
+									AllowedActions: []string{"kibana_all_write"},
+									TenantPatterns: []string{"internaltest"},
+								},
 							},
 						},
 					},
 					"p11": {
-						ClusterPermissions: []string{
-							"cluster:admin/opendistro/reports/menu/download",
-						},
-						IndexPermissions: []opensearch.IndexPermission{
-							{
-								AllowedActions: []string{
-									"read",
-									"indices:monitor/settings/get",
-								},
-								IndexPatterns: []string{
-									"/^(application|container|lagoon|router)-logs-drupal-example-_-.+/",
+						RolePermissions: opensearch.RolePermissions{
+							ClusterPermissions: []string{
+								"cluster:admin/opendistro/reports/menu/download",
+							},
+							IndexPermissions: []opensearch.IndexPermission{
+								{
+									AllowedActions: []string{
+										"read",
+										"indices:monitor/settings/get",
+									},
+									IndexPatterns: []string{
+										"/^(application|container|lagoon|router)-logs-drupal-example-_-.+/",
+									},
 								},
 							},
-						},
-						TenantPermissions: []opensearch.TenantPermission{
-							{
-								AllowedActions: []string{"kibana_all_read"},
-								TenantPatterns: []string{"global_tenant"},
+							TenantPermissions: []opensearch.TenantPermission{
+								{
+									AllowedActions: []string{"kibana_all_read"},
+									TenantPatterns: []string{"global_tenant"},
+								},
 							},
 						},
 					},
@@ -541,25 +571,27 @@ func TestCalculateRoleDiff(t *testing.T) {
 			expect: calculateRoleDiffOutput{
 				toCreate: map[string]opensearch.Role{
 					"internaltest": {
-						ClusterPermissions: []string{"cluster:admin/opendistro/reports/menu/download"},
-						IndexPermissions: []opensearch.IndexPermission{
-							{
-								AllowedActions: []string{
-									"read",
-									"indices:monitor/settings/get",
-								},
-								IndexPatterns: []string{
-									"/^(application|container|lagoon|router)-logs-drupal9-solr-_-.+/",
-									"/^(application|container|lagoon|router)-logs-react-example-_-.+/",
-									"/^(application|container|lagoon|router)-logs-drupal10-prerelease-_-.+/",
-									"/^(application|container|lagoon|router)-logs-drupal-example-_-.+/",
+						RolePermissions: opensearch.RolePermissions{
+							ClusterPermissions: []string{"cluster:admin/opendistro/reports/menu/download"},
+							IndexPermissions: []opensearch.IndexPermission{
+								{
+									AllowedActions: []string{
+										"read",
+										"indices:monitor/settings/get",
+									},
+									IndexPatterns: []string{
+										"/^(application|container|lagoon|router)-logs-drupal9-solr-_-.+/",
+										"/^(application|container|lagoon|router)-logs-react-example-_-.+/",
+										"/^(application|container|lagoon|router)-logs-drupal10-prerelease-_-.+/",
+										"/^(application|container|lagoon|router)-logs-drupal-example-_-.+/",
+									},
 								},
 							},
-						},
-						TenantPermissions: []opensearch.TenantPermission{
-							{
-								AllowedActions: []string{"kibana_all_write"},
-								TenantPatterns: []string{"internaltest"},
+							TenantPermissions: []opensearch.TenantPermission{
+								{
+									AllowedActions: []string{"kibana_all_write"},
+									TenantPatterns: []string{"internaltest"},
+								},
 							},
 						},
 					},

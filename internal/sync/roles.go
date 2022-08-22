@@ -81,26 +81,28 @@ func generateProjectGroupRole(
 		return "", nil, fmt.Errorf("invalid lagoon-projects attribute")
 	}
 	return fmt.Sprintf("p%s", pAttr[0]), &opensearch.Role{
-		ClusterPermissions: []string{
-			"cluster:admin/opendistro/reports/menu/download",
-		},
-		IndexPermissions: []opensearch.IndexPermission{
-			{
-				AllowedActions: []string{
-					"read",
-					"indices:monitor/settings/get",
-				},
-				IndexPatterns: []string{
-					fmt.Sprintf(
-						`/^(application|container|lagoon|router)-logs-%s-_-.+/`,
-						strings.TrimPrefix(group.Name, "project-")),
+		RolePermissions: opensearch.RolePermissions{
+			ClusterPermissions: []string{
+				"cluster:admin/opendistro/reports/menu/download",
+			},
+			IndexPermissions: []opensearch.IndexPermission{
+				{
+					AllowedActions: []string{
+						"read",
+						"indices:monitor/settings/get",
+					},
+					IndexPatterns: []string{
+						fmt.Sprintf(
+							`/^(application|container|lagoon|router)-logs-%s-_-.+/`,
+							strings.TrimPrefix(group.Name, "project-")),
+					},
 				},
 			},
-		},
-		TenantPermissions: []opensearch.TenantPermission{
-			{
-				AllowedActions: []string{"kibana_all_read"},
-				TenantPatterns: []string{"global_tenant"},
+			TenantPermissions: []opensearch.TenantPermission{
+				{
+					AllowedActions: []string{"kibana_all_read"},
+					TenantPatterns: []string{"global_tenant"},
+				},
 			},
 		},
 	}, nil
@@ -123,11 +125,14 @@ func generateRegularGroupRole(log *zap.Logger, projectNames map[int]string,
 	if err != nil {
 		return "", nil, fmt.Errorf("couldn't generate index patterns: %v", err)
 	}
-	return group.Name, &opensearch.Role{
-		ClusterPermissions: []string{
-			"cluster:admin/opendistro/reports/menu/download",
-		},
-		IndexPermissions: []opensearch.IndexPermission{
+	// the Opensearch API is picky about the structure of create group requests,
+	// so ensure that the index_permissions field is only set if there are any
+	// index patterns. Also it cannot be omitted, so can't be nil.
+	var indexPermissions []opensearch.IndexPermission
+	if len(indexPatterns) == 0 {
+		indexPermissions = []opensearch.IndexPermission{}
+	} else {
+		indexPermissions = []opensearch.IndexPermission{
 			{
 				AllowedActions: []string{
 					"read",
@@ -135,11 +140,19 @@ func generateRegularGroupRole(log *zap.Logger, projectNames map[int]string,
 				},
 				IndexPatterns: indexPatterns,
 			},
-		},
-		TenantPermissions: []opensearch.TenantPermission{
-			{
-				AllowedActions: []string{"kibana_all_write"},
-				TenantPatterns: []string{group.Name},
+		}
+	}
+	return group.Name, &opensearch.Role{
+		RolePermissions: opensearch.RolePermissions{
+			ClusterPermissions: []string{
+				"cluster:admin/opendistro/reports/menu/download",
+			},
+			IndexPermissions: indexPermissions,
+			TenantPermissions: []opensearch.TenantPermission{
+				{
+					AllowedActions: []string{"kibana_all_write"},
+					TenantPatterns: []string{group.Name},
+				},
 			},
 		},
 	}, nil
@@ -156,13 +169,16 @@ func generateRoles(log *zap.Logger, groups []keycloak.Group,
 		case group.Name == "lagoonadmin":
 			// lagoonadmin is a special role used by Lagoon
 			roles[group.Name] = opensearch.Role{
-				ClusterPermissions: []string{
-					"cluster:admin/opendistro/reports/menu/download",
-				},
-				TenantPermissions: []opensearch.TenantPermission{
-					{
-						AllowedActions: []string{"kibana_all_write"},
-						TenantPatterns: []string{"lagoonadmin"},
+				RolePermissions: opensearch.RolePermissions{
+					ClusterPermissions: []string{
+						"cluster:admin/opendistro/reports/menu/download",
+					},
+					IndexPermissions: []opensearch.IndexPermission{},
+					TenantPermissions: []opensearch.TenantPermission{
+						{
+							AllowedActions: []string{"kibana_all_write"},
+							TenantPatterns: []string{"lagoonadmin"},
+						},
 					},
 				},
 			}
@@ -196,11 +212,7 @@ func calculateRoleDiff(existing, required map[string]opensearch.Role) (
 	toCreate := map[string]opensearch.Role{}
 	for name, rRole := range required {
 		eRole, ok := existing[name]
-		if !ok {
-			toCreate[name] = rRole
-			continue
-		}
-		if !rolesEqual(eRole, rRole) {
+		if !ok || !rolesEqual(eRole, rRole) {
 			toCreate[name] = rRole
 		}
 	}
@@ -208,11 +220,7 @@ func calculateRoleDiff(existing, required map[string]opensearch.Role) (
 	var toDelete []string
 	for name, eRole := range existing {
 		rRole, ok := required[name]
-		if !ok {
-			toDelete = append(toDelete, name)
-			continue
-		}
-		if !rolesEqual(rRole, eRole) {
+		if !ok || !rolesEqual(rRole, eRole) {
 			// don't delete unnecessarily. create action in opensearch is actually
 			// create/replace.
 			// https://opensearch.org/docs/2.2/security-plugin/access-control
@@ -227,50 +235,56 @@ func calculateRoleDiff(existing, required map[string]opensearch.Role) (
 
 // given a map of opensearch roles, return those that are not static or
 // reserved.
-func filterStaticReservedRoles(
+func filterRoles(
 	roles map[string]opensearch.Role) map[string]opensearch.Role {
-	validRoles := map[string]opensearch.Role{}
+	valid := map[string]opensearch.Role{}
 	for name, role := range roles {
 		if role.Static || role.Reserved {
 			continue
 		}
-		validRoles[name] = role
+		valid[name] = role
 	}
-	return validRoles
+	return valid
 }
 
 // syncRoles reconciles Opensearch roles with Lagoon keycloak and projects.
 func syncRoles(ctx context.Context, log *zap.Logger, groups []keycloak.Group,
-	projectNames map[int]string, existingRoles map[string]opensearch.Role,
-	o OpensearchService, dryRun bool) {
-	// ignore static and reserved roles
-	existingRoles = filterStaticReservedRoles(existingRoles)
+	projectNames map[int]string, o OpensearchService, dryRun bool) {
+	existing, err := o.Roles(ctx)
+	if err != nil {
+		log.Error("couldn't get roles from Opensearch", zap.Error(err))
+		return
+	}
+	// ignore non-lagoon roles
+	existing = filterRoles(existing)
 	// generate the roles required by Lagoon
-	requiredRoles := generateRoles(log, groups, projectNames)
+	required := generateRoles(log, groups, projectNames)
 	// calculate roles to add/remove
-	toCreate, toDelete := calculateRoleDiff(existingRoles, requiredRoles)
-	// remove any extraneous roles
-	var err error
-	for _, roleName := range toDelete {
+	toCreate, toDelete := calculateRoleDiff(existing, required)
+	for _, name := range toDelete {
 		if dryRun {
 			log.Info("dry run mode: not deleting role",
-				zap.String("role name", roleName))
+				zap.String("name", name))
 			continue
 		}
-		err = o.DeleteRole(ctx, roleName)
+		err = o.DeleteRole(ctx, name)
 		if err != nil {
 			log.Warn("couldn't delete role", zap.Error(err))
+		} else {
+			log.Info("deleted role", zap.String("name", name))
 		}
 	}
-	for roleName, role := range toCreate {
+	for name, role := range toCreate {
 		if dryRun {
 			log.Info("dry run mode: not creating role",
-				zap.String("role name", roleName))
+				zap.String("name", name))
 			continue
 		}
-		err = o.CreateRole(ctx, roleName, &role)
+		err = o.CreateRole(ctx, name, &role)
 		if err != nil {
 			log.Warn("couldn't create role", zap.Error(err))
+		} else {
+			log.Info("created role", zap.String("name", name))
 		}
 	}
 }

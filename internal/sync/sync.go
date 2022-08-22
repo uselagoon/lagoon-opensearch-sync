@@ -27,12 +27,16 @@ type OpensearchService interface {
 	Roles(context.Context) (map[string]opensearch.Role, error)
 	CreateRole(context.Context, string, *opensearch.Role) error
 	DeleteRole(context.Context, string) error
+
+	Tenants(context.Context) (map[string]opensearch.Tenant, error)
+	CreateTenant(context.Context, string, *opensearch.Tenant) error
+	DeleteTenant(context.Context, string) error
 }
 
 // Sync will read the Lagoon state from the LagoonDBService and KeycloakService,
 // and then configure the OpensearchService as required.
 func Sync(ctx context.Context, log *zap.Logger, l LagoonDBService,
-	k KeycloakService, o OpensearchService, dryRun bool) error {
+	k KeycloakService, o OpensearchService, dryRun bool, objects []string) error {
 	// get projects from Lagoon
 	projects, err := l.Projects(ctx)
 	if err != nil {
@@ -54,11 +58,15 @@ func Sync(ctx context.Context, log *zap.Logger, l LagoonDBService,
 	if err != nil {
 		return fmt.Errorf("couldn't get groups: %v", err)
 	}
-	// get roles from Opensearch
-	roles, err := o.Roles(ctx)
-	if err != nil {
-		return fmt.Errorf("couldn't get roles: %v", err)
+	for _, object := range objects {
+		switch object {
+		case "tenants":
+			syncTenants(ctx, log, groups, o, dryRun)
+		case "roles":
+			syncRoles(ctx, log, groups, projectNames, o, dryRun)
+		default:
+			log.Info("sync object not implemented", zap.String("object", object))
+		}
 	}
-	syncRoles(ctx, log, groups, projectNames, roles, o, dryRun)
 	return nil
 }

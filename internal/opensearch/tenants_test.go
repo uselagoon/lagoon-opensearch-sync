@@ -20,24 +20,36 @@ func TestTenantsUnmarshal(t *testing.T) {
 			input: "testdata/tenants.json",
 			expect: map[string]opensearch.Tenant{
 				"admin_tenant": {
-					Description: "Tenant for admin user",
+					TenantDescription: opensearch.TenantDescription{
+						Description: "Tenant for admin user",
+					},
 				},
 				"amazee.io internal": {
-					Description: "amazee.io internal",
+					TenantDescription: opensearch.TenantDescription{
+						Description: "amazee.io internal",
+					},
 				},
 				"drupal-example": {
-					Description: "drupal-example",
+					TenantDescription: opensearch.TenantDescription{
+						Description: "drupal-example",
+					},
 				},
 				"global_tenant": {
-					Description: "Global tenant",
-					Reserved:    true,
-					Static:      true,
+					Reserved: true,
+					Static:   true,
+					TenantDescription: opensearch.TenantDescription{
+						Description: "Global tenant",
+					},
 				},
 				"internaltest": {
-					Description: "internaltest",
+					TenantDescription: opensearch.TenantDescription{
+						Description: "internaltest",
+					},
 				},
 				"lagoonadmin": {
-					Description: "lagoonadmin",
+					TenantDescription: opensearch.TenantDescription{
+						Description: "lagoonadmin",
+					},
 				},
 			},
 		},
