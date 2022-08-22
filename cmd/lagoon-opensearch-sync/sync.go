@@ -16,7 +16,8 @@ import (
 
 // SyncCmd represents the `sync` command.
 type SyncCmd struct {
-	DryRun bool `kong:"env='DRY_RUN',help='Print actions that will be taken but do not persist any changes to Opensearch'"`
+	DryRun  bool     `kong:"env='DRY_RUN',help='Print actions that will be taken but do not persist any changes to Opensearch'"`
+	Objects []string `kong:"enum='tenants,roles,rolesmapping,indextemplates',default='tenants,roles,rolesmapping,indextemplates',help='Opensearch objects which will be synchronized'"`
 	// lagoon DB client fields
 	APIDBAddress  string `kong:"required,env='API_DB_ADDRESS',help='Lagoon API DB Address (host[:port])'"`
 	APIDBDatabase string `kong:"default='infrastructure',env='API_DB_DATABASE',help='Lagoon API DB Database Name'"`
@@ -62,5 +63,5 @@ func (cmd *SyncCmd) Run(log *zap.Logger) error {
 		return fmt.Errorf("couldn't init opensearch client: %v", err)
 	}
 	// run the sync
-	return sync.Sync(ctx, log, l, k, o, cmd.DryRun)
+	return sync.Sync(ctx, log, l, k, o, cmd.DryRun, cmd.Objects)
 }

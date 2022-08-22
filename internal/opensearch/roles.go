@@ -75,10 +75,10 @@ func (c *Client) CreateRole(ctx context.Context, name string,
 		return fmt.Errorf("couldn't marshal role: %v", err)
 	}
 	// construct request
-	rolesURL := *c.baseURL
-	rolesURL.Path = path.Join(c.baseURL.Path,
+	url := *c.baseURL
+	url.Path = path.Join(c.baseURL.Path,
 		"/_plugins/_security/api/roles/", name)
-	req, err := http.NewRequestWithContext(ctx, "PUT", rolesURL.String(), &buf)
+	req, err := http.NewRequestWithContext(ctx, "PUT", url.String(), &buf)
 	if err != nil {
 		return fmt.Errorf("couldn't construct create role request: %v", err)
 	}
@@ -98,10 +98,10 @@ func (c *Client) CreateRole(ctx context.Context, name string,
 // DeleteRole deletes the named role from Opensearch.
 func (c *Client) DeleteRole(ctx context.Context, name string) error {
 	// construct request
-	rolesURL := *c.baseURL
-	rolesURL.Path = path.Join(c.baseURL.Path,
+	url := *c.baseURL
+	url.Path = path.Join(c.baseURL.Path,
 		"/_plugins/_security/api/roles/", name)
-	req, err := http.NewRequestWithContext(ctx, "DELETE", rolesURL.String(), nil)
+	req, err := http.NewRequestWithContext(ctx, "DELETE", url.String(), nil)
 	if err != nil {
 		return fmt.Errorf("couldn't construct delete role request: %v", err)
 	}
