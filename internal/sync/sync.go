@@ -24,13 +24,17 @@ type LagoonDBService interface {
 
 // OpensearchService defines the Opensearch service interface.
 type OpensearchService interface {
+	Tenants(context.Context) (map[string]opensearch.Tenant, error)
+	CreateTenant(context.Context, string, *opensearch.Tenant) error
+	DeleteTenant(context.Context, string) error
+
 	Roles(context.Context) (map[string]opensearch.Role, error)
 	CreateRole(context.Context, string, *opensearch.Role) error
 	DeleteRole(context.Context, string) error
 
-	Tenants(context.Context) (map[string]opensearch.Tenant, error)
-	CreateTenant(context.Context, string, *opensearch.Tenant) error
-	DeleteTenant(context.Context, string) error
+	RolesMapping(context.Context) (map[string]opensearch.RoleMapping, error)
+	CreateRoleMapping(context.Context, string, *opensearch.RoleMapping) error
+	DeleteRoleMapping(context.Context, string) error
 }
 
 // Sync will read the Lagoon state from the LagoonDBService and KeycloakService,
@@ -58,12 +62,21 @@ func Sync(ctx context.Context, log *zap.Logger, l LagoonDBService,
 	if err != nil {
 		return fmt.Errorf("couldn't get groups: %v", err)
 	}
+	// Get roles from Opensearch. Getting this data here is an optimisation
+	// because both syncRoles and syncRolesMapping use this data and this way we
+	// only need to request it from Opensearch once.
+	roles, err := o.Roles(ctx)
+	if err != nil {
+		return fmt.Errorf("couldn't get roles: %v", err)
+	}
 	for _, object := range objects {
 		switch object {
 		case "tenants":
 			syncTenants(ctx, log, groups, o, dryRun)
 		case "roles":
-			syncRoles(ctx, log, groups, projectNames, o, dryRun)
+			syncRoles(ctx, log, groups, projectNames, roles, o, dryRun)
+		case "rolesmapping":
+			syncRolesMapping(ctx, log, groups, projectNames, roles, o, dryRun)
 		default:
 			log.Info("sync object not implemented", zap.String("object", object))
 		}
