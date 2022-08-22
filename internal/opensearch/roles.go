@@ -82,6 +82,7 @@ func (c *Client) CreateRole(ctx context.Context, name string,
 	if err != nil {
 		return fmt.Errorf("couldn't construct create role request: %v", err)
 	}
+	req.Header.Set("Content-Type", "application/json")
 	// make request
 	res, err := c.httpClient.Do(req)
 	if err != nil {

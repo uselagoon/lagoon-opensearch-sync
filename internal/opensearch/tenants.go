@@ -69,6 +69,7 @@ func (c *Client) CreateTenant(ctx context.Context, name string,
 	if err != nil {
 		return fmt.Errorf("couldn't construct create tenant request: %v", err)
 	}
+	req.Header.Set("Content-Type", "application/json")
 	// make request
 	res, err := c.httpClient.Do(req)
 	if err != nil {
