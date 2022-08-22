@@ -24,13 +24,17 @@ type LagoonDBService interface {
 
 // OpensearchService defines the Opensearch service interface.
 type OpensearchService interface {
+	Tenants(context.Context) (map[string]opensearch.Tenant, error)
+	CreateTenant(context.Context, string, *opensearch.Tenant) error
+	DeleteTenant(context.Context, string) error
+
 	Roles(context.Context) (map[string]opensearch.Role, error)
 	CreateRole(context.Context, string, *opensearch.Role) error
 	DeleteRole(context.Context, string) error
 
-	Tenants(context.Context) (map[string]opensearch.Tenant, error)
-	CreateTenant(context.Context, string, *opensearch.Tenant) error
-	DeleteTenant(context.Context, string) error
+	RolesMapping(context.Context) (map[string]opensearch.RoleMapping, error)
+	CreateRoleMapping(context.Context, string, *opensearch.RoleMapping) error
+	DeleteRoleMapping(context.Context, string) error
 }
 
 // Sync will read the Lagoon state from the LagoonDBService and KeycloakService,
@@ -64,6 +68,8 @@ func Sync(ctx context.Context, log *zap.Logger, l LagoonDBService,
 			syncTenants(ctx, log, groups, o, dryRun)
 		case "roles":
 			syncRoles(ctx, log, groups, projectNames, o, dryRun)
+		case "rolesmapping":
+			syncRolesMapping(ctx, log, groups, projectNames, o, dryRun)
 		default:
 			log.Info("sync object not implemented", zap.String("object", object))
 		}

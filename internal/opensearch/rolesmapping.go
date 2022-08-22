@@ -1,6 +1,7 @@
 package opensearch
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -52,4 +53,58 @@ func (c *Client) RolesMapping(
 	}
 	var rm map[string]RoleMapping
 	return rm, json.Unmarshal(rawRolesMapping, &rm)
+}
+
+// CreateRoleMapping creates the given rolemapping in Opensearch.
+func (c *Client) CreateRoleMapping(ctx context.Context, name string,
+	rm *RoleMapping) error {
+	var buf bytes.Buffer
+	enc := json.NewEncoder(&buf)
+	if err := enc.Encode(rm); err != nil {
+		return fmt.Errorf("couldn't marshal rolemapping: %v", err)
+	}
+	// construct request
+	url := *c.baseURL
+	url.Path = path.Join(c.baseURL.Path,
+		"/_plugins/_security/api/rolesmapping/", name)
+	req, err := http.NewRequestWithContext(ctx, "PUT", url.String(), &buf)
+	if err != nil {
+		return fmt.Errorf("couldn't construct create rolemapping request: %v", err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+	// make request
+	res, err := c.httpClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("couldn't create rolemapping: %v", err)
+	}
+	defer res.Body.Close()
+	if res.StatusCode > 299 {
+		body, _ := io.ReadAll(res.Body)
+		return fmt.Errorf("bad create rolemapping response: %d\n%s",
+			res.StatusCode, body)
+	}
+	return nil
+}
+
+// DeleteRoleMapping deletes the named rolemapping from Opensearch.
+func (c *Client) DeleteRoleMapping(ctx context.Context, name string) error {
+	// construct request
+	url := *c.baseURL
+	url.Path = path.Join(c.baseURL.Path,
+		"/_plugins/_security/api/rolesmapping/", name)
+	req, err := http.NewRequestWithContext(ctx, "DELETE", url.String(), nil)
+	if err != nil {
+		return fmt.Errorf("couldn't construct delete rolemapping request: %v", err)
+	}
+	// make request
+	res, err := c.httpClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("couldn't delete rolemapping: %v", err)
+	}
+	defer res.Body.Close()
+	if res.StatusCode > 299 {
+		body, _ := io.ReadAll(res.Body)
+		return fmt.Errorf("bad delete rolemapping response: %d\n%s", res.StatusCode, body)
+	}
+	return nil
 }
