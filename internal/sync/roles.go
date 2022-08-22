@@ -123,11 +123,14 @@ func generateRegularGroupRole(log *zap.Logger, projectNames map[int]string,
 	if err != nil {
 		return "", nil, fmt.Errorf("couldn't generate index patterns: %v", err)
 	}
-	return group.Name, &opensearch.Role{
-		ClusterPermissions: []string{
-			"cluster:admin/opendistro/reports/menu/download",
-		},
-		IndexPermissions: []opensearch.IndexPermission{
+	// the Opensearch API is picky about the structure of create group requests,
+	// so ensure that the index_permissions field is only set if there are any
+	// index patterns. Also it cannot be omitted, so can't be nil.
+	var indexPermissions []opensearch.IndexPermission
+	if len(indexPatterns) == 0 {
+		indexPermissions = []opensearch.IndexPermission{}
+	} else {
+		indexPermissions = []opensearch.IndexPermission{
 			{
 				AllowedActions: []string{
 					"read",
@@ -135,7 +138,13 @@ func generateRegularGroupRole(log *zap.Logger, projectNames map[int]string,
 				},
 				IndexPatterns: indexPatterns,
 			},
+		}
+	}
+	return group.Name, &opensearch.Role{
+		ClusterPermissions: []string{
+			"cluster:admin/opendistro/reports/menu/download",
 		},
+		IndexPermissions: indexPermissions,
 		TenantPermissions: []opensearch.TenantPermission{
 			{
 				AllowedActions: []string{"kibana_all_write"},
@@ -159,6 +168,7 @@ func generateRoles(log *zap.Logger, groups []keycloak.Group,
 				ClusterPermissions: []string{
 					"cluster:admin/opendistro/reports/menu/download",
 				},
+				IndexPermissions: []opensearch.IndexPermission{},
 				TenantPermissions: []opensearch.TenantPermission{
 					{
 						AllowedActions: []string{"kibana_all_write"},
