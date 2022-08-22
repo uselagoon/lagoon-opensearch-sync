@@ -84,12 +84,19 @@ func generateRolesMapping(log *zap.Logger,
 
 // given a map of opensearch rolesmapping, return those that are not reserved
 // or hidden.
-func filterRolesMapping(
-	rolesmapping map[string]opensearch.RoleMapping) map[string]opensearch.RoleMapping {
+func filterRolesMapping(rolesmapping map[string]opensearch.RoleMapping,
+	roles map[string]opensearch.Role) map[string]opensearch.RoleMapping {
 	valid := map[string]opensearch.RoleMapping{}
 	for name, rolemapping := range rolesmapping {
 		if rolemapping.Reserved || rolemapping.Hidden {
 			continue
+		}
+		// for some reason even a "reserved" RoleMapping can have reserved=false,
+		// so we need to inspect the corresponding Role
+		if role, ok := roles[name]; ok {
+			if role.Reserved || role.Static {
+				continue
+			}
 		}
 		valid[name] = rolemapping
 	}
@@ -99,7 +106,8 @@ func filterRolesMapping(
 // syncRolesmapping reconciles Opensearch rolesmapping with Lagoon keycloak
 // groups.
 func syncRolesMapping(ctx context.Context, log *zap.Logger, groups []keycloak.Group,
-	projectNames map[int]string, o OpensearchService, dryRun bool) {
+	projectNames map[int]string, roles map[string]opensearch.Role,
+	o OpensearchService, dryRun bool) {
 	// get rolesmapping from Opensearch
 	existing, err := o.RolesMapping(ctx)
 	if err != nil {
@@ -107,7 +115,7 @@ func syncRolesMapping(ctx context.Context, log *zap.Logger, groups []keycloak.Gr
 		return
 	}
 	// ignore non-lagoon rolesmapping
-	existing = filterRolesMapping(existing)
+	existing = filterRolesMapping(existing, roles)
 	// generate the rolesmapping required by Lagoon
 	required := generateRolesMapping(log, groups)
 	// calculate rolesmapping to add/remove

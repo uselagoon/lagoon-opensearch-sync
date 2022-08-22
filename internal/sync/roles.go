@@ -261,18 +261,15 @@ func filterRoles(
 
 // syncRoles reconciles Opensearch roles with Lagoon keycloak and projects.
 func syncRoles(ctx context.Context, log *zap.Logger, groups []keycloak.Group,
-	projectNames map[int]string, o OpensearchService, dryRun bool) {
-	existing, err := o.Roles(ctx)
-	if err != nil {
-		log.Error("couldn't get roles from Opensearch", zap.Error(err))
-		return
-	}
+	projectNames map[int]string, roles map[string]opensearch.Role,
+	o OpensearchService, dryRun bool) {
 	// ignore non-lagoon roles
-	existing = filterRoles(existing)
+	existing := filterRoles(roles)
 	// generate the roles required by Lagoon
 	required := generateRoles(log, groups, projectNames)
 	// calculate roles to add/remove
 	toCreate, toDelete := calculateRoleDiff(existing, required)
+	var err error
 	for _, name := range toDelete {
 		if dryRun {
 			log.Info("dry run mode: not deleting role",
