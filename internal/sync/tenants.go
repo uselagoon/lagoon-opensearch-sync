@@ -111,6 +111,8 @@ func syncTenants(ctx context.Context, log *zap.Logger, groups []keycloak.Group,
 		err = o.DeleteTenant(ctx, name)
 		if err != nil {
 			log.Warn("couldn't delete tenant", zap.Error(err))
+		} else {
+			log.Info("deleted tenant", zap.String("name", name))
 		}
 	}
 	for name, tenant := range toCreate {
@@ -122,6 +124,8 @@ func syncTenants(ctx context.Context, log *zap.Logger, groups []keycloak.Group,
 		err = o.CreateTenant(ctx, name, &tenant)
 		if err != nil {
 			log.Warn("couldn't create tenant", zap.Error(err))
+		} else {
+			log.Info("created tenant", zap.String("name", name))
 		}
 	}
 }

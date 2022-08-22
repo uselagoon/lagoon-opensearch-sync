@@ -271,6 +271,8 @@ func syncRoles(ctx context.Context, log *zap.Logger, groups []keycloak.Group,
 		err = o.DeleteRole(ctx, name)
 		if err != nil {
 			log.Warn("couldn't delete role", zap.Error(err))
+		} else {
+			log.Info("deleted role", zap.String("name", name))
 		}
 	}
 	for name, role := range toCreate {
@@ -282,6 +284,8 @@ func syncRoles(ctx context.Context, log *zap.Logger, groups []keycloak.Group,
 		err = o.CreateRole(ctx, name, &role)
 		if err != nil {
 			log.Warn("couldn't create role", zap.Error(err))
+		} else {
+			log.Info("created role", zap.String("name", name))
 		}
 	}
 }
