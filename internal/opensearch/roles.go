@@ -33,7 +33,7 @@ type Role struct {
 }
 
 // RolePermissions contain only the permissions and description of the role.
-// This subtype which is embedded in Role exists so that a valid PUT request
+// This subtype, which is embedded in Role, exists so that a valid PUT request
 // can be easily made to the Opensearch API. This requires omitting the Hidden,
 // Reserved, and Static fields.
 type RolePermissions struct {

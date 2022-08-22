@@ -63,10 +63,12 @@ func generateTenants(log *zap.Logger,
 			continue
 		default:
 			tenants[group.Name] = opensearch.Tenant{
-				Description: group.Name,
-				Hidden:      false,
-				Reserved:    false,
-				Static:      false,
+				Hidden:   false,
+				Reserved: false,
+				Static:   false,
+				TenantDescription: opensearch.TenantDescription{
+					Description: group.Name,
+				},
 			}
 		}
 	}

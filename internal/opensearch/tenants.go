@@ -12,10 +12,18 @@ import (
 
 // Tenant represents an Opensearch Tenant.
 type Tenant struct {
+	Hidden   bool `json:"hidden"`
+	Reserved bool `json:"reserved"`
+	Static   bool `json:"static"`
+	TenantDescription
+}
+
+// TenantDescription contain only the description of the role.
+// This subtype, which is embedded in Tenant, exists so that a valid PUT request
+// can be easily made to the Opensearch API. This requires omitting the Hidden,
+// Reserved, and Static fields.
+type TenantDescription struct {
 	Description string `json:"description"`
-	Hidden      bool   `json:"hidden"`
-	Reserved    bool   `json:"reserved"`
-	Static      bool   `json:"static"`
 }
 
 // rawTenants returns the raw JSON tenants representation from the
@@ -58,7 +66,7 @@ func (c *Client) CreateTenant(ctx context.Context, name string,
 	// marshal payload
 	var buf bytes.Buffer
 	enc := json.NewEncoder(&buf)
-	if err := enc.Encode(tenant); err != nil {
+	if err := enc.Encode(tenant.TenantDescription); err != nil {
 		return fmt.Errorf("couldn't marshal tenant: %v", err)
 	}
 	// construct request
