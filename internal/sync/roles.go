@@ -69,18 +69,29 @@ func isInt(s string) bool {
 	return err == nil
 }
 
+// projectGroupRoleName generates the name of a project group role from the
+// lagoon-projects attribute on a keycloak group.
+func projectGroupRoleName(group keycloak.Group) (string, error) {
+	pAttr, ok := group.Attributes["lagoon-projects"]
+	if !ok {
+		return "", fmt.Errorf("missing lagoon-projects attribute")
+	}
+	if len(pAttr) != 1 || !isInt(pAttr[0]) {
+		return "", fmt.Errorf("invalid lagoon-projects attribute")
+	}
+	return fmt.Sprintf("p%s", pAttr[0]), nil
+}
+
 // generateProjectGroupRole constructs an opensearch.Role from the given
 // keycloak group corresponding to a Lagoon project group.
 func generateProjectGroupRole(
 	group keycloak.Group) (string, *opensearch.Role, error) {
-	pAttr, ok := group.Attributes["lagoon-projects"]
-	if !ok {
-		return "", nil, fmt.Errorf("missing lagoon-projects attribute")
+	name, err := projectGroupRoleName(group)
+	if err != nil {
+		return "", nil,
+			fmt.Errorf("couldn't generate project group role name: %v", err)
 	}
-	if len(pAttr) != 1 || !isInt(pAttr[0]) {
-		return "", nil, fmt.Errorf("invalid lagoon-projects attribute")
-	}
-	return fmt.Sprintf("p%s", pAttr[0]), &opensearch.Role{
+	return name, &opensearch.Role{
 		RolePermissions: opensearch.RolePermissions{
 			ClusterPermissions: []string{
 				"cluster:admin/opendistro/reports/menu/download",
@@ -168,6 +179,7 @@ func generateRoles(log *zap.Logger, groups []keycloak.Group,
 		switch {
 		case group.Name == "lagoonadmin":
 			// lagoonadmin is a special role used by Lagoon
+			// TODO: remove this logic if the role is really redundant
 			roles[group.Name] = opensearch.Role{
 				RolePermissions: opensearch.RolePermissions{
 					ClusterPermissions: []string{

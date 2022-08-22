@@ -42,7 +42,7 @@ func calculateTenantDiff(existing, required map[string]opensearch.Tenant) (
 			// don't delete unnecessarily. create action in opensearch is actually
 			// create/replace.
 			// https://opensearch.org/docs/2.2/security-plugin/access-control
-			// 	/api#create-role
+			// 	/api#create-tenant
 			if _, ok := toCreate[name]; !ok {
 				toDelete = append(toDelete, name)
 			}
