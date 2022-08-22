@@ -81,26 +81,28 @@ func generateProjectGroupRole(
 		return "", nil, fmt.Errorf("invalid lagoon-projects attribute")
 	}
 	return fmt.Sprintf("p%s", pAttr[0]), &opensearch.Role{
-		ClusterPermissions: []string{
-			"cluster:admin/opendistro/reports/menu/download",
-		},
-		IndexPermissions: []opensearch.IndexPermission{
-			{
-				AllowedActions: []string{
-					"read",
-					"indices:monitor/settings/get",
-				},
-				IndexPatterns: []string{
-					fmt.Sprintf(
-						`/^(application|container|lagoon|router)-logs-%s-_-.+/`,
-						strings.TrimPrefix(group.Name, "project-")),
+		RolePermissions: opensearch.RolePermissions{
+			ClusterPermissions: []string{
+				"cluster:admin/opendistro/reports/menu/download",
+			},
+			IndexPermissions: []opensearch.IndexPermission{
+				{
+					AllowedActions: []string{
+						"read",
+						"indices:monitor/settings/get",
+					},
+					IndexPatterns: []string{
+						fmt.Sprintf(
+							`/^(application|container|lagoon|router)-logs-%s-_-.+/`,
+							strings.TrimPrefix(group.Name, "project-")),
+					},
 				},
 			},
-		},
-		TenantPermissions: []opensearch.TenantPermission{
-			{
-				AllowedActions: []string{"kibana_all_read"},
-				TenantPatterns: []string{"global_tenant"},
+			TenantPermissions: []opensearch.TenantPermission{
+				{
+					AllowedActions: []string{"kibana_all_read"},
+					TenantPatterns: []string{"global_tenant"},
+				},
 			},
 		},
 	}, nil
@@ -141,14 +143,16 @@ func generateRegularGroupRole(log *zap.Logger, projectNames map[int]string,
 		}
 	}
 	return group.Name, &opensearch.Role{
-		ClusterPermissions: []string{
-			"cluster:admin/opendistro/reports/menu/download",
-		},
-		IndexPermissions: indexPermissions,
-		TenantPermissions: []opensearch.TenantPermission{
-			{
-				AllowedActions: []string{"kibana_all_write"},
-				TenantPatterns: []string{group.Name},
+		RolePermissions: opensearch.RolePermissions{
+			ClusterPermissions: []string{
+				"cluster:admin/opendistro/reports/menu/download",
+			},
+			IndexPermissions: indexPermissions,
+			TenantPermissions: []opensearch.TenantPermission{
+				{
+					AllowedActions: []string{"kibana_all_write"},
+					TenantPatterns: []string{group.Name},
+				},
 			},
 		},
 	}, nil
@@ -165,14 +169,16 @@ func generateRoles(log *zap.Logger, groups []keycloak.Group,
 		case group.Name == "lagoonadmin":
 			// lagoonadmin is a special role used by Lagoon
 			roles[group.Name] = opensearch.Role{
-				ClusterPermissions: []string{
-					"cluster:admin/opendistro/reports/menu/download",
-				},
-				IndexPermissions: []opensearch.IndexPermission{},
-				TenantPermissions: []opensearch.TenantPermission{
-					{
-						AllowedActions: []string{"kibana_all_write"},
-						TenantPatterns: []string{"lagoonadmin"},
+				RolePermissions: opensearch.RolePermissions{
+					ClusterPermissions: []string{
+						"cluster:admin/opendistro/reports/menu/download",
+					},
+					IndexPermissions: []opensearch.IndexPermission{},
+					TenantPermissions: []opensearch.TenantPermission{
+						{
+							AllowedActions: []string{"kibana_all_write"},
+							TenantPatterns: []string{"lagoonadmin"},
+						},
 					},
 				},
 			}
