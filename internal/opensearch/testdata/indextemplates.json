@@ -1,0 +1,39 @@
+{
+  "index_templates": [
+    {
+      "index_template": {
+        "composed_of": [],
+        "index_patterns": [
+          "router-logs-*"
+        ],
+        "template": {
+          "mappings": {
+            "dynamic_templates": [
+              {
+                "remote_addr": {
+                  "mapping": {
+                    "ignore_malformed": true,
+                    "type": "ip"
+                  },
+                  "match": "remote_addr",
+                  "match_mapping_type": "string"
+                }
+              },
+              {
+                "true-client-ip": {
+                  "mapping": {
+                    "ignore_malformed": true,
+                    "type": "ip"
+                  },
+                  "match": "true-client-ip",
+                  "match_mapping_type": "string"
+                }
+              }
+            ]
+          }
+        }
+      },
+      "name": "routerlogs"
+    }
+  ]
+}
