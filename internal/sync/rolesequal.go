@@ -62,11 +62,7 @@ func tenantPermissionsEqual(a, b []opensearch.TenantPermission) bool {
 	return true
 }
 
-// rolesEqual checks the fields Lagoon cares about for functional equality:
-// * ClusterPermissions
-// * Hidden
-// * IndexPermissions
-// * TenantPermissions
+// rolesEqual checks the fields Lagoon cares about for functional equality
 func rolesEqual(a, b opensearch.Role) bool {
 	if !stringSliceEqual(a.ClusterPermissions, b.ClusterPermissions) {
 		return false

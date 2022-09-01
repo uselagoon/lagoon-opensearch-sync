@@ -14,7 +14,8 @@ import (
 )
 
 // generateIndexPermissionPatterns returns a slice of index pattern strings
-// generated from the given slice of project IDs.
+// in regular expressions format generated from the given slice of project IDs.
+// https://www.elastic.co/guide/en/elasticsearch/reference/7.10/defining-roles.html#roles-indices-priv
 func generateIndexPermissionPatterns(log *zap.Logger, pids []int,
 	projectNames map[int]string) []string {
 	var patterns []string
@@ -72,8 +73,8 @@ func projectGroupRoleName(group keycloak.Group) (string, error) {
 
 // generateProjectGroupRole constructs an opensearch.Role from the given
 // keycloak group corresponding to a Lagoon project group.
-func generateProjectGroupRole(
-	group keycloak.Group) (string, *opensearch.Role, error) {
+func generateProjectGroupRole(group keycloak.Group) (
+	string, *opensearch.Role, error) {
 	name, err := projectGroupRoleName(group)
 	if err != nil {
 		return "", nil,
@@ -107,6 +108,8 @@ func generateProjectGroupRole(
 	}, nil
 }
 
+// projectIDsForGroup parses the lagoon-projects attribute on the given group
+// and returns a slice of project IDs.
 func projectIDsForGroup(group keycloak.Group) ([]int, error) {
 	// get lagoon-projects attribute
 	lpa, ok := group.Attributes["lagoon-projects"]
@@ -178,43 +181,31 @@ func generateRegularGroupRole(log *zap.Logger, projectNames map[int]string,
 func generateRoles(log *zap.Logger, groups []keycloak.Group,
 	projectNames map[int]string) map[string]opensearch.Role {
 	roles := map[string]opensearch.Role{}
+	var name string
+	var role *opensearch.Role
+	var err error
 	for _, group := range groups {
+		// TODO: remove this workaround once this group is removed from Lagoon
+		if group.Name == "lagoonadmin" {
+			continue
+		}
 		// figure out if this is a regular group or project group
-		switch {
-		case group.Name == "lagoonadmin":
-			// lagoonadmin is a special role used by Lagoon
-			// TODO: remove this logic if the role is really redundant
-			roles[group.Name] = opensearch.Role{
-				RolePermissions: opensearch.RolePermissions{
-					ClusterPermissions: []string{
-						"cluster:admin/opendistro/reports/menu/download",
-					},
-					IndexPermissions: []opensearch.IndexPermission{},
-					TenantPermissions: []opensearch.TenantPermission{
-						{
-							AllowedActions: []string{"kibana_all_write"},
-							TenantPatterns: []string{"lagoonadmin"},
-						},
-					},
-				},
-			}
-		case isProjectGroup(log, group):
-			name, role, err := generateProjectGroupRole(group)
+		if isProjectGroup(log, group) {
+			name, role, err = generateProjectGroupRole(group)
 			if err != nil {
 				log.Warn("couldn't generate role for project group",
 					zap.String("group name", group.Name), zap.Error(err))
 				continue
 			}
-			roles[name] = *role
-		default:
-			name, role, err := generateRegularGroupRole(log, projectNames, group)
+		} else {
+			name, role, err = generateRegularGroupRole(log, projectNames, group)
 			if err != nil {
 				log.Warn("couldn't generate role for regular group",
 					zap.String("group name", group.Name), zap.Error(err))
 				continue
 			}
-			roles[name] = *role
 		}
+		roles[name] = *role
 	}
 	return roles
 }
@@ -276,28 +267,26 @@ func syncRoles(ctx context.Context, log *zap.Logger, groups []keycloak.Group,
 	var err error
 	for _, name := range toDelete {
 		if dryRun {
-			log.Info("dry run mode: not deleting role",
-				zap.String("name", name))
+			log.Info("dry run mode: not deleting role", zap.String("name", name))
 			continue
 		}
 		err = o.DeleteRole(ctx, name)
 		if err != nil {
 			log.Warn("couldn't delete role", zap.Error(err))
-		} else {
-			log.Info("deleted role", zap.String("name", name))
+			continue
 		}
+		log.Info("deleted role", zap.String("name", name))
 	}
 	for name, role := range toCreate {
 		if dryRun {
-			log.Info("dry run mode: not creating role",
-				zap.String("name", name))
+			log.Info("dry run mode: not creating role", zap.String("name", name))
 			continue
 		}
 		err = o.CreateRole(ctx, name, &role)
 		if err != nil {
 			log.Warn("couldn't create role", zap.Error(err))
-		} else {
-			log.Info("created role", zap.String("name", name))
+			continue
 		}
+		log.Info("created role", zap.String("name", name))
 	}
 }

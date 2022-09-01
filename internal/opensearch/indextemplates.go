@@ -16,7 +16,7 @@ type Mapping struct {
 	IgnoreMalformed bool   `json:"ignore_malformed"`
 }
 
-// DynamicTemplate represents a dynamic template
+// DynamicTemplate represents a dynamic template.
 type DynamicTemplate struct {
 	MatchMappingType string  `json:"match_mapping_type,omitempty"`
 	MatchPattern     string  `json:"match_pattern,omitempty"`
@@ -116,8 +116,7 @@ func (c *Client) CreateIndexTemplate(ctx context.Context, name string,
 	}
 	// construct request
 	url := *c.baseURL
-	url.Path = path.Join(c.baseURL.Path,
-		"/_index_template/", name)
+	url.Path = path.Join(c.baseURL.Path, "/_index_template/", name)
 	req, err := http.NewRequestWithContext(ctx, "PUT", url.String(), &buf)
 	if err != nil {
 		return fmt.Errorf("couldn't construct create index template request: %v",
@@ -142,8 +141,7 @@ func (c *Client) CreateIndexTemplate(ctx context.Context, name string,
 func (c *Client) DeleteIndexTemplate(ctx context.Context, name string) error {
 	// construct request
 	url := *c.baseURL
-	url.Path = path.Join(c.baseURL.Path,
-		"/_index_template/", name)
+	url.Path = path.Join(c.baseURL.Path, "/_index_template/", name)
 	req, err := http.NewRequestWithContext(ctx, "DELETE", url.String(), nil)
 	if err != nil {
 		return fmt.Errorf("couldn't construct delete index template request: %v",

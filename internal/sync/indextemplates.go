@@ -94,9 +94,9 @@ func syncIndexTemplates(ctx context.Context, log *zap.Logger,
 		err = o.DeleteIndexTemplate(ctx, name)
 		if err != nil {
 			log.Warn("couldn't delete index template", zap.Error(err))
-		} else {
-			log.Info("deleted index template", zap.String("name", name))
+			continue
 		}
+		log.Info("deleted index template", zap.String("name", name))
 	}
 	for name, it := range toCreate {
 		if dryRun {
@@ -107,8 +107,7 @@ func syncIndexTemplates(ctx context.Context, log *zap.Logger,
 		err = o.CreateIndexTemplate(ctx, name, &it)
 		if err != nil {
 			log.Warn("couldn't create index template", zap.Error(err))
-		} else {
-			log.Info("created index template", zap.String("name", name))
 		}
+		log.Info("created index template", zap.String("name", name))
 	}
 }

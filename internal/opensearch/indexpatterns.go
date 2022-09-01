@@ -53,12 +53,14 @@ type SearchBody struct {
 	Sort        map[string]map[string]string `json:"sort"`
 }
 
+// newSearchBody returns an Opensearch search request body.
+// If after is given it populates the search_after field.
 func newSearchBody(after string) (*bytes.Buffer, error) {
 	var searchAfter []string
 	if len(after) > 0 {
 		searchAfter = append(searchAfter, after)
 	}
-	sb := SearchBody{
+	body := SearchBody{
 		Query: SearchQuery{
 			Term: map[string]map[string]string{
 				"type": {
@@ -76,7 +78,7 @@ func newSearchBody(after string) (*bytes.Buffer, error) {
 	}
 	var buf bytes.Buffer
 	enc := json.NewEncoder(&buf)
-	return &buf, enc.Encode(&sb)
+	return &buf, enc.Encode(&body)
 }
 
 // RawIndexPatterns returns the raw JSON index patterns representation from the
@@ -90,12 +92,10 @@ func (c *Client) RawIndexPatterns(ctx context.Context,
 	if err != nil {
 		return nil, fmt.Errorf("couldn't construct search body: %v", err)
 	}
-	// sort by updated_at, add search_after array containing the last value of
-	// the previous search. then the search result will continue _after_ the last
-	// value of the previous search.
 	indexPatternsURL := *c.baseURL
 	indexPatternsURL.Path = path.Join(c.baseURL.Path, ".kibana*/_search")
-	req, err := http.NewRequestWithContext(ctx, "GET", indexPatternsURL.String(), buf)
+	req, err := http.NewRequestWithContext(ctx, "GET", indexPatternsURL.String(),
+		buf)
 	if err != nil {
 		return nil, fmt.Errorf("couldn't construct indexPatterns request: %v", err)
 	}
@@ -118,7 +118,8 @@ func (c *Client) RawIndexPatterns(ctx context.Context,
 }
 
 // IndexPatterns returns all Opensearch index patterns.
-func (c *Client) IndexPatterns(ctx context.Context) (map[string]map[string]bool, error) {
+func (c *Client) IndexPatterns(ctx context.Context) (
+	map[string]map[string]bool, error) {
 	indexPatterns := map[string]map[string]bool{}
 	var after, index string
 	for {

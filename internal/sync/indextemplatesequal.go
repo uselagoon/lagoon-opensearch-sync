@@ -61,12 +61,8 @@ func mappingsEqual(a, b *opensearch.Mappings) bool {
 	return dynamicTemplatesEqual(a.DynamicTemplates, b.DynamicTemplates)
 }
 
-// indexTemplatesEqual checks the fields Lagoon cares about for functional equality:
-// * IndexPatterns
-// * Template.Aliases
-// * Template.Settings
-// * Template.Mappings
-// * ComposedOf
+// indexTemplatesEqual checks the fields Lagoon cares about for functional
+// equality
 func indexTemplatesEqual(a, b opensearch.IndexTemplate) bool {
 	if a.Name != b.Name {
 		return false
