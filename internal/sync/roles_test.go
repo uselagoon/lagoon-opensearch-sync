@@ -1,7 +1,6 @@
 package sync_test
 
 import (
-	"fmt"
 	"reflect"
 	"testing"
 
@@ -12,77 +11,51 @@ import (
 	"go.uber.org/zap"
 )
 
-type indexPatternInput struct {
-	lpa          string
+type generateIndexPermissionPatternsInput struct {
+	pids         []int
 	projectNames map[int]string
 }
 
-type indexPatternOutput struct {
-	indexPatterns []string
-	err           error
-}
-
-func TestGenerateIndexPatterns(t *testing.T) {
+func TestGenerateIndexPermissionPatterns(t *testing.T) {
 	var testCases = map[string]struct {
-		input  indexPatternInput
-		expect indexPatternOutput
+		input  generateIndexPermissionPatternsInput
+		expect []string
 	}{
 		"project group": {
-			input: indexPatternInput{
-				lpa: "33",
+			input: generateIndexPermissionPatternsInput{
+				pids: []int{33},
 				projectNames: map[int]string{
 					4:  "baz",
 					33: "foo",
 					34: "bar",
 				},
 			},
-			expect: indexPatternOutput{
-				indexPatterns: []string{
-					`/^(application|container|lagoon|router)-logs-foo-_-.+/`,
-				},
+			expect: []string{
+				`/^(application|container|lagoon|router)-logs-foo-_-.+/`,
 			},
 		},
 		"regular group": {
-			input: indexPatternInput{
-				lpa: "33,34,35",
+			input: generateIndexPermissionPatternsInput{
+				pids: []int{33, 34, 35},
 				projectNames: map[int]string{
 					4:  "baz",
 					33: "foo",
 					34: "bar",
 				},
 			},
-			expect: indexPatternOutput{
-				indexPatterns: []string{
-					`/^(application|container|lagoon|router)-logs-foo-_-.+/`,
-					`/^(application|container|lagoon|router)-logs-bar-_-.+/`,
-				},
-			},
-		},
-		"bad attribute": {
-			input: indexPatternInput{
-				lpa: "33,34,,35",
-				projectNames: map[int]string{
-					4:  "baz",
-					33: "foo",
-					34: "bar",
-				},
-			},
-			expect: indexPatternOutput{
-				err: fmt.Errorf("an error"),
+			expect: []string{
+				`/^(application|container|lagoon|router)-logs-foo-_-.+/`,
+				`/^(application|container|lagoon|router)-logs-bar-_-.+/`,
 			},
 		},
 	}
 	log := zap.Must(zap.NewDevelopment(zap.AddStacktrace(zap.ErrorLevel)))
 	for name, tc := range testCases {
 		t.Run(name, func(tt *testing.T) {
-			indexPatterns, err := sync.GenerateIndexPatterns(log, tc.input.lpa,
+			indexPatterns := sync.GenerateIndexPermissionPatterns(log, tc.input.pids,
 				tc.input.projectNames)
-			if (err == nil && tc.expect.err != nil) ||
-				(err != nil && tc.expect.err == nil) {
-				tt.Fatalf("got %v, expected %v", err, tc.expect.err)
-			}
-			if !reflect.DeepEqual(indexPatterns, tc.expect.indexPatterns) {
-				tt.Fatalf("got %v, expected %v", indexPatterns, tc.expect.indexPatterns)
+			if !reflect.DeepEqual(indexPatterns, tc.expect) {
+				tt.Fatalf("got %v, expected %v", indexPatterns, tc.expect)
 			}
 		})
 	}

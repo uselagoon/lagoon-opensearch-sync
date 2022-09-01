@@ -39,12 +39,21 @@ type OpensearchService interface {
 	IndexTemplates(context.Context) (map[string]opensearch.IndexTemplate, error)
 	CreateIndexTemplate(context.Context, string, *opensearch.IndexTemplate) error
 	DeleteIndexTemplate(context.Context, string) error
+
+	IndexPatterns(context.Context) (map[string]map[string]bool, error)
+}
+
+// DashboardsService defines the Opensearch Dashboards service interface.
+type DashboardsService interface {
+	DeleteIndexPattern(context.Context, string, string) error
+	CreateIndexPattern(context.Context, string, string) error
 }
 
 // Sync will read the Lagoon state from the LagoonDBService and KeycloakService,
 // and then configure the OpensearchService as required.
 func Sync(ctx context.Context, log *zap.Logger, l LagoonDBService,
-	k KeycloakService, o OpensearchService, dryRun bool, objects []string) error {
+	k KeycloakService, o OpensearchService, d DashboardsService, dryRun bool,
+	objects []string) error {
 	// get projects from Lagoon
 	projects, err := l.Projects(ctx)
 	if err != nil {
@@ -81,10 +90,12 @@ func Sync(ctx context.Context, log *zap.Logger, l LagoonDBService,
 			syncRoles(ctx, log, groups, projectNames, roles, o, dryRun)
 		case "rolesmapping":
 			syncRolesMapping(ctx, log, groups, projectNames, roles, o, dryRun)
+		case "indexpatterns":
+			syncIndexPatterns(ctx, log, groups, projectNames, o, d, dryRun)
 		case "indextemplates":
 			syncIndexTemplates(ctx, log, o, dryRun)
 		default:
-			log.Info("sync object not implemented", zap.String("object", object))
+			log.Warn("sync object not implemented", zap.String("object", object))
 		}
 	}
 	return nil
