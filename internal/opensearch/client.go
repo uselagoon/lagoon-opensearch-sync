@@ -7,16 +7,19 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+
+	"go.uber.org/zap"
 )
 
 // Client is an Opensearch client.
 type Client struct {
 	baseURL    *url.URL
 	httpClient *http.Client
+	log        *zap.Logger
 }
 
 // NewClient creates a new Opensearch client.
-func NewClient(ctx context.Context, baseURL, username,
+func NewClient(ctx context.Context, log *zap.Logger, baseURL, username,
 	password, caCertificate string) (*Client, error) {
 	// parse URL
 	u, err := url.Parse(baseURL)
@@ -36,5 +39,6 @@ func NewClient(ctx context.Context, baseURL, username,
 	return &Client{
 		baseURL:    u,
 		httpClient: httpClient(username, password, ca),
+		log:        log,
 	}, nil
 }

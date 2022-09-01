@@ -8,6 +8,7 @@ import (
 	"syscall"
 
 	"github.com/uselagoon/lagoon-opensearch-sync/internal/opensearch"
+	"go.uber.org/zap"
 )
 
 // DumpTenantsCmd represents the `dump-tenants` command.
@@ -20,12 +21,12 @@ type DumpTenantsCmd struct {
 }
 
 // Run the dump-tenants command.
-func (cmd *DumpTenantsCmd) Run() error {
+func (cmd *DumpTenantsCmd) Run(log *zap.Logger) error {
 	// get main process context, which cancels on SIGTERM
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGTERM)
 	defer stop()
 	// init the opensearch client
-	o, err := opensearch.NewClient(ctx, cmd.OpensearchBaseURL,
+	o, err := opensearch.NewClient(ctx, log, cmd.OpensearchBaseURL,
 		cmd.OpensearchUsername, cmd.OpensearchPassword, cmd.OpensearchCACertificate)
 	if err != nil {
 		return fmt.Errorf("couldn't init opensearch client: %v", err)
