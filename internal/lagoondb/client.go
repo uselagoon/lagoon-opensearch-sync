@@ -7,10 +7,7 @@ import (
 	"time"
 
 	"github.com/jmoiron/sqlx"
-	"go.opentelemetry.io/otel"
 )
-
-const pkgName = "github.com/uselagoon/lagoon-opensearch-sync/internal/lagoondb"
 
 // Client is a Lagoon API-DB client
 type Client struct {
@@ -44,9 +41,6 @@ func NewClient(ctx context.Context, dsn string) (*Client, error) {
 // Projects returns the Environment associated with the given
 // Namespace name (on Openshift this is the project name).
 func (c *Client) Projects(ctx context.Context) ([]Project, error) {
-	// set up tracing
-	ctx, span := otel.Tracer(pkgName).Start(ctx, "EnvironmentByNamespaceName")
-	defer span.End()
 	// run query
 	var projects []Project
 	err := c.db.SelectContext(ctx, &projects, `
