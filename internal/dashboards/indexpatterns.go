@@ -84,8 +84,7 @@ func (c *Client) DeleteIndexPattern(ctx context.Context,
 	defer res.Body.Close()
 	if res.StatusCode > 299 {
 		body, _ := io.ReadAll(res.Body)
-		return fmt.Errorf("bad response: %d\n%s", res.StatusCode,
-			body)
+		return fmt.Errorf("bad response: %d\n%s", res.StatusCode, body)
 	}
 	return nil
 }

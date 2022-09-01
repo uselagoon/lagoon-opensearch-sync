@@ -9,10 +9,7 @@ import (
 )
 
 // rolesMappingEqual checks the fields Lagoon cares about for functional
-// equality:
-// * BackendRoles
-// * Reserved
-// * Hidden
+// equality.
 func rolesMappingEqual(a, b opensearch.RoleMapping) bool {
 	if !stringSliceEqual(a.BackendRoles, b.BackendRoles) {
 		return false
@@ -63,12 +60,17 @@ func generateRolesMapping(log *zap.Logger,
 	groups []keycloak.Group) map[string]opensearch.RoleMapping {
 	rolesmapping := map[string]opensearch.RoleMapping{}
 	for _, group := range groups {
+		// TODO: remove this workaround once this group is removed from Lagoon
+		if group.Name == "lagoonadmin" {
+			continue
+		}
 		// figure out if this is a regular group or project group
 		if isProjectGroup(log, group) {
 			name, err := projectGroupRoleName(group)
 			if err != nil {
 				log.Warn("couldn't generate project group role name", zap.Error(err),
 					zap.String("group name", group.Name))
+				continue
 			}
 			rolesmapping[name] = opensearch.RoleMapping{
 				RoleMappingPermissions: opensearch.RoleMappingPermissions{
@@ -139,9 +141,9 @@ func syncRolesMapping(ctx context.Context, log *zap.Logger, groups []keycloak.Gr
 		err = o.DeleteRoleMapping(ctx, name)
 		if err != nil {
 			log.Warn("couldn't delete rolemapping", zap.Error(err))
-		} else {
-			log.Info("deleted rolemapping", zap.String("name", name))
+			continue
 		}
+		log.Info("deleted rolemapping", zap.String("name", name))
 	}
 	for name, rolemapping := range toCreate {
 		if dryRun {
@@ -152,8 +154,8 @@ func syncRolesMapping(ctx context.Context, log *zap.Logger, groups []keycloak.Gr
 		err = o.CreateRoleMapping(ctx, name, &rolemapping)
 		if err != nil {
 			log.Warn("couldn't create rolemapping", zap.Error(err))
-		} else {
-			log.Info("created rolemapping", zap.String("name", name))
+			continue
 		}
+		log.Info("created rolemapping", zap.String("name", name))
 	}
 }

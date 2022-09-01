@@ -32,6 +32,8 @@ var (
 	specialTenants = []string{"global_tenant"}
 )
 
+// hashPrefix returns an Opensearch-index-name-sanitized copy of given a string
+// s, prefixed with a Java String hashcode.
 func hashPrefix(s string) string {
 	return fmt.Sprintf("%s_%s", hashcode.String(s),
 		// Sanitize s for use in index name the way that the Opensearch security
@@ -45,7 +47,7 @@ func hashPrefix(s string) string {
 
 // calculateIndexPatternDiff returns a map of Opensearch Dashboards index
 // patterns which should be created, and a map of index patterns which should
-// be deleted, in order to reconcile existing with required.
+// be deleted, for each tenant, in order to reconcile existing with required.
 // existing contains keys which correspond to tenants, but are encoded in
 // "index name" form, which is <hashcode>_<sanitized tenant name>.
 func calculateIndexPatternDiff(log *zap.Logger,
@@ -76,9 +78,9 @@ func calculateIndexPatternDiff(log *zap.Logger,
 		if index == hashPrefix("admin_tenant") {
 			continue
 		}
-		// check for the tenant. if it doesn't appear in the required map then we
+		// Check for the tenant. If it doesn't appear in the required map then we
 		// may have a logic bug, or maybe the index hasn't been cleaned up by
-		// kibana?
+		// Opensearch Dashboards?
 		tenant, ok := index2tenant[index]
 		if !ok {
 			log.Warn("unknown index", zap.String("index", index))
@@ -94,8 +96,7 @@ func calculateIndexPatternDiff(log *zap.Logger,
 }
 
 // generateIndexPatternsForGroup returns a slice of index patterns for all the
-// projects associated with the given Opensearch tenant matching the given
-// group.
+// projects associated with the given group.
 func generateIndexPatternsForGroup(log *zap.Logger, group keycloak.Group,
 	projectNames map[int]string) ([]string, error) {
 	pids, err := projectIDsForGroup(group)
@@ -118,8 +119,8 @@ func generateIndexPatternsForGroup(log *zap.Logger, group keycloak.Group,
 	return indexPatterns, nil
 }
 
-// generateIndexPatterns returns a map of index pattern slices required by
-// Lagoon logging.
+// generateIndexPatterns returns a map of index patterns required by Lagoon
+// logging.
 func generateIndexPatterns(log *zap.Logger, groups []keycloak.Group,
 	projectNames map[int]string) map[string]map[string]bool {
 	indexPatterns := map[string]map[string]bool{}
@@ -178,10 +179,10 @@ func syncIndexPatterns(ctx context.Context, log *zap.Logger,
 			if err != nil {
 				log.Warn("couldn't delete index pattern", zap.String("tenant", tenant),
 					zap.String("pattern", pattern), zap.Error(err))
-			} else {
-				log.Info("deleted index pattern", zap.String("tenant", tenant),
-					zap.String("pattern", pattern))
+				continue
 			}
+			log.Info("deleted index pattern", zap.String("tenant", tenant),
+				zap.String("pattern", pattern))
 		}
 	}
 	for tenant, patterns := range toCreate {
@@ -195,10 +196,10 @@ func syncIndexPatterns(ctx context.Context, log *zap.Logger,
 			if err != nil {
 				log.Warn("couldn't create index pattern", zap.String("tenant", tenant),
 					zap.String("pattern", pattern), zap.Error(err))
-			} else {
-				log.Info("created index pattern", zap.String("tenant", tenant),
-					zap.String("pattern", pattern))
+				continue
 			}
+			log.Info("created index pattern", zap.String("tenant", tenant),
+				zap.String("pattern", pattern))
 		}
 	}
 }

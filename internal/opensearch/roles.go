@@ -85,8 +85,7 @@ func (c *Client) CreateRole(ctx context.Context, name string,
 	}
 	// construct request
 	url := *c.baseURL
-	url.Path = path.Join(c.baseURL.Path,
-		"/_plugins/_security/api/roles/", name)
+	url.Path = path.Join(c.baseURL.Path, "/_plugins/_security/api/roles/", name)
 	req, err := http.NewRequestWithContext(ctx, "PUT", url.String(), &buf)
 	if err != nil {
 		return fmt.Errorf("couldn't construct create role request: %v", err)
@@ -109,8 +108,7 @@ func (c *Client) CreateRole(ctx context.Context, name string,
 func (c *Client) DeleteRole(ctx context.Context, name string) error {
 	// construct request
 	url := *c.baseURL
-	url.Path = path.Join(c.baseURL.Path,
-		"/_plugins/_security/api/roles/", name)
+	url.Path = path.Join(c.baseURL.Path, "/_plugins/_security/api/roles/", name)
 	req, err := http.NewRequestWithContext(ctx, "DELETE", url.String(), nil)
 	if err != nil {
 		return fmt.Errorf("couldn't construct delete role request: %v", err)

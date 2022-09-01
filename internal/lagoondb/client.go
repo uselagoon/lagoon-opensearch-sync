@@ -33,9 +33,7 @@ func NewClient(ctx context.Context, dsn string) (*Client, error) {
 	db.SetConnMaxLifetime(4 * time.Minute)
 	db.SetMaxOpenConns(10)
 	db.SetMaxIdleConns(10)
-	return &Client{
-		db: db,
-	}, nil
+	return &Client{db: db}, nil
 }
 
 // Projects returns the Environment associated with the given

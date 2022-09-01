@@ -8,9 +8,7 @@ import (
 	"go.uber.org/zap"
 )
 
-// tenantsEqual checks the fields Lagoon cares about for functional equality:
-// * Description
-// * Hidden
+// tenantsEqual checks the fields Lagoon cares about for functional equality.
 func tenantsEqual(a, b opensearch.Tenant) bool {
 	if a.Description != b.Description {
 		return false
@@ -57,19 +55,21 @@ func generateTenants(log *zap.Logger,
 	groups []keycloak.Group) map[string]opensearch.Tenant {
 	tenants := map[string]opensearch.Tenant{}
 	for _, group := range groups {
-		// figure out if this is a regular group or project group
-		switch {
-		case isProjectGroup(log, group):
+		// TODO: remove this workaround once this group is removed from Lagoon
+		if group.Name == "lagoonadmin" {
 			continue
-		default:
-			tenants[group.Name] = opensearch.Tenant{
-				Hidden:   false,
-				Reserved: false,
-				Static:   false,
-				TenantDescription: opensearch.TenantDescription{
-					Description: group.Name,
-				},
-			}
+		}
+		// we only need tenants for regular groups, not project groups
+		if isProjectGroup(log, group) {
+			continue
+		}
+		tenants[group.Name] = opensearch.Tenant{
+			Hidden:   false,
+			Reserved: false,
+			Static:   false,
+			TenantDescription: opensearch.TenantDescription{
+				Description: group.Name,
+			},
 		}
 	}
 	return tenants
@@ -106,28 +106,26 @@ func syncTenants(ctx context.Context, log *zap.Logger, groups []keycloak.Group,
 	toCreate, toDelete := calculateTenantDiff(existing, required)
 	for _, name := range toDelete {
 		if dryRun {
-			log.Info("dry run mode: not deleting tenant",
-				zap.String("name", name))
+			log.Info("dry run mode: not deleting tenant", zap.String("name", name))
 			continue
 		}
 		err = o.DeleteTenant(ctx, name)
 		if err != nil {
 			log.Warn("couldn't delete tenant", zap.Error(err))
-		} else {
-			log.Info("deleted tenant", zap.String("name", name))
+			continue
 		}
+		log.Info("deleted tenant", zap.String("name", name))
 	}
 	for name, tenant := range toCreate {
 		if dryRun {
-			log.Info("dry run mode: not creating tenant",
-				zap.String("name", name))
+			log.Info("dry run mode: not creating tenant", zap.String("name", name))
 			continue
 		}
 		err = o.CreateTenant(ctx, name, &tenant)
 		if err != nil {
 			log.Warn("couldn't create tenant", zap.Error(err))
-		} else {
-			log.Info("created tenant", zap.String("name", name))
+			continue
 		}
+		log.Info("created tenant", zap.String("name", name))
 	}
 }
