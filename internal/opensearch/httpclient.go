@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"net/http"
+	"time"
 )
 
 // AuthenticatedRoundTripper implements the http.RoundTripper interface
@@ -14,7 +15,8 @@ type AuthenticatedRoundTripper struct {
 }
 
 // RoundTrip sets the basic authentication header and then handles the request
-// using the http.DefaultTransport.
+// using a custom transport with which validates the connection using the
+// configured CA.
 func (art *AuthenticatedRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
 	req.SetBasicAuth(art.username, art.password)
 	return art.roundTripper.RoundTrip(req)
@@ -26,6 +28,7 @@ func httpClient(username, password string, ca *x509.Certificate) *http.Client {
 	cp.AddCert(ca)
 	// construct http.Client with custom CA and automatic basic auth
 	return &http.Client{
+		Timeout: 30 * time.Second,
 		Transport: &AuthenticatedRoundTripper{
 			roundTripper: &http.Transport{
 				TLSClientConfig: &tls.Config{

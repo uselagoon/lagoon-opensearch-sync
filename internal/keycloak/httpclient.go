@@ -23,7 +23,7 @@ func httpClient(ctx context.Context, u url.URL, realm, clientID,
 		},
 	}
 	ctx = context.WithValue(ctx, oauth2.HTTPClient, &http.Client{
-		Timeout: 10 * time.Second,
+		Timeout: 30 * time.Second,
 	})
 	// authenticate for a token
 	token, err := config.Exchange(ctx, "",
