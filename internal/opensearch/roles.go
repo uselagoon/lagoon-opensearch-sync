@@ -43,8 +43,8 @@ type RolePermissions struct {
 	TenantPermissions  []TenantPermission `json:"tenant_permissions"`
 }
 
-// rawRoles returns the raw JSON roles representation from the Opensearch API.
-func (c *Client) rawRoles(ctx context.Context) ([]byte, error) {
+// RawRoles returns the raw JSON roles representation from the Opensearch API.
+func (c *Client) RawRoles(ctx context.Context) ([]byte, error) {
 	rolesURL := *c.baseURL
 	rolesURL.Path = path.Join(c.baseURL.Path, "/_plugins/_security/api/roles/")
 	req, err := http.NewRequestWithContext(ctx, "GET", rolesURL.String(), nil)
@@ -65,12 +65,12 @@ func (c *Client) rawRoles(ctx context.Context) ([]byte, error) {
 
 // Roles returns all Opensearch Roles.
 func (c *Client) Roles(ctx context.Context) (map[string]Role, error) {
-	rawRoles, err := c.rawRoles(ctx)
+	data, err := c.RawRoles(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("couldn't get roles from Opensearch API: %v", err)
 	}
 	var roles map[string]Role
-	return roles, json.Unmarshal(rawRoles, &roles)
+	return roles, json.Unmarshal(data, &roles)
 }
 
 // CreateRole creates the given role in Opensearch.

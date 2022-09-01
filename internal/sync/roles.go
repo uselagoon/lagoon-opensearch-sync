@@ -13,22 +13,10 @@ import (
 	"go.uber.org/zap"
 )
 
-// generateIndexPatterns returns a slice of index pattern strings generated
-// from the given lagoon-projects keycloak group attribute. This attribute
-// contains a comma-separated list of Lagoon project IDs.
-func generateIndexPatterns(log *zap.Logger, lpa string,
-	projectNames map[int]string) ([]string, error) {
-	var buf bytes.Buffer
-	// get the project IDs
-	if _, err := fmt.Fprintf(&buf, "[%s]", lpa); err != nil {
-		return nil,
-			fmt.Errorf("couldn't format lagoon-projects attribute: %v", err)
-	}
-	var pids []int
-	if err := json.Unmarshal(buf.Bytes(), &pids); err != nil {
-		return nil,
-			fmt.Errorf("couldn't unmarshal lagoon-projects attribute: %v", err)
-	}
+// generateIndexPermissionPatterns returns a slice of index pattern strings
+// generated from the given slice of project IDs.
+func generateIndexPermissionPatterns(log *zap.Logger, pids []int,
+	projectNames map[int]string) []string {
 	var patterns []string
 	for _, pid := range pids {
 		name, ok := projectNames[pid]
@@ -40,7 +28,7 @@ func generateIndexPatterns(log *zap.Logger, lpa string,
 		patterns = append(patterns,
 			fmt.Sprintf(`/^(application|container|lagoon|router)-logs-%s-_-.+/`, name))
 	}
-	return patterns, nil
+	return patterns
 }
 
 // isProjectGroup inspects the given group to determine if it is a
@@ -119,23 +107,39 @@ func generateProjectGroupRole(
 	}, nil
 }
 
+func projectIDsForGroup(group keycloak.Group) ([]int, error) {
+	// get lagoon-projects attribute
+	lpa, ok := group.Attributes["lagoon-projects"]
+	if !ok {
+		return nil, fmt.Errorf("missing lagoon-projects attribute")
+	}
+	if len(lpa) != 1 {
+		return nil, fmt.Errorf("invalid lagoon-projects attribute")
+	}
+	// get the project IDs
+	var buf bytes.Buffer
+	if _, err := fmt.Fprintf(&buf, "[%s]", lpa[0]); err != nil {
+		return nil,
+			fmt.Errorf("couldn't format lagoon-projects attribute: %v", err)
+	}
+	var pids []int
+	if err := json.Unmarshal(buf.Bytes(), &pids); err != nil {
+		return nil,
+			fmt.Errorf("couldn't unmarshal lagoon-projects attribute: %v", err)
+	}
+	return pids, nil
+}
+
 // generateRegularGroupRole constructs an opensearch.Role from the given
 // keycloak group corresponding to a Lagoon group.
 func generateRegularGroupRole(log *zap.Logger, projectNames map[int]string,
 	group keycloak.Group) (string, *opensearch.Role, error) {
-	// get lagoon-projects attribute
-	lpa, ok := group.Attributes["lagoon-projects"]
-	if !ok {
-		return "", nil, fmt.Errorf("missing lagoon-projects attribute")
-	}
-	if len(lpa) != 1 {
-		return "", nil, fmt.Errorf("invalid lagoon-projects attribute")
+	pids, err := projectIDsForGroup(group)
+	if err != nil {
+		return "", nil, fmt.Errorf("couldn't get project IDs for group: %v", err)
 	}
 	// calculate index patterns from lagoon-projects attribute
-	indexPatterns, err := generateIndexPatterns(log, lpa[0], projectNames)
-	if err != nil {
-		return "", nil, fmt.Errorf("couldn't generate index patterns: %v", err)
-	}
+	indexPatterns := generateIndexPermissionPatterns(log, pids, projectNames)
 	// the Opensearch API is picky about the structure of create group requests,
 	// so ensure that the index_permissions field is only set if there are any
 	// index patterns. Also it cannot be omitted, so can't be nil.

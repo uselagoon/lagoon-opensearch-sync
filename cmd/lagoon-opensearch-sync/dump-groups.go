@@ -15,6 +15,7 @@ type DumpGroupsCmd struct {
 	KeycloakClientID     string `kong:"default='lagoon-opensearch-sync',env='KEYCLOAK_CLIENT_ID',help='Keycloak OAuth2 Client ID'"`
 	KeycloakClientSecret string `kong:"required,env='KEYCLOAK_CLIENT_SECRET',help='Keycloak OAuth2 Client Secret'"`
 	KeycloakBaseURL      string `kong:"required,env='KEYCLOAK_BASE_URL',help='Keycloak Base URL'"`
+	Raw                  bool   `kong:"help='Dump the raw JSON recevied from the backend service.'"`
 }
 
 // Run the dump-groups command.
@@ -27,6 +28,11 @@ func (cmd *DumpGroupsCmd) Run() error {
 		cmd.KeycloakClientSecret)
 	if err != nil {
 		return fmt.Errorf("couldn't init keycloak client: %v", err)
+	}
+	if cmd.Raw {
+		data, err := k.RawGroups(ctx)
+		fmt.Println(string(data))
+		return err
 	}
 	groups, err := k.Groups(ctx)
 	if err != nil {

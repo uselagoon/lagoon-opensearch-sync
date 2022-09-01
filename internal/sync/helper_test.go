@@ -3,7 +3,11 @@ package sync
 // this test helper facilitates unit testing of private functions.
 
 var (
-	GenerateIndexPatterns = generateIndexPatterns
-	GenerateRoles         = generateRoles
-	CalculateRoleDiff     = calculateRoleDiff
+	CalculateIndexPatternDiff       = calculateIndexPatternDiff
+	CalculateRoleDiff               = calculateRoleDiff
+	GenerateIndexPatterns           = generateIndexPatterns
+	GenerateIndexPatternsForGroup   = generateIndexPatternsForGroup
+	GenerateIndexPermissionPatterns = generateIndexPermissionPatterns
+	GenerateRoles                   = generateRoles
+	HashPrefix                      = hashPrefix
 )

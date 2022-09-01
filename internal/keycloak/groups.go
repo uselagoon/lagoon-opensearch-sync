@@ -22,8 +22,8 @@ type GroupUpdateRepresentation struct {
 	Attributes map[string][]string `json:"attributes"`
 }
 
-// rawGroups returns the raw JSON group representation from the Keycloak API.
-func (c *Client) rawGroups(ctx context.Context) ([]byte, error) {
+// RawGroups returns the raw JSON group representation from the Keycloak API.
+func (c *Client) RawGroups(ctx context.Context) ([]byte, error) {
 	groupsURL := *c.baseURL
 	groupsURL.Path = path.Join(c.baseURL.Path,
 		"/auth/admin/realms/lagoon/groups")
@@ -48,10 +48,10 @@ func (c *Client) rawGroups(ctx context.Context) ([]byte, error) {
 
 // Groups returns all Keycloak Groups including their attributes.
 func (c *Client) Groups(ctx context.Context) ([]Group, error) {
-	rawGroups, err := c.rawGroups(ctx)
+	data, err := c.RawGroups(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("couldn't get groups from Keycloak API: %v", err)
 	}
 	var groups []Group
-	return groups, json.Unmarshal(rawGroups, &groups)
+	return groups, json.Unmarshal(data, &groups)
 }

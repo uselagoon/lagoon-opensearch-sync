@@ -23,6 +23,7 @@ type CLI struct {
 	DumpRolesmapping   DumpRolesmappingCmd   `kong:"cmd,help='Print Opensearch Rolesmapping JSON to standard out'"`
 	DumpTenants        DumpTenantsCmd        `kong:"cmd,help='Print Opensearch Tenants JSON to standard out'"`
 	DumpIndexTemplates DumpIndexTemplatesCmd `kong:"cmd,help='Print Opensearch Index Templates JSON to standard out'"`
+	DumpIndexPatterns  DumpIndexPatternsCmd  `kong:"cmd,help='Print Opensearch Index Patterns JSON to standard out'"`
 	Sync               SyncCmd               `kong:"cmd,help='Synchronise Opensearch roles, rolesmapping, tenants, and index templates with Lagoon'"`
 }
 
