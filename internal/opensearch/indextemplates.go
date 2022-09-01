@@ -66,9 +66,9 @@ func indexTemplatesMap(its *IndexTemplatesSlice) map[string]IndexTemplate {
 	return itm
 }
 
-// rawIndexTemplates returns the raw JSON index templates representation from
+// RawIndexTemplates returns the raw JSON index templates representation from
 // the Opensearch API.
-func (c *Client) rawIndexTemplates(ctx context.Context) ([]byte, error) {
+func (c *Client) RawIndexTemplates(ctx context.Context) ([]byte, error) {
 	url := *c.baseURL
 	url.Path = path.Join(c.baseURL.Path,
 		"/_index_template/")
@@ -92,7 +92,7 @@ func (c *Client) rawIndexTemplates(ctx context.Context) ([]byte, error) {
 // IndexTemplates returns all Opensearch IndexTemplates.
 func (c *Client) IndexTemplates(
 	ctx context.Context) (map[string]IndexTemplate, error) {
-	data, err := c.rawIndexTemplates(ctx)
+	data, err := c.RawIndexTemplates(ctx)
 	if err != nil {
 		return nil,
 			fmt.Errorf("couldn't get index templates from Opensearch API: %v", err)

@@ -26,9 +26,9 @@ type TenantDescription struct {
 	Description string `json:"description"`
 }
 
-// rawTenants returns the raw JSON tenants representation from the
+// RawTenants returns the raw JSON tenants representation from the
 // Opensearch API.
-func (c *Client) rawTenants(ctx context.Context) ([]byte, error) {
+func (c *Client) RawTenants(ctx context.Context) ([]byte, error) {
 	tenantsURL := *c.baseURL
 	tenantsURL.Path = path.Join(c.baseURL.Path,
 		"/_plugins/_security/api/tenants/")
@@ -51,13 +51,13 @@ func (c *Client) rawTenants(ctx context.Context) ([]byte, error) {
 
 // Tenants returns all Opensearch Tenants.
 func (c *Client) Tenants(ctx context.Context) (map[string]Tenant, error) {
-	rawTenants, err := c.rawTenants(ctx)
+	data, err := c.RawTenants(ctx)
 	if err != nil {
 		return nil,
 			fmt.Errorf("couldn't get tenants from Opensearch API: %v", err)
 	}
 	var t map[string]Tenant
-	return t, json.Unmarshal(rawTenants, &t)
+	return t, json.Unmarshal(data, &t)
 }
 
 // CreateTenant creates the given tenant in Opensearch.

@@ -16,6 +16,7 @@ type DumpTenantsCmd struct {
 	OpensearchPassword      string `kong:"required,env='OPENSEARCH_ADMIN_PASSWORD',help='Opensearch admin password'"`
 	OpensearchBaseURL       string `kong:"required,env='OPENSEARCH_BASE_URL',help='Opensearch Base URL'"`
 	OpensearchCACertificate string `kong:"required,env='OPENSEARCH_CA_CERTIFICATE',help='Opensearch CA Certificate'"`
+	Raw                     bool   `kong:"help='Dump the raw JSON recevied from the backend service.'"`
 }
 
 // Run the dump-tenants command.
@@ -28,6 +29,11 @@ func (cmd *DumpTenantsCmd) Run() error {
 		cmd.OpensearchUsername, cmd.OpensearchPassword, cmd.OpensearchCACertificate)
 	if err != nil {
 		return fmt.Errorf("couldn't init opensearch client: %v", err)
+	}
+	if cmd.Raw {
+		data, err := o.RawTenants(ctx)
+		fmt.Println(string(data))
+		return err
 	}
 	// get the tenants
 	tenants, err := o.Tenants(ctx)

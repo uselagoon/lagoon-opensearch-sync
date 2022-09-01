@@ -28,9 +28,9 @@ type RoleMappingPermissions struct {
 	Users           []string `json:"users"`
 }
 
-// rawRolesmapping returns the raw JSON rolesmapping representation from the
+// RawRolesMapping returns the raw JSON rolesmapping representation from the
 // Opensearch API.
-func (c *Client) rawRolesMapping(ctx context.Context) ([]byte, error) {
+func (c *Client) RawRolesMapping(ctx context.Context) ([]byte, error) {
 	rolesURL := *c.baseURL
 	rolesURL.Path = path.Join(c.baseURL.Path,
 		"/_plugins/_security/api/rolesmapping/")
@@ -54,13 +54,13 @@ func (c *Client) rawRolesMapping(ctx context.Context) ([]byte, error) {
 // RolesMapping returns all Opensearch RolesMapping.
 func (c *Client) RolesMapping(
 	ctx context.Context) (map[string]RoleMapping, error) {
-	rawRolesMapping, err := c.rawRolesMapping(ctx)
+	data, err := c.RawRolesMapping(ctx)
 	if err != nil {
 		return nil,
 			fmt.Errorf("couldn't get rolesmapping from Opensearch API: %v", err)
 	}
 	var rm map[string]RoleMapping
-	return rm, json.Unmarshal(rawRolesMapping, &rm)
+	return rm, json.Unmarshal(data, &rm)
 }
 
 // CreateRoleMapping creates the given rolemapping in Opensearch.
