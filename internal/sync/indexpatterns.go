@@ -83,7 +83,7 @@ func calculateIndexPatternDiff(log *zap.Logger,
 		// Opensearch Dashboards?
 		tenant, ok := index2tenant[index]
 		if !ok {
-			log.Warn("unknown index", zap.String("index", index))
+			log.Debug("unknown tenant index", zap.String("index", index))
 			continue
 		}
 		for pattern := range patterns {
