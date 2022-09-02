@@ -60,10 +60,6 @@ func generateRolesMapping(log *zap.Logger,
 	groups []keycloak.Group) map[string]opensearch.RoleMapping {
 	rolesmapping := map[string]opensearch.RoleMapping{}
 	for _, group := range groups {
-		// TODO: remove this workaround once this group is removed from Lagoon
-		if group.Name == "lagoonadmin" {
-			continue
-		}
 		// figure out if this is a regular group or project group
 		if isProjectGroup(log, group) {
 			name, err := projectGroupRoleName(group)

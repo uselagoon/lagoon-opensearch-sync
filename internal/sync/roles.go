@@ -185,10 +185,6 @@ func generateRoles(log *zap.Logger, groups []keycloak.Group,
 	var role *opensearch.Role
 	var err error
 	for _, group := range groups {
-		// TODO: remove this workaround once this group is removed from Lagoon
-		if group.Name == "lagoonadmin" {
-			continue
-		}
 		// figure out if this is a regular group or project group
 		if isProjectGroup(log, group) {
 			name, role, err = generateProjectGroupRole(group)
