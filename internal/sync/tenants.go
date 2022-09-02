@@ -55,10 +55,6 @@ func generateTenants(log *zap.Logger,
 	groups []keycloak.Group) map[string]opensearch.Tenant {
 	tenants := map[string]opensearch.Tenant{}
 	for _, group := range groups {
-		// TODO: remove this workaround once this group is removed from Lagoon
-		if group.Name == "lagoonadmin" {
-			continue
-		}
 		// we only need tenants for regular groups, not project groups
 		if isProjectGroup(log, group) {
 			continue
