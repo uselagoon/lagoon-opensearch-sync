@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/go-sql-driver/mysql"
 	"github.com/uselagoon/lagoon-opensearch-sync/internal/dashboards"
@@ -17,8 +18,10 @@ import (
 
 // SyncCmd represents the `sync` command.
 type SyncCmd struct {
-	DryRun  bool     `kong:"env='DRY_RUN',help='Print actions that will be taken but do not persist any changes to Opensearch'"`
-	Objects []string `kong:"enum='tenants,roles,rolesmapping,indexpatterns,indextemplates',default='tenants,roles,rolesmapping,indexpatterns,indextemplates',help='Opensearch objects which will be synchronized'"`
+	DryRun  bool          `kong:"env='DRY_RUN',help='Print actions that will be taken but do not persist any changes to Opensearch'"`
+	Once    bool          `kong:"default='false',help='Run the sync once instead of forever at the given period'"`
+	Period  time.Duration `kong:"default='8m',help='Period between synchronisation polls'"`
+	Objects []string      `kong:"enum='tenants,roles,rolesmapping,indexpatterns,indextemplates',default='tenants,roles,rolesmapping,indexpatterns,indextemplates',help='Opensearch objects which will be synchronized'"`
 	// lagoon DB client fields
 	APIDBAddress  string `kong:"required,env='API_DB_ADDRESS',help='Lagoon API DB Address (host[:port])'"`
 	APIDBDatabase string `kong:"default='infrastructure',env='API_DB_DATABASE',help='Lagoon API DB Database Name'"`
@@ -54,7 +57,7 @@ func (cmd *SyncCmd) Run(log *zap.Logger) error {
 		return fmt.Errorf("couldn't init lagoon DBClient: %v", err)
 	}
 	// init the keycloak client
-	k, err := keycloak.NewClient(ctx, cmd.KeycloakBaseURL, cmd.KeycloakClientID,
+	k, err := keycloak.NewClientCredentialsClient(ctx, cmd.KeycloakBaseURL, cmd.KeycloakClientID,
 		cmd.KeycloakClientSecret)
 	if err != nil {
 		return fmt.Errorf("couldn't init keycloak client: %v", err)
@@ -71,6 +74,21 @@ func (cmd *SyncCmd) Run(log *zap.Logger) error {
 	if err != nil {
 		return fmt.Errorf("couldn't init opensearch client: %v", err)
 	}
-	// run the sync
-	return sync.Sync(ctx, log, l, k, o, d, cmd.DryRun, cmd.Objects)
+	// run sync immediately
+	err = sync.Sync(ctx, log, l, k, o, d, cmd.DryRun, cmd.Objects)
+	if err != nil {
+		return err
+	}
+	if cmd.Once {
+		return nil
+	}
+	// continue running in a loop
+	tick := time.NewTicker(cmd.Period)
+	for range tick.C {
+		err = sync.Sync(ctx, log, l, k, o, d, cmd.DryRun, cmd.Objects)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }

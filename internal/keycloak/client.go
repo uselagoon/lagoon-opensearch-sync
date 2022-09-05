@@ -1,3 +1,4 @@
+// Package keycloak implements a keycloak client for Lagoon.
 package keycloak
 
 import (
@@ -13,8 +14,8 @@ type Client struct {
 	httpClient *http.Client
 }
 
-// NewClient creates a new keycloak client.
-func NewClient(ctx context.Context, baseURL, clientID,
+// NewClientCredentialsClient creates a new keycloak client.
+func NewClientCredentialsClient(ctx context.Context, baseURL, clientID,
 	clientSecret string) (*Client, error) {
 	u, err := url.Parse(baseURL)
 	if err != nil {

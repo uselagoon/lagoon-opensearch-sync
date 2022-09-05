@@ -24,8 +24,8 @@ func (cmd *DumpGroupsCmd) Run() error {
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGTERM)
 	defer stop()
 	// init the keycloak client
-	k, err := keycloak.NewClient(ctx, cmd.KeycloakBaseURL, cmd.KeycloakClientID,
-		cmd.KeycloakClientSecret)
+	k, err := keycloak.NewClientCredentialsClient(ctx, cmd.KeycloakBaseURL,
+		cmd.KeycloakClientID, cmd.KeycloakClientSecret)
 	if err != nil {
 		return fmt.Errorf("couldn't init keycloak client: %v", err)
 	}
