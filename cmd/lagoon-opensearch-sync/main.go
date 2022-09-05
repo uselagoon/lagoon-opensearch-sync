@@ -1,3 +1,4 @@
+// lagoon-opensearch-sync is a CLI for automatically configuring Opensearch for Lagoon.
 package main
 
 import (
@@ -24,8 +25,7 @@ type CLI struct {
 	DumpTenants        DumpTenantsCmd        `kong:"cmd,help='Print Opensearch Tenants JSON to standard out'"`
 	DumpIndexTemplates DumpIndexTemplatesCmd `kong:"cmd,help='Print Opensearch Index Templates JSON to standard out'"`
 	DumpIndexPatterns  DumpIndexPatternsCmd  `kong:"cmd,help='Print Opensearch Index Patterns JSON to standard out'"`
-	Sync               SyncCmd               `kong:"cmd,help='Synchronise Opensearch configuration with Lagoon once'"`
-	Watch              WatchCmd              `kong:"cmd,default='1',help='Synchronise Opensearch configuration with Lagoon continuously'"`
+	Sync               SyncCmd               `kong:"cmd,default='1',help='Synchronise Opensearch configuration with Lagoon'"`
 }
 
 func main() {
