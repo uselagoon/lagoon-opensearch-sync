@@ -54,7 +54,7 @@ func (cmd *SyncCmd) Run(log *zap.Logger) error {
 		return fmt.Errorf("couldn't init lagoon DBClient: %v", err)
 	}
 	// init the keycloak client
-	k, err := keycloak.NewClient(ctx, cmd.KeycloakBaseURL, cmd.KeycloakClientID,
+	k, err := keycloak.NewClientCredentialsClient(ctx, cmd.KeycloakBaseURL, cmd.KeycloakClientID,
 		cmd.KeycloakClientSecret)
 	if err != nil {
 		return fmt.Errorf("couldn't init keycloak client: %v", err)
