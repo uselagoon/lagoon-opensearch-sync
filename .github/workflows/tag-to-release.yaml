@@ -58,7 +58,7 @@ jobs:
       id: docker_metadata
       uses: docker/metadata-action@v4
       with:
-        images: ghcr.io/${{ github.repository }}/${{ matrix.binary }}
+        images: ghcr.io/${{ github.repository_owner }}/${{ matrix.binary }}
         tags: |
           ${{ needs.tag.outputs.new-tag-version }}
           latest
