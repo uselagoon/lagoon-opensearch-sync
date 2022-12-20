@@ -8,8 +8,8 @@ import (
 	"io"
 	"net/http"
 	"path"
+	"regexp"
 	"strconv"
-	"strings"
 
 	"go.uber.org/zap"
 )
@@ -18,9 +18,26 @@ import (
 // https://opensearch.org/docs/latest/opensearch/ux/#scroll-search
 const searchSize = 10000
 
+var (
+	// globalTenantIndexName matches the name of the index that the global tenant
+	// index patterns are stored in.
+	globalTenantIndexName = regexp.MustCompile(`^\.kibana_[0-9]+$`)
+	// tenantIndexName matches the name of the index that regular tenant index
+	// patterns are stored in. The format of the match is
+	// <hashInt>_<sanitizedName>.
+	tenantIndexName = regexp.MustCompile(`^\.kibana_(.+)_[0-9]+$`)
+)
+
+// SourceIndexPattern represents the index pattern definition inside the
+// index-pattern index.
+type SourceIndexPattern struct {
+	Title string `json:"title"`
+}
+
 // Source represents the source field in an Opensearch search result.
 type Source struct {
-	UpdatedAt string `json:"updated_at"`
+	UpdatedAt    string             `json:"updated_at"`
+	IndexPattern SourceIndexPattern `json:"index-pattern"`
 }
 
 // IndexPattern represents an Opensearch Dashboards index pattern.
@@ -117,49 +134,73 @@ func (c *Client) RawIndexPatterns(ctx context.Context,
 	return io.ReadAll(res.Body)
 }
 
-// IndexPatterns returns all Opensearch index patterns.
+// IndexPatterns returns all Opensearch index patterns as a map of index names
+// (which are derived from tenant names) to map of index pattern titles to
+// bool, which is set to true if the index pattern exists in the tenant.
+//
+// This function ignores migrated .kibana indices, so it may set the same index
+// pattern to true in the map more than once if e.g. indices named
+// .kibana_mytenant_{1,2,3} all exist. TODO: figure out how to tell which of
+// these indices represents the current index-pattern.
 func (c *Client) IndexPatterns(ctx context.Context) (
 	map[string]map[string]bool, error) {
 	indexPatterns := map[string]map[string]bool{}
-	var after, index string
+	var after string
 	for {
 		rawIndexPatterns, err := c.RawIndexPatterns(ctx, after)
 		if err != nil {
 			return nil,
 				fmt.Errorf("couldn't get index patterns from Opensearch API: %v", err)
 		}
-		// unpack all index patterns
-		var s SearchResult
-		if err = json.Unmarshal(rawIndexPatterns, &s); err != nil {
-			return nil, fmt.Errorf(
-				"couldn't unmarshal index patterns search result: %v", err)
+		searchResultSize, lastUpdatedAt, err :=
+			parseIndexPatterns(rawIndexPatterns, indexPatterns)
+		if err != nil {
+			return nil,
+				fmt.Errorf("couldn't parse index patterns: %v", err)
 		}
-		for _, hit := range s.Hits.Hits {
-			if hit.Index == ".kibana_1" {
-				index = "global_tenant"
-			} else {
-				index = strings.TrimPrefix(hit.Index, ".kibana_")
-				index = strings.TrimSuffix(index, "_1")
-				// sanity-check the index pattern format and return an error if it is
-				// not as expected.
-				if len(strings.Split(index, "_")) != 2 {
-					return nil, fmt.Errorf("unexpected index name: %v", hit.Index)
-				}
-			}
-			// initialize the nested map
-			if indexPatterns[index] == nil {
-				indexPatterns[index] = map[string]bool{}
-			}
-			indexPatterns[index][strings.TrimPrefix(hit.ID, "index-pattern:")] = true
-		}
-		if len(s.Hits.Hits) < searchSize {
+		if searchResultSize < searchSize {
 			c.log.Debug("got all index patterns, returning result",
-				zap.Int("hits", len(s.Hits.Hits)))
+				zap.Int("hits", searchResultSize))
 			break // we have got all the index patterns...
 		}
 		// ...otherwise we need to do another request
 		c.log.Debug("partial index pattern search response: scrolling results")
-		after = s.Hits.Hits[searchSize-1].Source.UpdatedAt
+		after = lastUpdatedAt
 	}
 	return indexPatterns, nil
+}
+
+// parseIndexPatterns takes the raw index patterns search results as a JSON
+// blob, and a map to store results.
+// It fills out the map according to the index patterns that it finds, and
+// returns the number of search results found, the updated at date on the last
+// search result, and an error (if any).
+func parseIndexPatterns(data []byte,
+	indexPatterns map[string]map[string]bool) (int, string, error) {
+	// unpack all index patterns
+	var s SearchResult
+	var index string
+	if err := json.Unmarshal(data, &s); err != nil {
+		return 0, "", fmt.Errorf(
+			"couldn't unmarshal index patterns search result: %v", err)
+	}
+	for _, hit := range s.Hits.Hits {
+		if globalTenantIndexName.MatchString(hit.Index) {
+			index = "global_tenant"
+		} else {
+			matches := tenantIndexName.FindStringSubmatch(hit.Index)
+			// sanity-check the index pattern format and return an error if it is
+			// not as expected.
+			if len(matches) != 2 {
+				return 0, "", fmt.Errorf("unexpected index name: %v", hit.Index)
+			}
+			index = matches[1]
+		}
+		// initialize the nested map
+		if indexPatterns[index] == nil {
+			indexPatterns[index] = map[string]bool{}
+		}
+		indexPatterns[index][hit.Source.IndexPattern.Title] = true
+	}
+	return len(s.Hits.Hits), s.Hits.Hits[len(s.Hits.Hits)-1].Source.UpdatedAt, nil
 }
