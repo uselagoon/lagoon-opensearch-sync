@@ -1,3 +1,4 @@
+// Package opensearch implements a client for interacting with Opensearch.
 package opensearch
 
 import (
