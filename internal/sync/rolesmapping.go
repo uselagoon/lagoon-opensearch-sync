@@ -56,6 +56,9 @@ func calculateRoleMappingDiff(
 
 // generateRolesMapping returns a slice of rolesmapping generated from the
 // given slice of keycloak Groups.
+//
+// Any groups which are not recognized as either project groups or regular
+// Lagoon groups are ignored.
 func generateRolesMapping(log *zap.Logger,
 	groups []keycloak.Group) map[string]opensearch.RoleMapping {
 	rolesmapping := map[string]opensearch.RoleMapping{}
@@ -76,7 +79,7 @@ func generateRolesMapping(log *zap.Logger,
 					Users:           []string{},
 				},
 			}
-		} else {
+		} else if isLagoonGroup(group) {
 			rolesmapping[group.Name] = opensearch.RoleMapping{
 				RoleMappingPermissions: opensearch.RoleMappingPermissions{
 					BackendRoles:    []string{group.Name},

@@ -1,3 +1,4 @@
+// Package sync implements synchronization of state from Lagoon to Opensearch.
 package sync
 
 import (
