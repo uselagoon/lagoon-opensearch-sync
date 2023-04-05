@@ -54,7 +54,9 @@ func (c *Client) CreateIndexPattern(ctx context.Context,
 	defer res.Body.Close()
 	if res.StatusCode > 299 {
 		body, _ := io.ReadAll(res.Body)
-		return fmt.Errorf("bad response: %d\n%s", res.StatusCode, body)
+		return fmt.Errorf(
+			"bad response creating index pattern %s for tenant %s: %d\n%s",
+			pattern, tenant, res.StatusCode, body)
 	}
 	return nil
 }

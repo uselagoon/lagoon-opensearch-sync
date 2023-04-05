@@ -1,3 +1,4 @@
+// Package dashboards implements an Opensearch Dashboards API client.
 package dashboards
 
 import (
