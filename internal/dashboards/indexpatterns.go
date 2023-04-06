@@ -42,8 +42,15 @@ func (c *Client) CreateIndexPattern(ctx context.Context,
 	}
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("osd-xsrf", "true")
-	if tenant != "global_tenant" {
-		// omitting the securitytenant header targets the Global tenant
+	switch tenant {
+	case "global_tenant":
+		// the global tenant is special cased in the dashboards security plugin
+		//
+		// https://github.com/opensearch-project/security-dashboards-plugin/blob/
+		// 	5e99582ea55176a16f0190998abcc99c99e7f974/server/multitenancy/
+		//  tenant_resolver.ts#L23
+		req.Header.Set("securitytenant", "global")
+	default:
 		req.Header.Set("securitytenant", tenant)
 	}
 	// make request
@@ -74,8 +81,15 @@ func (c *Client) DeleteIndexPattern(ctx context.Context,
 		return fmt.Errorf("couldn't construct delete request: %v", err)
 	}
 	req.Header.Set("osd-xsrf", "true")
-	if tenant != "global_tenant" {
-		// omitting the securitytenant header targets the Global tenant
+	switch tenant {
+	case "global_tenant":
+		// the global tenant is special cased in the dashboards security plugin
+		//
+		// https://github.com/opensearch-project/security-dashboards-plugin/blob/
+		// 	5e99582ea55176a16f0190998abcc99c99e7f974/server/multitenancy/
+		//  tenant_resolver.ts#L23
+		req.Header.Set("securitytenant", "global")
+	default:
 		req.Header.Set("securitytenant", tenant)
 	}
 	// make request
