@@ -184,6 +184,10 @@ func parseIndexPatterns(data []byte,
 		return 0, "", fmt.Errorf(
 			"couldn't unmarshal index patterns search result: %v", err)
 	}
+	// handle the case of zero index patterns
+	if len(s.Hits.Hits) == 0 {
+		return 0, "1970-01-01T00:00:00Z", nil
+	}
 	for _, hit := range s.Hits.Hits {
 		if globalTenantIndexName.MatchString(hit.Index) {
 			index = "global_tenant"
