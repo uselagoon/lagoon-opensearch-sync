@@ -121,14 +121,17 @@ func generateIndexPatternsForGroup(log *zap.Logger, group keycloak.Group,
 
 // generateIndexPatterns returns a map of index patterns required by Lagoon
 // logging.
+//
+// Only regular Lagoon groups are associated with a tenant (which is where
+// index patterns are placed), so project groups are ignored.
 func generateIndexPatterns(log *zap.Logger, groups []keycloak.Group,
 	projectNames map[int]string) map[string]map[string]bool {
 	indexPatterns := map[string]map[string]bool{}
 	var patterns []string
 	var err error
 	for _, group := range groups {
-		if isProjectGroup(log, group) {
-			continue // project groups don't get any index patterns
+		if !isLagoonGroup(group) || isProjectGroup(log, group) {
+			continue
 		}
 		patterns, err = generateIndexPatternsForGroup(log, group, projectNames)
 		if err != nil {
