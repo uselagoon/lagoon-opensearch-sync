@@ -46,13 +46,20 @@ func hashPrefix(s string) string {
 }
 
 // calculateIndexPatternDiff returns a map of Opensearch Dashboards index
-// patterns which should be created, and a map of index patterns which should
-// be deleted, for each tenant, in order to reconcile existing with required.
+// patterns which should be created, and a map of tenants to index pattern
+// names to index pattern IDs which should be deleted, for each tenant.
+// The idea is to use these values to reconcile existing with required.
+//
+// The to-delete map contains index patterns names _and_ index pattern IDs
+// rather than just index pattern names because, while the dashboards API for
+// deletion requires index patterns to be referenced by ID, informative logs
+// require index pattern names.
+//
 // existing contains keys which correspond to tenants, but are encoded in
 // "index name" form, which is <hashcode>_<sanitized tenant name>.
 func calculateIndexPatternDiff(log *zap.Logger,
-	existing, required map[string]map[string]bool) (
-	map[string][]string, map[string][]string) {
+	existing map[string]map[string]string, required map[string]map[string]bool) (
+	map[string][]string, map[string]map[string]string) {
 	index2tenant := map[string]string{}
 	// calculate index patterns to create
 	toCreate := map[string][]string{}
@@ -66,13 +73,13 @@ func calculateIndexPatternDiff(log *zap.Logger,
 		// store tenant name for later use in the toDelete loop
 		index2tenant[index] = tenant
 		for pattern := range patterns {
-			if !existing[index][pattern] {
+			if _, ok := existing[index][pattern]; !ok {
 				toCreate[tenant] = append(toCreate[tenant], pattern)
 			}
 		}
 	}
 	// calculate index patterns to delete
-	toDelete := map[string][]string{}
+	toDelete := map[string]map[string]string{}
 	for index, patterns := range existing {
 		// ignore any custom index patterns created in the admin_tenant
 		if index == hashPrefix("admin_tenant") {
@@ -86,9 +93,12 @@ func calculateIndexPatternDiff(log *zap.Logger,
 			log.Debug("unknown tenant index", zap.String("index", index))
 			continue
 		}
-		for pattern := range patterns {
+		for pattern, patternID := range patterns {
 			if !required[tenant][pattern] {
-				toDelete[tenant] = append(toDelete[tenant], pattern)
+				if toDelete[tenant] == nil {
+					toDelete[tenant] = map[string]string{}
+				}
+				toDelete[tenant][pattern] = patternID
 			}
 		}
 	}
@@ -171,21 +181,22 @@ func syncIndexPatterns(ctx context.Context, log *zap.Logger,
 	required := generateIndexPatterns(log, groups, projectNames)
 	// calculate index templates to add/remove
 	toCreate, toDelete := calculateIndexPatternDiff(log, existing, required)
-	for tenant, patterns := range toDelete {
-		for _, pattern := range patterns {
+	for tenant, patternIDMap := range toDelete {
+		for pattern, patternID := range patternIDMap {
 			if dryRun {
 				log.Info("dry run mode: not deleting index pattern",
-					zap.String("tenant", tenant), zap.String("pattern", pattern))
+					zap.String("tenant", tenant), zap.String("patternID", patternID))
 				continue
 			}
-			err = d.DeleteIndexPattern(ctx, tenant, pattern)
+			err = d.DeleteIndexPattern(ctx, tenant, patternID)
 			if err != nil {
 				log.Warn("couldn't delete index pattern", zap.String("tenant", tenant),
-					zap.String("pattern", pattern), zap.Error(err))
+					zap.String("pattern", pattern), zap.String("patternID", patternID),
+					zap.Error(err))
 				continue
 			}
 			log.Info("deleted index pattern", zap.String("tenant", tenant),
-				zap.String("pattern", pattern))
+				zap.String("pattern", pattern), zap.String("patternID", patternID))
 		}
 	}
 	for tenant, patterns := range toCreate {

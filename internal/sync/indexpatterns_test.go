@@ -119,33 +119,31 @@ func TestGenerateIndexPatternsForGroup(t *testing.T) {
 	}
 }
 
-type calculateIndexPatternDiffInput struct {
-	existing map[string]map[string]bool
-	required map[string]map[string]bool
-}
-
-type calculateIndexPatternDiffOutput struct {
-	toCreate map[string][]string
-	toDelete map[string][]string
-}
-
 func TestCalculateIndexPatternDiff(t *testing.T) {
+	type input struct {
+		existing map[string]map[string]string
+		required map[string]map[string]bool
+	}
+	type output struct {
+		toCreate map[string][]string
+		toDelete map[string]map[string]string
+	}
 	var testCases = map[string]struct {
-		input  calculateIndexPatternDiffInput
-		expect calculateIndexPatternDiffOutput
+		input  input
+		expect output
 	}{
 		"no diff": {
-			input: calculateIndexPatternDiffInput{
-				existing: map[string]map[string]bool{
+			input: input{
+				existing: map[string]map[string]string{
 					sync.HashPrefix("mygroup"): {
-						"foo-project":     true,
-						"bar-project":     true,
-						"drupal-example2": true,
+						"foo-project":     "",
+						"bar-project":     "",
+						"drupal-example2": "",
 					},
 					sync.HashPrefix("yourgroup"): {
-						"baz-project":    true,
-						"quux-project":   true,
-						"drupal-example": true,
+						"baz-project":    "",
+						"quux-project":   "",
+						"drupal-example": "",
 					},
 				},
 				required: map[string]map[string]bool{
@@ -161,18 +159,18 @@ func TestCalculateIndexPatternDiff(t *testing.T) {
 					},
 				},
 			},
-			expect: calculateIndexPatternDiffOutput{
+			expect: output{
 				toCreate: map[string][]string{},
-				toDelete: map[string][]string{},
+				toDelete: map[string]map[string]string{},
 			},
 		},
 		"create group/tenant": {
-			input: calculateIndexPatternDiffInput{
-				existing: map[string]map[string]bool{
+			input: input{
+				existing: map[string]map[string]string{
 					sync.HashPrefix("mygroup"): {
-						"foo-project":     true,
-						"bar-project":     true,
-						"drupal-example2": true,
+						"foo-project":     "",
+						"bar-project":     "",
+						"drupal-example2": "",
 					},
 				},
 				required: map[string]map[string]bool{
@@ -188,7 +186,7 @@ func TestCalculateIndexPatternDiff(t *testing.T) {
 					},
 				},
 			},
-			expect: calculateIndexPatternDiffOutput{
+			expect: output{
 				toCreate: map[string][]string{
 					"yourgroup": {
 						"baz-project",
@@ -196,20 +194,20 @@ func TestCalculateIndexPatternDiff(t *testing.T) {
 						"quux-project",
 					},
 				},
-				toDelete: map[string][]string{},
+				toDelete: map[string]map[string]string{},
 			},
 		},
 		"create project pattern": {
-			input: calculateIndexPatternDiffInput{
-				existing: map[string]map[string]bool{
+			input: input{
+				existing: map[string]map[string]string{
 					sync.HashPrefix("mygroup"): {
-						"foo-project":     true,
-						"drupal-example2": true,
+						"foo-project":     "",
+						"drupal-example2": "",
 					},
 					sync.HashPrefix("yourgroup"): {
-						"baz-project":    true,
-						"quux-project":   true,
-						"drupal-example": true,
+						"baz-project":    "",
+						"quux-project":   "",
+						"drupal-example": "",
 					},
 				},
 				required: map[string]map[string]bool{
@@ -225,27 +223,27 @@ func TestCalculateIndexPatternDiff(t *testing.T) {
 					},
 				},
 			},
-			expect: calculateIndexPatternDiffOutput{
+			expect: output{
 				toCreate: map[string][]string{
 					"mygroup": {
 						"bar-project",
 					},
 				},
-				toDelete: map[string][]string{},
+				toDelete: map[string]map[string]string{},
 			},
 		},
 		"delete project": {
-			input: calculateIndexPatternDiffInput{
-				existing: map[string]map[string]bool{
+			input: input{
+				existing: map[string]map[string]string{
 					sync.HashPrefix("mygroup"): {
-						"foo-project":     true,
-						"bar-project":     true,
-						"drupal-example2": true,
+						"foo-project":     "fooID-123",
+						"bar-project":     "barID-123",
+						"drupal-example2": "drupalID-123",
 					},
 					sync.HashPrefix("yourgroup"): {
-						"baz-project":    true,
-						"quux-project":   true,
-						"drupal-example": true,
+						"baz-project":    "bazID-123",
+						"quux-project":   "quuxID-123",
+						"drupal-example": "drupalID-456",
 					},
 				},
 				required: map[string]map[string]bool{
@@ -260,27 +258,27 @@ func TestCalculateIndexPatternDiff(t *testing.T) {
 					},
 				},
 			},
-			expect: calculateIndexPatternDiffOutput{
+			expect: output{
 				toCreate: map[string][]string{},
-				toDelete: map[string][]string{
+				toDelete: map[string]map[string]string{
 					"mygroup": {
-						"bar-project",
+						"bar-project": "barID-123",
 					},
 				},
 			},
 		},
 		"create and delete": {
-			input: calculateIndexPatternDiffInput{
-				existing: map[string]map[string]bool{
+			input: input{
+				existing: map[string]map[string]string{
 					sync.HashPrefix("mygroup"): {
-						"foo-project":     true,
-						"bar-project":     true,
-						"drupal-example2": true,
+						"foo-project":     "fooID-123",
+						"bar-project":     "barID-123",
+						"drupal-example2": "drupalID-123",
 					},
 					sync.HashPrefix("yourgroup"): {
-						"baz-project":    true,
-						"quux-project":   true,
-						"drupal-example": true,
+						"baz-project":    "bazID-123",
+						"quux-project":   "quuxID-123",
+						"drupal-example": "drupalID-456",
 					},
 				},
 				required: map[string]map[string]bool{
@@ -296,15 +294,15 @@ func TestCalculateIndexPatternDiff(t *testing.T) {
 					},
 				},
 			},
-			expect: calculateIndexPatternDiffOutput{
+			expect: output{
 				toCreate: map[string][]string{
 					"mygroup": {
 						"drupal-example3",
 					},
 				},
-				toDelete: map[string][]string{
+				toDelete: map[string]map[string]string{
 					"mygroup": {
-						"bar-project",
+						"bar-project": "barID-123",
 					},
 				},
 			},
@@ -320,9 +318,6 @@ func TestCalculateIndexPatternDiff(t *testing.T) {
 			// strings.
 			for k := range toCreate {
 				sort.Strings(toCreate[k])
-			}
-			for k := range toDelete {
-				sort.Strings(toDelete[k])
 			}
 			if !reflect.DeepEqual(toCreate, tc.expect.toCreate) {
 				tt.Fatalf("got:\n%v\nexpected:\n%v\n", toCreate,

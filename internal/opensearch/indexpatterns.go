@@ -10,6 +10,7 @@ import (
 	"path"
 	"regexp"
 	"strconv"
+	"strings"
 
 	"go.uber.org/zap"
 )
@@ -136,15 +137,16 @@ func (c *Client) RawIndexPatterns(ctx context.Context,
 
 // IndexPatterns returns all Opensearch index patterns as a map of index names
 // (which are derived from tenant names) to map of index pattern titles to
-// bool, which is set to true if the index pattern exists in the tenant.
+// index pattern IDs, which is set if the index pattern exists in the tenant.
 //
+// TODO:
 // This function ignores migrated .kibana indices, so it may set the same index
 // pattern to true in the map more than once if e.g. indices named
-// .kibana_mytenant_{1,2,3} all exist. TODO: figure out how to tell which of
-// these indices represents the current index-pattern.
+// .kibana_mytenant_{1,2,3} all exist. Instead it should figure out how to tell
+// which of these indices represents the current index-pattern.
 func (c *Client) IndexPatterns(ctx context.Context) (
-	map[string]map[string]bool, error) {
-	indexPatterns := map[string]map[string]bool{}
+	map[string]map[string]string, error) {
+	indexPatterns := map[string]map[string]string{}
 	var after string
 	for {
 		rawIndexPatterns, err := c.RawIndexPatterns(ctx, after)
@@ -176,13 +178,17 @@ func (c *Client) IndexPatterns(ctx context.Context) (
 // returns the number of search results found, the updated at date on the last
 // search result, and an error (if any).
 func parseIndexPatterns(data []byte,
-	indexPatterns map[string]map[string]bool) (int, string, error) {
+	indexPatterns map[string]map[string]string) (int, string, error) {
 	// unpack all index patterns
 	var s SearchResult
 	var index string
 	if err := json.Unmarshal(data, &s); err != nil {
 		return 0, "", fmt.Errorf(
 			"couldn't unmarshal index patterns search result: %v", err)
+	}
+	// handle the case of zero index patterns
+	if len(s.Hits.Hits) == 0 {
+		return 0, "1970-01-01T00:00:00Z", nil
 	}
 	for _, hit := range s.Hits.Hits {
 		if globalTenantIndexName.MatchString(hit.Index) {
@@ -198,9 +204,13 @@ func parseIndexPatterns(data []byte,
 		}
 		// initialize the nested map
 		if indexPatterns[index] == nil {
-			indexPatterns[index] = map[string]bool{}
+			indexPatterns[index] = map[string]string{}
 		}
-		indexPatterns[index][hit.Source.IndexPattern.Title] = true
+		// search results prefix ID with "index-pattern:", which is stripped here
+		// because the prefix is not used when referring to the index pattern by ID
+		// in other API requests.
+		indexPatterns[index][hit.Source.IndexPattern.Title] =
+			strings.TrimPrefix(hit.ID, "index-pattern:")
 	}
 	return len(s.Hits.Hits), s.Hits.Hits[len(s.Hits.Hits)-1].Source.UpdatedAt, nil
 }

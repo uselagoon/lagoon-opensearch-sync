@@ -41,7 +41,7 @@ type OpensearchService interface {
 	CreateIndexTemplate(context.Context, string, *opensearch.IndexTemplate) error
 	DeleteIndexTemplate(context.Context, string) error
 
-	IndexPatterns(context.Context) (map[string]map[string]bool, error)
+	IndexPatterns(context.Context) (map[string]map[string]string, error)
 }
 
 // DashboardsService defines the Opensearch Dashboards service interface.
