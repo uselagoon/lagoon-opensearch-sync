@@ -76,6 +76,22 @@ func Sync(ctx context.Context, log *zap.Logger, l LagoonDBService,
 	if err != nil {
 		return fmt.Errorf("couldn't get groups: %v", err)
 	}
+	// Work around security-dashboards-plugin bug by ignoring "global" group when
+	// creating tenants and index patterns:
+	// * Users in the "global" group will have to use the reserved Global Tenant.
+	// * Users will still have access to their logs, but not their
+	//   project-specific index patterns.
+	// https://github.com/opensearch-project/security-dashboards-plugin/issues/1411
+	//
+	// TODO: once the upstream bug is closed, target the global tenant correctly
+	// (however they fix it) and remove this workaround.
+	var groupsSansGlobal []keycloak.Group
+	for i := range groups {
+		if groups[i].Name == "global" {
+			continue
+		}
+		groupsSansGlobal = append(groupsSansGlobal, groups[i])
+	}
 	// Get roles from Opensearch. Getting this data here is an optimisation
 	// because both syncRoles and syncRolesMapping use this data and this way we
 	// only need to request it from Opensearch once.
@@ -86,13 +102,13 @@ func Sync(ctx context.Context, log *zap.Logger, l LagoonDBService,
 	for _, object := range objects {
 		switch object {
 		case "tenants":
-			syncTenants(ctx, log, groups, o, dryRun)
+			syncTenants(ctx, log, groupsSansGlobal, o, dryRun)
 		case "roles":
 			syncRoles(ctx, log, groups, projectNames, roles, o, dryRun)
 		case "rolesmapping":
 			syncRolesMapping(ctx, log, groups, projectNames, roles, o, dryRun)
 		case "indexpatterns":
-			syncIndexPatterns(ctx, log, groups, projectNames, o, d, dryRun)
+			syncIndexPatterns(ctx, log, groupsSansGlobal, projectNames, o, d, dryRun)
 		case "indextemplates":
 			syncIndexTemplates(ctx, log, o, dryRun)
 		default:
