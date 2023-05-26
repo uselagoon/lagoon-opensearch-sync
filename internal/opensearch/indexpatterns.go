@@ -13,6 +13,7 @@ import (
 	"strings"
 
 	"go.uber.org/zap"
+	"golang.org/x/exp/slices"
 )
 
 // maximum size of search results returned by Opensearch
@@ -145,8 +146,8 @@ func (c *Client) RawIndexPatterns(ctx context.Context,
 // .kibana_mytenant_{1,2,3} all exist. Instead it should figure out how to tell
 // which of these indices represents the current index-pattern.
 func (c *Client) IndexPatterns(ctx context.Context) (
-	map[string]map[string]string, error) {
-	indexPatterns := map[string]map[string]string{}
+	map[string]map[string][]string, error) {
+	indexPatterns := map[string]map[string][]string{}
 	var after string
 	for {
 		rawIndexPatterns, err := c.RawIndexPatterns(ctx, after)
@@ -178,7 +179,7 @@ func (c *Client) IndexPatterns(ctx context.Context) (
 // returns the number of search results found, the updated at date on the last
 // search result, and an error (if any).
 func parseIndexPatterns(data []byte,
-	indexPatterns map[string]map[string]string) (int, string, error) {
+	indexPatterns map[string]map[string][]string) (int, string, error) {
 	// unpack all index patterns
 	var s SearchResult
 	var index string
@@ -204,13 +205,26 @@ func parseIndexPatterns(data []byte,
 		}
 		// initialize the nested map
 		if indexPatterns[index] == nil {
-			indexPatterns[index] = map[string]string{}
+			indexPatterns[index] = map[string][]string{}
 		}
 		// search results prefix ID with "index-pattern:", which is stripped here
 		// because the prefix is not used when referring to the index pattern by ID
 		// in other API requests.
+		patternID := strings.TrimPrefix(hit.ID, "index-pattern:")
+		// check if the patternID is already in the slice. This happens when there
+		// are multiple versions of the same index pattern stored in opensearch as
+		// a result of a migration during version updates. For example, name_1,
+		// name_2 etc.
+		// If the patternID _is_ already in the slice, don't add it as the slice
+		// should contain unique IDs only.
+		if slices.Contains(indexPatterns[index][hit.Source.IndexPattern.Title],
+			patternID) {
+			continue
+		}
+		// Multiple identically named index patterns may be added to a single
+		// tenant, so map the index pattern names to a slice of IDs.
 		indexPatterns[index][hit.Source.IndexPattern.Title] =
-			strings.TrimPrefix(hit.ID, "index-pattern:")
+			append(indexPatterns[index][hit.Source.IndexPattern.Title], patternID)
 	}
 	return len(s.Hits.Hits), s.Hits.Hits[len(s.Hits.Hits)-1].Source.UpdatedAt, nil
 }

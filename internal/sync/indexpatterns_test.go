@@ -121,12 +121,12 @@ func TestGenerateIndexPatternsForGroup(t *testing.T) {
 
 func TestCalculateIndexPatternDiff(t *testing.T) {
 	type input struct {
-		existing map[string]map[string]string
+		existing map[string]map[string][]string
 		required map[string]map[string]bool
 	}
 	type output struct {
 		toCreate map[string][]string
-		toDelete map[string]map[string]string
+		toDelete map[string]map[string][]string
 	}
 	var testCases = map[string]struct {
 		input  input
@@ -134,16 +134,16 @@ func TestCalculateIndexPatternDiff(t *testing.T) {
 	}{
 		"no diff": {
 			input: input{
-				existing: map[string]map[string]string{
+				existing: map[string]map[string][]string{
 					sync.HashPrefix("mygroup"): {
-						"foo-project":     "",
-						"bar-project":     "",
-						"drupal-example2": "",
+						"foo-project":     []string{""},
+						"bar-project":     []string{""},
+						"drupal-example2": []string{""},
 					},
 					sync.HashPrefix("yourgroup"): {
-						"baz-project":    "",
-						"quux-project":   "",
-						"drupal-example": "",
+						"baz-project":    []string{""},
+						"quux-project":   []string{""},
+						"drupal-example": []string{""},
 					},
 				},
 				required: map[string]map[string]bool{
@@ -161,16 +161,16 @@ func TestCalculateIndexPatternDiff(t *testing.T) {
 			},
 			expect: output{
 				toCreate: map[string][]string{},
-				toDelete: map[string]map[string]string{},
+				toDelete: map[string]map[string][]string{},
 			},
 		},
 		"create group/tenant": {
 			input: input{
-				existing: map[string]map[string]string{
+				existing: map[string]map[string][]string{
 					sync.HashPrefix("mygroup"): {
-						"foo-project":     "",
-						"bar-project":     "",
-						"drupal-example2": "",
+						"foo-project":     []string{""},
+						"bar-project":     []string{""},
+						"drupal-example2": []string{""},
 					},
 				},
 				required: map[string]map[string]bool{
@@ -194,20 +194,20 @@ func TestCalculateIndexPatternDiff(t *testing.T) {
 						"quux-project",
 					},
 				},
-				toDelete: map[string]map[string]string{},
+				toDelete: map[string]map[string][]string{},
 			},
 		},
 		"create project pattern": {
 			input: input{
-				existing: map[string]map[string]string{
+				existing: map[string]map[string][]string{
 					sync.HashPrefix("mygroup"): {
-						"foo-project":     "",
-						"drupal-example2": "",
+						"foo-project":     []string{""},
+						"drupal-example2": []string{""},
 					},
 					sync.HashPrefix("yourgroup"): {
-						"baz-project":    "",
-						"quux-project":   "",
-						"drupal-example": "",
+						"baz-project":    []string{""},
+						"quux-project":   []string{""},
+						"drupal-example": []string{""},
 					},
 				},
 				required: map[string]map[string]bool{
@@ -229,21 +229,21 @@ func TestCalculateIndexPatternDiff(t *testing.T) {
 						"bar-project",
 					},
 				},
-				toDelete: map[string]map[string]string{},
+				toDelete: map[string]map[string][]string{},
 			},
 		},
 		"delete project": {
 			input: input{
-				existing: map[string]map[string]string{
+				existing: map[string]map[string][]string{
 					sync.HashPrefix("mygroup"): {
-						"foo-project":     "fooID-123",
-						"bar-project":     "barID-123",
-						"drupal-example2": "drupalID-123",
+						"foo-project":     []string{"fooID-123"},
+						"bar-project":     []string{"barID-123"},
+						"drupal-example2": []string{"drupalID-123"},
 					},
 					sync.HashPrefix("yourgroup"): {
-						"baz-project":    "bazID-123",
-						"quux-project":   "quuxID-123",
-						"drupal-example": "drupalID-456",
+						"baz-project":    []string{"bazID-123"},
+						"quux-project":   []string{"quuxID-123"},
+						"drupal-example": []string{"drupalID-456"},
 					},
 				},
 				required: map[string]map[string]bool{
@@ -260,25 +260,25 @@ func TestCalculateIndexPatternDiff(t *testing.T) {
 			},
 			expect: output{
 				toCreate: map[string][]string{},
-				toDelete: map[string]map[string]string{
+				toDelete: map[string]map[string][]string{
 					"mygroup": {
-						"bar-project": "barID-123",
+						"bar-project": []string{"barID-123"},
 					},
 				},
 			},
 		},
 		"create and delete": {
 			input: input{
-				existing: map[string]map[string]string{
+				existing: map[string]map[string][]string{
 					sync.HashPrefix("mygroup"): {
-						"foo-project":     "fooID-123",
-						"bar-project":     "barID-123",
-						"drupal-example2": "drupalID-123",
+						"foo-project":     []string{"fooID-123"},
+						"bar-project":     []string{"barID-123"},
+						"drupal-example2": []string{"drupalID-123"},
 					},
 					sync.HashPrefix("yourgroup"): {
-						"baz-project":    "bazID-123",
-						"quux-project":   "quuxID-123",
-						"drupal-example": "drupalID-456",
+						"baz-project":    []string{"bazID-123"},
+						"quux-project":   []string{"quuxID-123"},
+						"drupal-example": []string{"drupalID-456"},
 					},
 				},
 				required: map[string]map[string]bool{
@@ -300,9 +300,52 @@ func TestCalculateIndexPatternDiff(t *testing.T) {
 						"drupal-example3",
 					},
 				},
-				toDelete: map[string]map[string]string{
+				toDelete: map[string]map[string][]string{
 					"mygroup": {
-						"bar-project": "barID-123",
+						"bar-project": []string{"barID-123"},
+					},
+				},
+			},
+		},
+		"create and delete duplicate": {
+			input: input{
+				existing: map[string]map[string][]string{
+					sync.HashPrefix("mygroup"): {
+						"foo-project":     []string{"fooID-123"},
+						"bar-project":     []string{"barID-123"},
+						"drupal-example2": []string{"drupalID-123"},
+					},
+					sync.HashPrefix("yourgroup"): {
+						"baz-project":    []string{"bazID-123"},
+						"quux-project":   []string{"quuxID-123"},
+						"drupal-example": []string{"drupalID-456", "drupalID-789"},
+					},
+				},
+				required: map[string]map[string]bool{
+					"mygroup": {
+						"foo-project":     true,
+						"drupal-example2": true,
+						"drupal-example3": true,
+					},
+					"yourgroup": {
+						"baz-project":    true,
+						"quux-project":   true,
+						"drupal-example": true,
+					},
+				},
+			},
+			expect: output{
+				toCreate: map[string][]string{
+					"mygroup": {
+						"drupal-example3",
+					},
+				},
+				toDelete: map[string]map[string][]string{
+					"mygroup": {
+						"bar-project": []string{"barID-123"},
+					},
+					"yourgroup": {
+						"drupal-example": []string{"drupalID-789"},
 					},
 				},
 			},
