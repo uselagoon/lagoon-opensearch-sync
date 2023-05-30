@@ -71,8 +71,7 @@ func TestSearchBodyMarshal(t *testing.T) {
 	}
 }
 
-func TestIndexPatternsUnmarshal(t *testing.T) {
-
+func TestParseIndexPatterns(t *testing.T) {
 	type parseIndexPatternsResponse struct {
 		indexPatterns map[string]map[string][]string
 		length        int
@@ -273,6 +272,20 @@ func TestIndexPatternsUnmarshal(t *testing.T) {
 				},
 				length:        152,
 				lastUpdatedAt: "2022-12-02T17:18:31.585Z",
+			},
+		},
+		"handle multiple kibana indices": {
+			input: "testdata/indexpatterns3.json",
+			expect: parseIndexPatternsResponse{
+				indexPatterns: map[string]map[string][]string{
+					"global_tenant": {
+						"router-logs-*":      []string{"router-logs-*"},
+						"lagoon-logs-*":      []string{"lagoon-logs-*"},
+						"application-logs-*": []string{"9b7da830-d427-11ed-b326-3348256dd0e8"},
+					},
+				},
+				length:        5,
+				lastUpdatedAt: "2023-05-02T07:54:24.736Z",
 			},
 		},
 	}
