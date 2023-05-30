@@ -1,0 +1,199 @@
+{
+  "_shards": {
+    "failed": 0,
+    "skipped": 0,
+    "successful": 13,
+    "total": 13
+  },
+  "hits": {
+    "hits": [
+      {
+        "_id": "index-pattern:9b7da830-d427-11ed-b326-3348256dd0e8",
+        "_index": ".kibana_1",
+        "_score": null,
+        "_source": {
+          "index-pattern": {
+            "timeFieldName": "@timestamp",
+            "title": "application-logs-*"
+          },
+          "migrationVersion": {
+            "index-pattern": "7.6.0"
+          },
+          "references": [],
+          "type": "index-pattern",
+          "updated_at": "2023-04-06T03:03:38.452Z"
+        },
+        "sort": [
+          1680750218452
+        ]
+      },
+      {
+        "_id": "index-pattern:9b7da830-d427-11ed-b326-3348256dd0e8",
+        "_index": ".kibana_2",
+        "_score": null,
+        "_source": {
+          "index-pattern": {
+            "timeFieldName": "@timestamp",
+            "title": "application-logs-*"
+          },
+          "migrationVersion": {
+            "index-pattern": "7.6.0"
+          },
+          "references": [],
+          "type": "index-pattern",
+          "updated_at": "2023-04-06T03:03:38.452Z"
+        },
+        "sort": [
+          1680750218452
+        ]
+      },
+      {
+        "_id": "index-pattern:d872ab00-d427-11ed-b326-3348256dd0e8",
+        "_index": ".kibana_1",
+        "_score": null,
+        "_source": {
+          "index-pattern": {
+            "timeFieldName": "@timestamp",
+            "title": "container-logs-*"
+          },
+          "migrationVersion": {
+            "index-pattern": "7.6.0"
+          },
+          "references": [],
+          "type": "index-pattern",
+          "updated_at": "2023-04-06T03:05:11.854Z"
+        },
+        "sort": [
+          1680750311854
+        ]
+      },
+      {
+        "_id": "index-pattern:lagoon-logs-*",
+        "_index": ".kibana_-152937574_admintenant_1",
+        "_score": null,
+        "_source": {
+          "index-pattern": {
+            "timeFieldName": "@timestamp",
+            "title": "lagoon-logs-*"
+          },
+          "migrationVersion": {
+            "index-pattern": "7.6.0"
+          },
+          "references": [],
+          "type": "index-pattern",
+          "updated_at": "2023-04-24T05:22:06.165Z"
+        },
+        "sort": [
+          1682313726165
+        ]
+      },
+      {
+        "_id": "index-pattern:lagoon-logs-*",
+        "_index": ".kibana_-152937574_admintenant_2",
+        "_score": null,
+        "_source": {
+          "index-pattern": {
+            "timeFieldName": "@timestamp",
+            "title": "lagoon-logs-*"
+          },
+          "migrationVersion": {
+            "index-pattern": "7.6.0"
+          },
+          "references": [],
+          "type": "index-pattern",
+          "updated_at": "2023-04-24T05:22:06.165Z"
+        },
+        "sort": [
+          1682313726165
+        ]
+      },
+      {
+        "_id": "index-pattern:router-logs-*",
+        "_index": ".kibana_-152937574_admintenant_1",
+        "_score": null,
+        "_source": {
+          "index-pattern": {
+            "timeFieldName": "@timestamp",
+            "title": "router-logs-*"
+          },
+          "migrationVersion": {
+            "index-pattern": "7.6.0"
+          },
+          "references": [],
+          "type": "index-pattern",
+          "updated_at": "2023-04-24T05:22:06.165Z"
+        },
+        "sort": [
+          1682313726165
+        ]
+      },
+      {
+        "_id": "index-pattern:container-logs-*",
+        "_index": ".kibana_-152937574_admintenant_1",
+        "_score": null,
+        "_source": {
+          "index-pattern": {
+            "timeFieldName": "@timestamp",
+            "title": "container-logs-*"
+          },
+          "migrationVersion": {
+            "index-pattern": "7.6.0"
+          },
+          "references": [],
+          "type": "index-pattern",
+          "updated_at": "2023-04-24T05:22:06.165Z"
+        },
+        "sort": [
+          1682313726165
+        ]
+      },
+      {
+        "_id": "index-pattern:lagoon-logs-*",
+        "_index": ".kibana_2",
+        "_score": null,
+        "_source": {
+          "index-pattern": {
+            "timeFieldName": "@timestamp",
+            "title": "lagoon-logs-*"
+          },
+          "migrationVersion": {
+            "index-pattern": "7.6.0"
+          },
+          "references": [],
+          "type": "index-pattern",
+          "updated_at": "2023-05-02T07:48:39.336Z"
+        },
+        "sort": [
+          1683013719336
+        ]
+      },
+      {
+        "_id": "index-pattern:router-logs-*",
+        "_index": ".kibana_2",
+        "_score": null,
+        "_source": {
+          "index-pattern": {
+            "timeFieldName": "@timestamp",
+            "title": "router-logs-*"
+          },
+          "migrationVersion": {
+            "index-pattern": "7.6.0"
+          },
+          "references": [],
+          "type": "index-pattern",
+          "updated_at": "2023-05-02T07:54:24.736Z"
+        },
+        "sort": [
+          1683014064736
+        ]
+      }
+    ],
+    "max_score": null,
+    "total": {
+      "relation": "eq",
+      "value": 9
+    }
+  },
+  "timed_out": false,
+  "took": 13
+}
