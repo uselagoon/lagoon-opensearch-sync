@@ -69,6 +69,86 @@
       },
       {
         "_id": "index-pattern:lagoon-logs-*",
+        "_index": ".kibana_-152937574_admintenant_1",
+        "_score": null,
+        "_source": {
+          "index-pattern": {
+            "timeFieldName": "@timestamp",
+            "title": "lagoon-logs-*"
+          },
+          "migrationVersion": {
+            "index-pattern": "7.6.0"
+          },
+          "references": [],
+          "type": "index-pattern",
+          "updated_at": "2023-04-24T05:22:06.165Z"
+        },
+        "sort": [
+          1682313726165
+        ]
+      },
+      {
+        "_id": "index-pattern:lagoon-logs-*",
+        "_index": ".kibana_-152937574_admintenant_2",
+        "_score": null,
+        "_source": {
+          "index-pattern": {
+            "timeFieldName": "@timestamp",
+            "title": "lagoon-logs-*"
+          },
+          "migrationVersion": {
+            "index-pattern": "7.6.0"
+          },
+          "references": [],
+          "type": "index-pattern",
+          "updated_at": "2023-04-24T05:22:06.165Z"
+        },
+        "sort": [
+          1682313726165
+        ]
+      },
+      {
+        "_id": "index-pattern:router-logs-*",
+        "_index": ".kibana_-152937574_admintenant_1",
+        "_score": null,
+        "_source": {
+          "index-pattern": {
+            "timeFieldName": "@timestamp",
+            "title": "router-logs-*"
+          },
+          "migrationVersion": {
+            "index-pattern": "7.6.0"
+          },
+          "references": [],
+          "type": "index-pattern",
+          "updated_at": "2023-04-24T05:22:06.165Z"
+        },
+        "sort": [
+          1682313726165
+        ]
+      },
+      {
+        "_id": "index-pattern:container-logs-*",
+        "_index": ".kibana_-152937574_admintenant_1",
+        "_score": null,
+        "_source": {
+          "index-pattern": {
+            "timeFieldName": "@timestamp",
+            "title": "container-logs-*"
+          },
+          "migrationVersion": {
+            "index-pattern": "7.6.0"
+          },
+          "references": [],
+          "type": "index-pattern",
+          "updated_at": "2023-04-24T05:22:06.165Z"
+        },
+        "sort": [
+          1682313726165
+        ]
+      },
+      {
+        "_id": "index-pattern:lagoon-logs-*",
         "_index": ".kibana_2",
         "_score": null,
         "_source": {
@@ -111,7 +191,7 @@
     "max_score": null,
     "total": {
       "relation": "eq",
-      "value": 174
+      "value": 9
     }
   },
   "timed_out": false,

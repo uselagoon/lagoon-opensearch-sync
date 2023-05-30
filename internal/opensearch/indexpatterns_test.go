@@ -283,8 +283,11 @@ func TestParseIndexPatterns(t *testing.T) {
 						"lagoon-logs-*":      []string{"lagoon-logs-*"},
 						"application-logs-*": []string{"9b7da830-d427-11ed-b326-3348256dd0e8"},
 					},
+					"-152937574_admintenant": {
+						"lagoon-logs-*": []string{"lagoon-logs-*"},
+					},
 				},
-				length:        5,
+				length:        9,
 				lastUpdatedAt: "2023-05-02T07:54:24.736Z",
 			},
 		},

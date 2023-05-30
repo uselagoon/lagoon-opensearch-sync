@@ -13,7 +13,6 @@ import (
 	"strings"
 
 	"go.uber.org/zap"
-	"golang.org/x/exp/slices"
 )
 
 // maximum size of search results returned by Opensearch
@@ -21,13 +20,9 @@ import (
 const searchSize = 10000
 
 var (
-	// globalTenantIndexName matches the name of the index that the global tenant
-	// index patterns are stored in.
-	globalTenantIndexName = regexp.MustCompile(`^\.kibana_[0-9]+$`)
-	// tenantIndexName matches the name of the index that regular tenant index
-	// patterns are stored in. The format of the match is
-	// <hashInt>_<sanitizedName>.
-	tenantIndexName = regexp.MustCompile(`^\.kibana_(.+)_[0-9]+$`)
+	// indexName matches the raw name of an index-pattern index name and its
+	// migration number
+	indexName = regexp.MustCompile(`^\.kibana(?:_(.+))?_([0-9]+)$`)
 )
 
 // SourceIndexPattern represents the index pattern definition inside the
@@ -136,15 +131,98 @@ func (c *Client) RawIndexPatterns(ctx context.Context,
 	return io.ReadAll(res.Body)
 }
 
+// parseIndexName takes a raw index name with the ".kibana_" prefix and "_n"
+// suffix (where "n" is the migration number). It returns the index name
+// stripped of the prefix and suffix, the migration number as an int, and an
+// error (if any).
+func parseIndexName(rawIndex string) (string, int, error) {
+	matches := indexName.FindStringSubmatch(rawIndex)
+	if len(matches) != 3 {
+		return "", 0, fmt.Errorf("invalid index name: %s", rawIndex)
+	}
+	var index string
+	if matches[1] == "" {
+		index = "global_tenant"
+	} else {
+		index = matches[1]
+	}
+	migration, err := strconv.Atoi(matches[2])
+	if err != nil {
+		return "", 0, fmt.Errorf("couldn't parse migration number: %v", err)
+	}
+	if migration < 1 {
+		return "", 0, fmt.Errorf("invalid migration number: %d", migration)
+	}
+	return index, migration, nil
+}
+
+// indexMaxMigration iterates over hits and returns a map containing the unique
+// index names found, mapped to the maximum migration number of each of those
+// indices. The index names are stripped of their ".kibana_" prefix and their
+// "_n" suffix, where "n" is the migration number.
+func indexMaxMigration(hits []IndexPattern) (map[string]int, error) {
+	maxMigration := map[string]int{}
+	for _, hit := range hits {
+		index, migration, err := parseIndexName(hit.Index)
+		if err != nil {
+			return nil, fmt.Errorf("couldn't parse index name %s: %v", hit.Index, err)
+		}
+		if maxMigration[index] < migration {
+			maxMigration[index] = migration
+		}
+	}
+	return maxMigration, nil
+}
+
+// parseIndexPatterns takes the raw index patterns search results as a JSON
+// blob, and a map to store results.
+// It fills out the map according to the index patterns that it finds, and
+// returns the number of search results found in data, the updated at date on
+// the last search result in data, and an error (if any).
+func parseIndexPatterns(data []byte,
+	indexPatterns map[string]map[string][]string) (int, string, error) {
+	// unpack all index patterns
+	var s SearchResult
+	if err := json.Unmarshal(data, &s); err != nil {
+		return 0, "", fmt.Errorf(
+			"couldn't unmarshal index patterns search result: %v", err)
+	}
+	// handle the case of zero index patterns
+	if len(s.Hits.Hits) == 0 {
+		return 0, "1970-01-01T00:00:00Z", nil
+	}
+	maxMigration, err := indexMaxMigration(s.Hits.Hits)
+	if err != nil {
+		return 0, "", fmt.Errorf("couldn't get max migrations: %v", err)
+	}
+	for _, hit := range s.Hits.Hits {
+		index, migration, err := parseIndexName(hit.Index)
+		if err != nil {
+			return 0, "", fmt.Errorf("couldn't parse index name %s: %v", hit.Index, err)
+		}
+		if maxMigration[index] != migration {
+			// ignore old migrations of indices
+			continue
+		}
+		// initialize the nested map
+		if indexPatterns[index] == nil {
+			indexPatterns[index] = map[string][]string{}
+		}
+		// search results prefix ID with "index-pattern:", which is stripped here
+		// because the prefix is not used when referring to the index pattern by ID
+		// in other API requests.
+		patternID := strings.TrimPrefix(hit.ID, "index-pattern:")
+		// Multiple identically named index patterns may be added to a single
+		// tenant, so map the index pattern names to a slice of IDs.
+		indexPatterns[index][hit.Source.IndexPattern.Title] =
+			append(indexPatterns[index][hit.Source.IndexPattern.Title], patternID)
+	}
+	return len(s.Hits.Hits), s.Hits.Hits[len(s.Hits.Hits)-1].Source.UpdatedAt, nil
+}
+
 // IndexPatterns returns all Opensearch index patterns as a map of index names
 // (which are derived from tenant names) to map of index pattern titles to
 // index pattern IDs, which is set if the index pattern exists in the tenant.
-//
-// TODO:
-// This function ignores migrated .kibana indices, so it may set the same index
-// pattern to true in the map more than once if e.g. indices named
-// .kibana_mytenant_{1,2,3} all exist. Instead it should figure out how to tell
-// which of these indices represents the current index-pattern.
 func (c *Client) IndexPatterns(ctx context.Context) (
 	map[string]map[string][]string, error) {
 	indexPatterns := map[string]map[string][]string{}
@@ -171,60 +249,4 @@ func (c *Client) IndexPatterns(ctx context.Context) (
 		after = lastUpdatedAt
 	}
 	return indexPatterns, nil
-}
-
-// parseIndexPatterns takes the raw index patterns search results as a JSON
-// blob, and a map to store results.
-// It fills out the map according to the index patterns that it finds, and
-// returns the number of search results found, the updated at date on the last
-// search result, and an error (if any).
-func parseIndexPatterns(data []byte,
-	indexPatterns map[string]map[string][]string) (int, string, error) {
-	// unpack all index patterns
-	var s SearchResult
-	var index string
-	if err := json.Unmarshal(data, &s); err != nil {
-		return 0, "", fmt.Errorf(
-			"couldn't unmarshal index patterns search result: %v", err)
-	}
-	// handle the case of zero index patterns
-	if len(s.Hits.Hits) == 0 {
-		return 0, "1970-01-01T00:00:00Z", nil
-	}
-	for _, hit := range s.Hits.Hits {
-		if globalTenantIndexName.MatchString(hit.Index) {
-			index = "global_tenant"
-		} else {
-			matches := tenantIndexName.FindStringSubmatch(hit.Index)
-			// sanity-check the index pattern format and return an error if it is
-			// not as expected.
-			if len(matches) != 2 {
-				return 0, "", fmt.Errorf("unexpected index name: %v", hit.Index)
-			}
-			index = matches[1]
-		}
-		// initialize the nested map
-		if indexPatterns[index] == nil {
-			indexPatterns[index] = map[string][]string{}
-		}
-		// search results prefix ID with "index-pattern:", which is stripped here
-		// because the prefix is not used when referring to the index pattern by ID
-		// in other API requests.
-		patternID := strings.TrimPrefix(hit.ID, "index-pattern:")
-		// check if the patternID is already in the slice. This happens when there
-		// are multiple versions of the same index pattern stored in opensearch as
-		// a result of a migration during version updates. For example, name_1,
-		// name_2 etc.
-		// If the patternID _is_ already in the slice, don't add it as the slice
-		// should contain unique IDs only.
-		if slices.Contains(indexPatterns[index][hit.Source.IndexPattern.Title],
-			patternID) {
-			continue
-		}
-		// Multiple identically named index patterns may be added to a single
-		// tenant, so map the index pattern names to a slice of IDs.
-		indexPatterns[index][hit.Source.IndexPattern.Title] =
-			append(indexPatterns[index][hit.Source.IndexPattern.Title], patternID)
-	}
-	return len(s.Hits.Hits), s.Hits.Hits[len(s.Hits.Hits)-1].Source.UpdatedAt, nil
 }
