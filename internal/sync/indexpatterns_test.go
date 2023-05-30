@@ -46,18 +46,18 @@ func TestGenerateIndexPatternsForGroup(t *testing.T) {
 			},
 			expect: generateIndexPatternsForGroupOutput{
 				indexPatterns: []string{
-					"application-logs-drupal9-base-*",
-					"container-logs-drupal9-base-*",
-					"lagoon-logs-drupal9-base-*",
-					"router-logs-drupal9-base-*",
-					"application-logs-somelongerprojectname-*",
-					"container-logs-somelongerprojectname-*",
-					"lagoon-logs-somelongerprojectname-*",
-					"router-logs-somelongerprojectname-*",
-					"application-logs-drupal10-prerelease-*",
-					"container-logs-drupal10-prerelease-*",
-					"lagoon-logs-drupal10-prerelease-*",
-					"router-logs-drupal10-prerelease-*",
+					"application-logs-drupal9-base-_-*",
+					"container-logs-drupal9-base-_-*",
+					"lagoon-logs-drupal9-base-_-*",
+					"router-logs-drupal9-base-_-*",
+					"application-logs-somelongerprojectname-_-*",
+					"container-logs-somelongerprojectname-_-*",
+					"lagoon-logs-somelongerprojectname-_-*",
+					"router-logs-somelongerprojectname-_-*",
+					"application-logs-drupal10-prerelease-_-*",
+					"container-logs-drupal10-prerelease-_-*",
+					"lagoon-logs-drupal10-prerelease-_-*",
+					"router-logs-drupal10-prerelease-_-*",
 					"application-logs-*",
 					"container-logs-*",
 					"lagoon-logs-*",
@@ -86,14 +86,14 @@ func TestGenerateIndexPatternsForGroup(t *testing.T) {
 			},
 			expect: generateIndexPatternsForGroupOutput{
 				indexPatterns: []string{
-					"application-logs-drupal9-base-*",
-					"container-logs-drupal9-base-*",
-					"lagoon-logs-drupal9-base-*",
-					"router-logs-drupal9-base-*",
-					"application-logs-drupal10-prerelease-*",
-					"container-logs-drupal10-prerelease-*",
-					"lagoon-logs-drupal10-prerelease-*",
-					"router-logs-drupal10-prerelease-*",
+					"application-logs-drupal9-base-_-*",
+					"container-logs-drupal9-base-_-*",
+					"lagoon-logs-drupal9-base-_-*",
+					"router-logs-drupal9-base-_-*",
+					"application-logs-drupal10-prerelease-_-*",
+					"container-logs-drupal10-prerelease-_-*",
+					"lagoon-logs-drupal10-prerelease-_-*",
+					"router-logs-drupal10-prerelease-_-*",
 					"application-logs-*",
 					"container-logs-*",
 					"lagoon-logs-*",
@@ -106,7 +106,7 @@ func TestGenerateIndexPatternsForGroup(t *testing.T) {
 	for name, tc := range testCases {
 		t.Run(name, func(tt *testing.T) {
 			indexPatterns, err := sync.GenerateIndexPatternsForGroup(log, tc.input.group,
-				tc.input.projectNames)
+				tc.input.projectNames, false)
 			if (err == nil && tc.expect.err != nil) ||
 				(err != nil && tc.expect.err == nil) {
 				tt.Fatalf("got err:\n%v\nexpected err:\n%v\n", err, tc.expect.err)
@@ -374,17 +374,17 @@ func TestCalculateIndexPatternDiff(t *testing.T) {
 	}
 }
 
-type generateIndexPatternsInput struct {
-	groups       []keycloak.Group
-	projectNames map[int]string
-}
-
 func TestGenerateIndexPatterns(t *testing.T) {
+	type generateIndexPatternsInput struct {
+		groups          []keycloak.Group
+		projectNames    map[int]string
+		legacyDelimiter bool
+	}
 	var testCases = map[string]struct {
 		input  generateIndexPatternsInput
 		expect map[string]map[string]bool
 	}{
-		"high-level test 0": {
+		"high-level test default group index patterns": {
 			input: generateIndexPatternsInput{
 				groups: []keycloak.Group{
 					{
@@ -412,6 +412,56 @@ func TestGenerateIndexPatterns(t *testing.T) {
 				projectNames: map[int]string{
 					34435: "drupal12-base",
 				},
+				legacyDelimiter: false,
+			},
+			expect: map[string]map[string]bool{
+				"foocorp": {
+					`application-logs-drupal12-base-_-*`: true,
+					`container-logs-drupal12-base-_-*`:   true,
+					`lagoon-logs-drupal12-base-_-*`:      true,
+					`router-logs-drupal12-base-_-*`:      true,
+					`application-logs-*`:                 true,
+					`container-logs-*`:                   true,
+					`lagoon-logs-*`:                      true,
+					`router-logs-*`:                      true,
+				},
+				"global_tenant": {
+					`application-logs-*`: true,
+					`container-logs-*`:   true,
+					`lagoon-logs-*`:      true,
+					`router-logs-*`:      true,
+				},
+			},
+		},
+		"high-level test legacy group index patterns": {
+			input: generateIndexPatternsInput{
+				groups: []keycloak.Group{
+					{
+						ID: "08fef83d-cde7-43a5-8bd2-a18cf440214a",
+						GroupUpdateRepresentation: keycloak.GroupUpdateRepresentation{
+							Name: "foocorp",
+							Attributes: map[string][]string{
+								"group-lagoon-project-ids": {`{"foocorp":[3133,34435]}`},
+								"lagoon-projects":          {`3133,34435`},
+							},
+						},
+					},
+					{
+						ID: "9f92af94-a7ee-4759-83bb-2b983bd30142",
+						GroupUpdateRepresentation: keycloak.GroupUpdateRepresentation{
+							Name: "project-drupal12-base",
+							Attributes: map[string][]string{
+								"group-lagoon-project-ids": {`{"project-drupal12-base":[34435]}`},
+								"lagoon-projects":          {`34435`},
+								"type":                     {`project-default-group`},
+							},
+						},
+					},
+				},
+				projectNames: map[int]string{
+					34435: "drupal12-base",
+				},
+				legacyDelimiter: true,
 			},
 			expect: map[string]map[string]bool{
 				"foocorp": {
@@ -437,7 +487,8 @@ func TestGenerateIndexPatterns(t *testing.T) {
 	for name, tc := range testCases {
 		t.Run(name, func(tt *testing.T) {
 			indexPatterns := sync.GenerateIndexPatterns(
-				log, tc.input.groups, tc.input.projectNames)
+				log, tc.input.groups, tc.input.projectNames,
+				tc.input.legacyDelimiter)
 			if !reflect.DeepEqual(indexPatterns, tc.expect) {
 				tt.Fatalf("got:\n%v\nexpected:\n%v\n", indexPatterns, tc.expect)
 			}

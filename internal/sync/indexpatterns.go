@@ -12,17 +12,23 @@ import (
 )
 
 var (
-	indexPatternTemplates = []string{
-		`application-logs-%s-*`,
-		`container-logs-%s-*`,
-		`lagoon-logs-%s-*`,
-		`router-logs-%s-*`,
-	}
 	globalIndexPatterns = []string{
 		`application-logs-*`,
 		`container-logs-*`,
 		`lagoon-logs-*`,
 		`router-logs-*`,
+	}
+	defaultIndexPatternTemplates = []string{
+		`application-logs-%s-_-*`,
+		`container-logs-%s-_-*`,
+		`lagoon-logs-%s-_-*`,
+		`router-logs-%s-_-*`,
+	}
+	legacyIndexPatternTemplates = []string{
+		`application-logs-%s-*`,
+		`container-logs-%s-*`,
+		`lagoon-logs-%s-*`,
+		`router-logs-%s-*`,
 	}
 	// indexNameInvalid matches characters which cannot appear in Opensearch
 	// index names
@@ -116,7 +122,7 @@ func calculateIndexPatternDiff(log *zap.Logger,
 // generateIndexPatternsForGroup returns a slice of index patterns for all the
 // projects associated with the given group.
 func generateIndexPatternsForGroup(log *zap.Logger, group keycloak.Group,
-	projectNames map[int]string) ([]string, error) {
+	projectNames map[int]string, legacyDelimiter bool) ([]string, error) {
 	pids, err := projectIDsForGroup(group)
 	if err != nil {
 		return nil, fmt.Errorf("couldn't get project IDs for group: %v", err)
@@ -128,6 +134,12 @@ func generateIndexPatternsForGroup(log *zap.Logger, group keycloak.Group,
 			log.Debug("invalid project ID in lagoon-projects group attribute",
 				zap.Int("projectID", pid))
 			continue
+		}
+		var indexPatternTemplates []string
+		if legacyDelimiter {
+			indexPatternTemplates = legacyIndexPatternTemplates
+		} else {
+			indexPatternTemplates = defaultIndexPatternTemplates
 		}
 		for _, tpl := range indexPatternTemplates {
 			indexPatterns = append(indexPatterns, fmt.Sprintf(tpl, name))
@@ -143,7 +155,7 @@ func generateIndexPatternsForGroup(log *zap.Logger, group keycloak.Group,
 // Only regular Lagoon groups are associated with a tenant (which is where
 // index patterns are placed), so project groups are ignored.
 func generateIndexPatterns(log *zap.Logger, groups []keycloak.Group,
-	projectNames map[int]string) map[string]map[string]bool {
+	projectNames map[int]string, legacyDelimiter bool) map[string]map[string]bool {
 	indexPatterns := map[string]map[string]bool{}
 	var patterns []string
 	var err error
@@ -151,7 +163,8 @@ func generateIndexPatterns(log *zap.Logger, groups []keycloak.Group,
 		if !isLagoonGroup(group) || isProjectGroup(log, group) {
 			continue
 		}
-		patterns, err = generateIndexPatternsForGroup(log, group, projectNames)
+		patterns, err = generateIndexPatternsForGroup(log, group, projectNames,
+			legacyDelimiter)
 		if err != nil {
 			log.Warn("couldn't generate index patterns for group",
 				zap.String("group", group.Name), zap.Error(err))
@@ -178,7 +191,7 @@ func generateIndexPatterns(log *zap.Logger, groups []keycloak.Group,
 // Lagoon logging requirements.
 func syncIndexPatterns(ctx context.Context, log *zap.Logger,
 	groups []keycloak.Group, projectNames map[int]string, o OpensearchService,
-	d DashboardsService, dryRun bool) {
+	d DashboardsService, dryRun, legacyDelimiter bool) {
 	// get index patterns from Opensearch
 	existing, err := o.IndexPatterns(ctx)
 	if err != nil {
@@ -186,7 +199,7 @@ func syncIndexPatterns(ctx context.Context, log *zap.Logger,
 		return
 	}
 	// generate the index patterns required by Lagoon
-	required := generateIndexPatterns(log, groups, projectNames)
+	required := generateIndexPatterns(log, groups, projectNames, legacyDelimiter)
 	// calculate index templates to add/remove
 	toCreate, toDelete := calculateIndexPatternDiff(log, existing, required)
 	for tenant, patternIDMap := range toDelete {
