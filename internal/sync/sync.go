@@ -54,7 +54,7 @@ type DashboardsService interface {
 // and then configure the OpensearchService as required.
 func Sync(ctx context.Context, log *zap.Logger, l LagoonDBService,
 	k KeycloakService, o OpensearchService, d DashboardsService, dryRun bool,
-	objects []string) error {
+	objects []string, legacyIndexPatternDelimiter bool) error {
 	// get projects from Lagoon
 	projects, err := l.Projects(ctx)
 	if err != nil {
@@ -108,7 +108,8 @@ func Sync(ctx context.Context, log *zap.Logger, l LagoonDBService,
 		case "rolesmapping":
 			syncRolesMapping(ctx, log, groups, projectNames, roles, o, dryRun)
 		case "indexpatterns":
-			syncIndexPatterns(ctx, log, groupsSansGlobal, projectNames, o, d, dryRun)
+			syncIndexPatterns(ctx, log, groupsSansGlobal, projectNames, o, d, dryRun,
+				legacyIndexPatternDelimiter)
 		case "indextemplates":
 			syncIndexTemplates(ctx, log, o, dryRun)
 		default:
