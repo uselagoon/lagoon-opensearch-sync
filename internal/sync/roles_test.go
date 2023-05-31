@@ -4,19 +4,18 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/davecgh/go-spew/spew"
+	"github.com/alecthomas/assert"
 	"github.com/uselagoon/lagoon-opensearch-sync/internal/keycloak"
 	"github.com/uselagoon/lagoon-opensearch-sync/internal/opensearch"
 	"github.com/uselagoon/lagoon-opensearch-sync/internal/sync"
 	"go.uber.org/zap"
 )
 
-type generateIndexPermissionPatternsInput struct {
-	pids         []int
-	projectNames map[int]string
-}
-
 func TestGenerateIndexPermissionPatterns(t *testing.T) {
+	type generateIndexPermissionPatternsInput struct {
+		pids         []int
+		projectNames map[int]string
+	}
 	var testCases = map[string]struct {
 		input  generateIndexPermissionPatternsInput
 		expect []string
@@ -61,16 +60,14 @@ func TestGenerateIndexPermissionPatterns(t *testing.T) {
 	}
 }
 
-type generateRolesInput struct {
-	groups       []keycloak.Group
-	projectNames map[int]string
-}
-
-type generateRolesOutput struct {
-	roles map[string]opensearch.Role
-}
-
 func TestGenerateRoles(t *testing.T) {
+	type generateRolesInput struct {
+		groups       []keycloak.Group
+		projectNames map[int]string
+	}
+	type generateRolesOutput struct {
+		roles map[string]opensearch.Role
+	}
 	var testCases = map[string]struct {
 		input  generateRolesInput
 		expect generateRolesOutput
@@ -101,6 +98,8 @@ func TestGenerateRoles(t *testing.T) {
 					"drupal-example": {
 						RolePermissions: opensearch.RolePermissions{
 							ClusterPermissions: []string{
+								"cluster:admin/opendistro/reports/instance/list",
+								"cluster:admin/opendistro/reports/instance/get",
 								"cluster:admin/opendistro/reports/menu/download",
 							},
 							IndexPermissions: []opensearch.IndexPermission{
@@ -153,6 +152,8 @@ func TestGenerateRoles(t *testing.T) {
 					"p27": {
 						RolePermissions: opensearch.RolePermissions{
 							ClusterPermissions: []string{
+								"cluster:admin/opendistro/reports/instance/list",
+								"cluster:admin/opendistro/reports/instance/get",
 								"cluster:admin/opendistro/reports/menu/download",
 							},
 							IndexPermissions: []opensearch.IndexPermission{
@@ -189,17 +190,15 @@ func TestGenerateRoles(t *testing.T) {
 	}
 }
 
-type calculateRoleDiffInput struct {
-	existing map[string]opensearch.Role
-	required map[string]opensearch.Role
-}
-
-type calculateRoleDiffOutput struct {
-	toCreate map[string]opensearch.Role
-	toDelete []string
-}
-
 func TestCalculateRoleDiff(t *testing.T) {
+	type calculateRoleDiffInput struct {
+		existing map[string]opensearch.Role
+		required map[string]opensearch.Role
+	}
+	type calculateRoleDiffOutput struct {
+		toCreate map[string]opensearch.Role
+		toDelete []string
+	}
 	var testCases = map[string]struct {
 		input  calculateRoleDiffInput
 		expect calculateRoleDiffOutput
@@ -209,7 +208,11 @@ func TestCalculateRoleDiff(t *testing.T) {
 				existing: map[string]opensearch.Role{
 					"drupal-example": {
 						RolePermissions: opensearch.RolePermissions{
-							ClusterPermissions: []string{"cluster:admin/opendistro/reports/menu/download"},
+							ClusterPermissions: []string{
+								"cluster:admin/opendistro/reports/instance/list",
+								"cluster:admin/opendistro/reports/instance/get",
+								"cluster:admin/opendistro/reports/menu/download",
+							},
 							IndexPermissions: []opensearch.IndexPermission{
 								{
 									AllowedActions: []string{
@@ -233,7 +236,11 @@ func TestCalculateRoleDiff(t *testing.T) {
 					},
 					"drupal-example2": {
 						RolePermissions: opensearch.RolePermissions{
-							ClusterPermissions: []string{"cluster:admin/opendistro/reports/menu/download"},
+							ClusterPermissions: []string{
+								"cluster:admin/opendistro/reports/instance/list",
+								"cluster:admin/opendistro/reports/instance/get",
+								"cluster:admin/opendistro/reports/menu/download",
+							},
 							IndexPermissions: []opensearch.IndexPermission{
 								{
 									AllowedActions: []string{
@@ -258,6 +265,8 @@ func TestCalculateRoleDiff(t *testing.T) {
 					"p11": {
 						RolePermissions: opensearch.RolePermissions{
 							ClusterPermissions: []string{
+								"cluster:admin/opendistro/reports/instance/list",
+								"cluster:admin/opendistro/reports/instance/get",
 								"cluster:admin/opendistro/reports/menu/download",
 							},
 							IndexPermissions: []opensearch.IndexPermission{
@@ -283,7 +292,11 @@ func TestCalculateRoleDiff(t *testing.T) {
 				required: map[string]opensearch.Role{
 					"drupal-example": {
 						RolePermissions: opensearch.RolePermissions{
-							ClusterPermissions: []string{"cluster:admin/opendistro/reports/menu/download"},
+							ClusterPermissions: []string{
+								"cluster:admin/opendistro/reports/instance/list",
+								"cluster:admin/opendistro/reports/instance/get",
+								"cluster:admin/opendistro/reports/menu/download",
+							},
 							IndexPermissions: []opensearch.IndexPermission{
 								{
 									AllowedActions: []string{
@@ -307,7 +320,11 @@ func TestCalculateRoleDiff(t *testing.T) {
 					},
 					"internaltest": {
 						RolePermissions: opensearch.RolePermissions{
-							ClusterPermissions: []string{"cluster:admin/opendistro/reports/menu/download"},
+							ClusterPermissions: []string{
+								"cluster:admin/opendistro/reports/instance/list",
+								"cluster:admin/opendistro/reports/instance/get",
+								"cluster:admin/opendistro/reports/menu/download",
+							},
 							IndexPermissions: []opensearch.IndexPermission{
 								{
 									AllowedActions: []string{
@@ -333,6 +350,8 @@ func TestCalculateRoleDiff(t *testing.T) {
 					"p11": {
 						RolePermissions: opensearch.RolePermissions{
 							ClusterPermissions: []string{
+								"cluster:admin/opendistro/reports/instance/list",
+								"cluster:admin/opendistro/reports/instance/get",
 								"cluster:admin/opendistro/reports/menu/download",
 							},
 							IndexPermissions: []opensearch.IndexPermission{
@@ -357,6 +376,8 @@ func TestCalculateRoleDiff(t *testing.T) {
 					"p23": {
 						RolePermissions: opensearch.RolePermissions{
 							ClusterPermissions: []string{
+								"cluster:admin/opendistro/reports/instance/list",
+								"cluster:admin/opendistro/reports/instance/get",
 								"cluster:admin/opendistro/reports/menu/download",
 							},
 							IndexPermissions: []opensearch.IndexPermission{
@@ -384,7 +405,11 @@ func TestCalculateRoleDiff(t *testing.T) {
 				toCreate: map[string]opensearch.Role{
 					"internaltest": {
 						RolePermissions: opensearch.RolePermissions{
-							ClusterPermissions: []string{"cluster:admin/opendistro/reports/menu/download"},
+							ClusterPermissions: []string{
+								"cluster:admin/opendistro/reports/instance/list",
+								"cluster:admin/opendistro/reports/instance/get",
+								"cluster:admin/opendistro/reports/menu/download",
+							},
 							IndexPermissions: []opensearch.IndexPermission{
 								{
 									AllowedActions: []string{
@@ -410,6 +435,8 @@ func TestCalculateRoleDiff(t *testing.T) {
 					"p23": {
 						RolePermissions: opensearch.RolePermissions{
 							ClusterPermissions: []string{
+								"cluster:admin/opendistro/reports/instance/list",
+								"cluster:admin/opendistro/reports/instance/get",
 								"cluster:admin/opendistro/reports/menu/download",
 							},
 							IndexPermissions: []opensearch.IndexPermission{
@@ -440,7 +467,161 @@ func TestCalculateRoleDiff(t *testing.T) {
 				existing: map[string]opensearch.Role{
 					"internaltest": {
 						RolePermissions: opensearch.RolePermissions{
-							ClusterPermissions: []string{"cluster:admin/opendistro/reports/menu/download"},
+							ClusterPermissions: []string{
+								"cluster:admin/opendistro/reports/instance/list",
+								"cluster:admin/opendistro/reports/instance/get",
+								"cluster:admin/opendistro/reports/menu/download",
+							},
+							IndexPermissions: []opensearch.IndexPermission{
+								{
+									AllowedActions: []string{
+										"read",
+										"indices:monitor/settings/get",
+									},
+									IndexPatterns: []string{
+										"/^(application|container|lagoon|router)-logs-drupal9-solr-_-.+/",
+										"/^(application|container|lagoon|router)-logs-react-example-_-.+/",
+										"/^(application|container|lagoon|router)-logs-drupal10-prerelease-_-.+/",
+										"/^(application|container|lagoon|router)-logs-nolongerexists-_-.+/",
+										"/^(application|container|lagoon|router)-logs-drupal-example-_-.+/",
+									},
+								},
+							},
+							TenantPermissions: []opensearch.TenantPermission{
+								{
+									AllowedActions: []string{"kibana_all_write"},
+									TenantPatterns: []string{"internaltest"},
+								},
+							},
+						},
+					},
+					"p11": {
+						RolePermissions: opensearch.RolePermissions{
+							ClusterPermissions: []string{
+								"cluster:admin/opendistro/reports/instance/list",
+								"cluster:admin/opendistro/reports/instance/get",
+								"cluster:admin/opendistro/reports/menu/download",
+							},
+							IndexPermissions: []opensearch.IndexPermission{
+								{
+									AllowedActions: []string{
+										"read",
+										"indices:monitor/settings/get",
+									},
+									IndexPatterns: []string{
+										"/^(application|container|lagoon|router)-logs-drupal-example-_-.+/",
+									},
+								},
+							},
+							TenantPermissions: []opensearch.TenantPermission{
+								{
+									AllowedActions: []string{"kibana_all_read"},
+									TenantPatterns: []string{"global_tenant"},
+								},
+							},
+						},
+					},
+				},
+				required: map[string]opensearch.Role{
+					"internaltest": {
+						RolePermissions: opensearch.RolePermissions{
+							ClusterPermissions: []string{
+								"cluster:admin/opendistro/reports/instance/list",
+								"cluster:admin/opendistro/reports/instance/get",
+								"cluster:admin/opendistro/reports/menu/download",
+							},
+							IndexPermissions: []opensearch.IndexPermission{
+								{
+									AllowedActions: []string{
+										"read",
+										"indices:monitor/settings/get",
+									},
+									IndexPatterns: []string{
+										"/^(application|container|lagoon|router)-logs-drupal9-solr-_-.+/",
+										"/^(application|container|lagoon|router)-logs-react-example-_-.+/",
+										"/^(application|container|lagoon|router)-logs-drupal10-prerelease-_-.+/",
+										"/^(application|container|lagoon|router)-logs-drupal-example-_-.+/",
+									},
+								},
+							},
+							TenantPermissions: []opensearch.TenantPermission{
+								{
+									AllowedActions: []string{"kibana_all_write"},
+									TenantPatterns: []string{"internaltest"},
+								},
+							},
+						},
+					},
+					"p11": {
+						RolePermissions: opensearch.RolePermissions{
+							ClusterPermissions: []string{
+								"cluster:admin/opendistro/reports/instance/list",
+								"cluster:admin/opendistro/reports/instance/get",
+								"cluster:admin/opendistro/reports/menu/download",
+							},
+							IndexPermissions: []opensearch.IndexPermission{
+								{
+									AllowedActions: []string{
+										"read",
+										"indices:monitor/settings/get",
+									},
+									IndexPatterns: []string{
+										"/^(application|container|lagoon|router)-logs-drupal-example-_-.+/",
+									},
+								},
+							},
+							TenantPermissions: []opensearch.TenantPermission{
+								{
+									AllowedActions: []string{"kibana_all_read"},
+									TenantPatterns: []string{"global_tenant"},
+								},
+							},
+						},
+					},
+				},
+			},
+			expect: calculateRoleDiffOutput{
+				toCreate: map[string]opensearch.Role{
+					"internaltest": {
+						RolePermissions: opensearch.RolePermissions{
+							ClusterPermissions: []string{
+								"cluster:admin/opendistro/reports/instance/list",
+								"cluster:admin/opendistro/reports/instance/get",
+								"cluster:admin/opendistro/reports/menu/download",
+							},
+							IndexPermissions: []opensearch.IndexPermission{
+								{
+									AllowedActions: []string{
+										"read",
+										"indices:monitor/settings/get",
+									},
+									IndexPatterns: []string{
+										"/^(application|container|lagoon|router)-logs-drupal9-solr-_-.+/",
+										"/^(application|container|lagoon|router)-logs-react-example-_-.+/",
+										"/^(application|container|lagoon|router)-logs-drupal10-prerelease-_-.+/",
+										"/^(application|container|lagoon|router)-logs-drupal-example-_-.+/",
+									},
+								},
+							},
+							TenantPermissions: []opensearch.TenantPermission{
+								{
+									AllowedActions: []string{"kibana_all_write"},
+									TenantPatterns: []string{"internaltest"},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		"update report role": {
+			input: calculateRoleDiffInput{
+				existing: map[string]opensearch.Role{
+					"internaltest": {
+						RolePermissions: opensearch.RolePermissions{
+							ClusterPermissions: []string{
+								"cluster:admin/opendistro/reports/menu/download",
+							},
 							IndexPermissions: []opensearch.IndexPermission{
 								{
 									AllowedActions: []string{
@@ -492,7 +673,11 @@ func TestCalculateRoleDiff(t *testing.T) {
 				required: map[string]opensearch.Role{
 					"internaltest": {
 						RolePermissions: opensearch.RolePermissions{
-							ClusterPermissions: []string{"cluster:admin/opendistro/reports/menu/download"},
+							ClusterPermissions: []string{
+								"cluster:admin/opendistro/reports/instance/list",
+								"cluster:admin/opendistro/reports/instance/get",
+								"cluster:admin/opendistro/reports/menu/download",
+							},
 							IndexPermissions: []opensearch.IndexPermission{
 								{
 									AllowedActions: []string{
@@ -518,6 +703,8 @@ func TestCalculateRoleDiff(t *testing.T) {
 					"p11": {
 						RolePermissions: opensearch.RolePermissions{
 							ClusterPermissions: []string{
+								"cluster:admin/opendistro/reports/instance/list",
+								"cluster:admin/opendistro/reports/instance/get",
 								"cluster:admin/opendistro/reports/menu/download",
 							},
 							IndexPermissions: []opensearch.IndexPermission{
@@ -545,7 +732,11 @@ func TestCalculateRoleDiff(t *testing.T) {
 				toCreate: map[string]opensearch.Role{
 					"internaltest": {
 						RolePermissions: opensearch.RolePermissions{
-							ClusterPermissions: []string{"cluster:admin/opendistro/reports/menu/download"},
+							ClusterPermissions: []string{
+								"cluster:admin/opendistro/reports/instance/list",
+								"cluster:admin/opendistro/reports/instance/get",
+								"cluster:admin/opendistro/reports/menu/download",
+							},
 							IndexPermissions: []opensearch.IndexPermission{
 								{
 									AllowedActions: []string{
@@ -568,6 +759,32 @@ func TestCalculateRoleDiff(t *testing.T) {
 							},
 						},
 					},
+					"p11": {
+						RolePermissions: opensearch.RolePermissions{
+							ClusterPermissions: []string{
+								"cluster:admin/opendistro/reports/instance/list",
+								"cluster:admin/opendistro/reports/instance/get",
+								"cluster:admin/opendistro/reports/menu/download",
+							},
+							IndexPermissions: []opensearch.IndexPermission{
+								{
+									AllowedActions: []string{
+										"read",
+										"indices:monitor/settings/get",
+									},
+									IndexPatterns: []string{
+										"/^(application|container|lagoon|router)-logs-drupal-example-_-.+/",
+									},
+								},
+							},
+							TenantPermissions: []opensearch.TenantPermission{
+								{
+									AllowedActions: []string{"kibana_all_read"},
+									TenantPatterns: []string{"global_tenant"},
+								},
+							},
+						},
+					},
 				},
 			},
 		},
@@ -576,16 +793,8 @@ func TestCalculateRoleDiff(t *testing.T) {
 		t.Run(name, func(tt *testing.T) {
 			toCreate, toDelete :=
 				sync.CalculateRoleDiff(tc.input.existing, tc.input.required)
-			if !((len(toCreate) == 0 && len(tc.expect.toCreate) == 0) ||
-				reflect.DeepEqual(toCreate, tc.expect.toCreate)) {
-				tt.Fatalf("toCreate got:\n%v\nexpected:\n%v\n",
-					spew.Sdump(toCreate), spew.Sdump(tc.expect.toCreate))
-			}
-			if !((len(toDelete) == 0 && len(tc.expect.toDelete) == 0) ||
-				reflect.DeepEqual(toDelete, tc.expect.toDelete)) {
-				tt.Fatalf("toDelete got:\n%v\nexpected:\n%v\n",
-					toDelete, tc.expect.toDelete)
-			}
+			assert.Equal(tt, tc.expect.toCreate, toCreate, "toCreate")
+			assert.Equal(tt, tc.expect.toDelete, toDelete, "toDelete")
 		})
 	}
 }

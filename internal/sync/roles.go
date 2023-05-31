@@ -91,7 +91,12 @@ func generateProjectGroupRole(group keycloak.Group) (
 	}
 	return name, &opensearch.Role{
 		RolePermissions: opensearch.RolePermissions{
+			// Allow users to read and download Reports
+			// https://github.com/opensearch-project/security/blob/2.7.0.0/config/
+			// 	roles.yml#L126-L132
 			ClusterPermissions: []string{
+				"cluster:admin/opendistro/reports/instance/list",
+				"cluster:admin/opendistro/reports/instance/get",
 				"cluster:admin/opendistro/reports/menu/download",
 			},
 			IndexPermissions: []opensearch.IndexPermission{
@@ -171,7 +176,12 @@ func generateRegularGroupRole(log *zap.Logger, projectNames map[int]string,
 	}
 	return group.Name, &opensearch.Role{
 		RolePermissions: opensearch.RolePermissions{
+			// Allow users to read and download Reports
+			// https://github.com/opensearch-project/security/blob/2.7.0.0/config/
+			// 		roles.yml#L126-L132
 			ClusterPermissions: []string{
+				"cluster:admin/opendistro/reports/instance/list",
+				"cluster:admin/opendistro/reports/instance/get",
 				"cluster:admin/opendistro/reports/menu/download",
 			},
 			IndexPermissions: indexPermissions,
