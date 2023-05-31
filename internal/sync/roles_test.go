@@ -1,7 +1,6 @@
 package sync_test
 
 import (
-	"reflect"
 	"testing"
 
 	"github.com/alecthomas/assert"
@@ -53,9 +52,7 @@ func TestGenerateIndexPermissionPatterns(t *testing.T) {
 		t.Run(name, func(tt *testing.T) {
 			indexPatterns := sync.GenerateIndexPermissionPatterns(log, tc.input.pids,
 				tc.input.projectNames)
-			if !reflect.DeepEqual(indexPatterns, tc.expect) {
-				tt.Fatalf("got %v, expected %v", indexPatterns, tc.expect)
-			}
+			assert.Equal(tt, tc.expect, indexPatterns, "indexPatterns")
 		})
 	}
 }
@@ -72,7 +69,7 @@ func TestGenerateRoles(t *testing.T) {
 		input  generateRolesInput
 		expect generateRolesOutput
 	}{
-		"generate roles for project group": {
+		"generate roles for regular group": {
 			input: generateRolesInput{
 				groups: []keycloak.Group{
 					{
@@ -127,7 +124,7 @@ func TestGenerateRoles(t *testing.T) {
 				},
 			},
 		},
-		"generate roles for regular group": {
+		"generate roles for project group": {
 			input: generateRolesInput{
 				groups: []keycloak.Group{
 					{
@@ -151,11 +148,7 @@ func TestGenerateRoles(t *testing.T) {
 				roles: map[string]opensearch.Role{
 					"p27": {
 						RolePermissions: opensearch.RolePermissions{
-							ClusterPermissions: []string{
-								"cluster:admin/opendistro/reports/instance/list",
-								"cluster:admin/opendistro/reports/instance/get",
-								"cluster:admin/opendistro/reports/menu/download",
-							},
+							ClusterPermissions: []string{},
 							IndexPermissions: []opensearch.IndexPermission{
 								{
 									AllowedActions: []string{
@@ -183,9 +176,7 @@ func TestGenerateRoles(t *testing.T) {
 	for name, tc := range testCases {
 		t.Run(name, func(tt *testing.T) {
 			roles := sync.GenerateRoles(log, tc.input.groups, tc.input.projectNames)
-			if !reflect.DeepEqual(roles, tc.expect.roles) {
-				tt.Fatalf("got:\n%v\nexpected:\n%v\n", roles, tc.expect.roles)
-			}
+			assert.Equal(tt, tc.expect.roles, roles, "roles")
 		})
 	}
 }
@@ -702,11 +693,7 @@ func TestCalculateRoleDiff(t *testing.T) {
 					},
 					"p11": {
 						RolePermissions: opensearch.RolePermissions{
-							ClusterPermissions: []string{
-								"cluster:admin/opendistro/reports/instance/list",
-								"cluster:admin/opendistro/reports/instance/get",
-								"cluster:admin/opendistro/reports/menu/download",
-							},
+							ClusterPermissions: []string{},
 							IndexPermissions: []opensearch.IndexPermission{
 								{
 									AllowedActions: []string{
@@ -761,11 +748,7 @@ func TestCalculateRoleDiff(t *testing.T) {
 					},
 					"p11": {
 						RolePermissions: opensearch.RolePermissions{
-							ClusterPermissions: []string{
-								"cluster:admin/opendistro/reports/instance/list",
-								"cluster:admin/opendistro/reports/instance/get",
-								"cluster:admin/opendistro/reports/menu/download",
-							},
+							ClusterPermissions: []string{},
 							IndexPermissions: []opensearch.IndexPermission{
 								{
 									AllowedActions: []string{
