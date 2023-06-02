@@ -431,6 +431,12 @@ func TestGenerateIndexPatterns(t *testing.T) {
 					`lagoon-logs-*`:      true,
 					`router-logs-*`:      true,
 				},
+				"admin_tenant": {
+					`application-logs-*`: true,
+					`container-logs-*`:   true,
+					`lagoon-logs-*`:      true,
+					`router-logs-*`:      true,
+				},
 			},
 		},
 		"high-level test legacy group index patterns": {
@@ -475,6 +481,12 @@ func TestGenerateIndexPatterns(t *testing.T) {
 					`router-logs-*`:                    true,
 				},
 				"global_tenant": {
+					`application-logs-*`: true,
+					`container-logs-*`:   true,
+					`lagoon-logs-*`:      true,
+					`router-logs-*`:      true,
+				},
+				"admin_tenant": {
 					`application-logs-*`: true,
 					`container-logs-*`:   true,
 					`lagoon-logs-*`:      true,
