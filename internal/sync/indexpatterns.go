@@ -35,7 +35,7 @@ var (
 	indexNameInvalid = regexp.MustCompile(`[^a-z0-9]+`)
 	// specialTenants are not associated with a Lagoon group and receive just the
 	// globalIndexPatterns
-	specialTenants = []string{"global_tenant"}
+	specialTenants = []string{"global_tenant", "admin_tenant"}
 )
 
 // hashPrefix returns an Opensearch-index-name-sanitized copy of given a string
@@ -87,7 +87,9 @@ func calculateIndexPatternDiff(log *zap.Logger,
 	// calculate index patterns to delete
 	toDelete := map[string]map[string][]string{}
 	for index, patterns := range existing {
-		// ignore any custom index patterns created in the admin_tenant
+		// do not delete any custom index patterns created in the admin_tenant
+		// these are sometimes useful for administrators, and aren't visible to
+		// customers (they don't have access to the admin_tenant)
 		if index == hashPrefix("admin_tenant") {
 			continue
 		}
