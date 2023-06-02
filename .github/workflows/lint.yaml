@@ -15,6 +15,9 @@ jobs:
       uses: golangci/golangci-lint-action@v3
       with:
         args: --timeout=180s
+        # temporarily pin the linter version until
+        # https://github.com/golangci/golangci-lint/issues/3862 is fixed
+        version: v1.52.2
   commitlint:
     runs-on: ubuntu-latest
     steps:
