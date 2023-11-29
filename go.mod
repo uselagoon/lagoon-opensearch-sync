@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/alecthomas/assert v1.0.0
 	github.com/alecthomas/kong v0.8.1
-	github.com/coreos/go-oidc/v3 v3.7.0
+	github.com/coreos/go-oidc/v3 v3.8.0
 	github.com/davecgh/go-spew v1.1.1
 	github.com/go-sql-driver/mysql v1.7.1
 	github.com/jmoiron/sqlx v1.3.5
