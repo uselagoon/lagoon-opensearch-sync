@@ -1,8 +1,11 @@
 # Lagoon Opensearch Sync
 
+[![Go Reference](https://pkg.go.dev/badge/github.com/uselagoon/lagoon-opensearch-sync.svg)](https://pkg.go.dev/github.com/uselagoon/lagoon-opensearch-sync)
 [![Release](https://github.com/uselagoon/lagoon-opensearch-sync/actions/workflows/release.yaml/badge.svg)](https://github.com/uselagoon/lagoon-opensearch-sync/actions/workflows/release.yaml)
-[![Coverage](https://coveralls.io/repos/github/uselagoon/lagoon-opensearch-sync/badge.svg?branch=main)](https://coveralls.io/github/uselagoon/lagoon-opensearch-sync?branch=main)
+[![coverage](https://raw.githubusercontent.com/uselagoon/lagoon-opensearch-sync/badges/.badges/main/coverage.svg)](https://github.com/uselagoon/lagoon-opensearch-sync/actions/workflows/coverage.yaml)
 [![Go Report Card](https://goreportcard.com/badge/github.com/uselagoon/lagoon-opensearch-sync)](https://goreportcard.com/report/github.com/uselagoon/lagoon-opensearch-sync)
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/uselagoon/lagoon-opensearch-sync/badge)](https://securityscorecards.dev/viewer/?uri=github.com/uselagoon/lagoon-opensearch-sync)
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/8659/badge)](https://www.bestpractices.dev/projects/8659)
 
 This tool/service synchronises Opensearch with Lagoon.
 This means that it sets up the required roles and permissions based on Lagoon groups and projects.
