@@ -12,9 +12,9 @@ This means that it sets up the required roles and permissions based on Lagoon gr
 
 ## Prerequisites
 
-Create a Keycloak client with group read permissions, and client credential authorization enabled.
+Create a Keycloak client with the `query-groups` realm management role, and client credential authorization enabled.
 
-TODO: More detailed configuration instructions for Keycloak.
+See, for example, the [lagoon realm export](https://github.com/uselagoon/lagoon/tree/main/services/keycloak).
 
 ## How to use
 
