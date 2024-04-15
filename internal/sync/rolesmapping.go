@@ -116,9 +116,14 @@ func filterRolesMapping(rolesmapping map[string]opensearch.RoleMapping,
 
 // syncRolesmapping reconciles Opensearch rolesmapping with Lagoon keycloak
 // groups.
-func syncRolesMapping(ctx context.Context, log *zap.Logger, groups []keycloak.Group,
-	projectNames map[int]string, roles map[string]opensearch.Role,
-	o OpensearchService, dryRun bool) {
+func syncRolesMapping(
+	ctx context.Context,
+	log *zap.Logger,
+	groups []keycloak.Group,
+	roles map[string]opensearch.Role,
+	o OpensearchService,
+	dryRun bool,
+) {
 	// get rolesmapping from Opensearch
 	existing, err := o.RolesMapping(ctx)
 	if err != nil {
