@@ -54,11 +54,13 @@ func calculateTenantDiff(existing, required map[string]opensearch.Tenant) (
 //
 // Only regular Lagoon groups are associated with a tenant, so project groups
 // are ignored.
-func generateTenants(log *zap.Logger,
-	groups []keycloak.Group) map[string]opensearch.Tenant {
+func generateTenants(
+	log *zap.Logger,
+	groups []keycloak.Group,
+) map[string]opensearch.Tenant {
 	tenants := map[string]opensearch.Tenant{}
 	for _, group := range groups {
-		if !isLagoonGroup(group) || isProjectGroup(log, group) {
+		if isProjectGroup(log, group) {
 			continue
 		}
 		tenants[group.Name] = opensearch.Tenant{

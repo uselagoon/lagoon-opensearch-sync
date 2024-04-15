@@ -52,15 +52,6 @@ func isProjectGroup(log *zap.Logger, group keycloak.Group) bool {
 	return true
 }
 
-// isLagoonGroup inspects the given group to determine if it is a Lagoon group.
-//
-// All Lagoon groups (project groups and regular groups) have a lagoon-projects
-// attribute, which is checked by this function.
-func isLagoonGroup(group keycloak.Group) bool {
-	_, ok := group.Attributes["lagoon-projects"]
-	return ok
-}
-
 // isInt returns true if the given string looks like a base-10 integer.
 func isInt(s string) bool {
 	_, err := strconv.Atoi(s)
@@ -193,10 +184,13 @@ func generateRegularGroupRole(log *zap.Logger, projectNames map[int]string,
 // generateRoles returns a slice of roles generated from the given slice of
 // keycloak Groups.
 //
-// Any groups which are not recognized as either project groups or regular
-// Lagoon groups are ignored.
-func generateRoles(log *zap.Logger, groups []keycloak.Group,
-	projectNames map[int]string) map[string]opensearch.Role {
+// Any groups which are not recognized as project groups are assumed to be
+// Lagoon groups.
+func generateRoles(
+	log *zap.Logger,
+	groups []keycloak.Group,
+	projectNames map[int]string,
+) map[string]opensearch.Role {
 	roles := map[string]opensearch.Role{}
 	var name string
 	var role *opensearch.Role
@@ -209,7 +203,7 @@ func generateRoles(log *zap.Logger, groups []keycloak.Group,
 					zap.String("group name", group.Name), zap.Error(err))
 				continue
 			}
-		} else if isLagoonGroup(group) {
+		} else {
 			name, role, err = generateRegularGroupRole(log, projectNames, group)
 			if err != nil {
 				log.Warn("couldn't generate role for regular group",

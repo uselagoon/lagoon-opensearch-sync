@@ -162,7 +162,7 @@ func generateIndexPatterns(log *zap.Logger, groups []keycloak.Group,
 	var patterns []string
 	var err error
 	for _, group := range groups {
-		if !isLagoonGroup(group) || isProjectGroup(log, group) {
+		if isProjectGroup(log, group) {
 			continue
 		}
 		patterns, err = generateIndexPatternsForGroup(log, group, projectNames,
