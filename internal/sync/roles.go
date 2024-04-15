@@ -1,11 +1,8 @@
 package sync
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/uselagoon/lagoon-opensearch-sync/internal/keycloak"
@@ -16,13 +13,22 @@ import (
 // generateIndexPermissionPatterns returns a slice of index pattern strings
 // in regular expressions format generated from the given slice of project IDs.
 // https://www.elastic.co/guide/en/elasticsearch/reference/7.10/defining-roles.html#roles-indices-priv
-func generateIndexPermissionPatterns(log *zap.Logger, pids []int,
-	projectNames map[int]string) []string {
+func generateIndexPermissionPatterns(
+	log *zap.Logger,
+	pids []int,
+	projectNames map[int]string,
+) []string {
 	var patterns []string
 	for _, pid := range pids {
 		name, ok := projectNames[pid]
 		if !ok {
-			log.Debug("invalid project ID in lagoon-projects group attribute",
+			// If you see this warning it means that a project ID appears in the
+			// kc_group_projects table that does not appear in the projects table in
+			// the Lagoon API DB.
+			// This is likely a bug in Lagoon causing loss of referential integrity,
+			// as there is no foreign key constraint to enforce valid project IDs in
+			// the group mapping.
+			log.Warn("invalid project ID when generating index permission patterns",
 				zap.Int("projectID", pid))
 			continue
 		}
@@ -52,30 +58,35 @@ func isProjectGroup(log *zap.Logger, group keycloak.Group) bool {
 	return true
 }
 
-// isInt returns true if the given string looks like a base-10 integer.
-func isInt(s string) bool {
-	_, err := strconv.Atoi(s)
-	return err == nil
-}
-
 // projectGroupRoleName generates the name of a project group role from the
-// lagoon-projects attribute on a keycloak group.
-func projectGroupRoleName(group keycloak.Group) (string, error) {
-	pAttr, ok := group.Attributes["lagoon-projects"]
+// ID of the group's project.
+func projectGroupRoleName(
+	group keycloak.Group,
+	groupProjectsMap map[string][]int,
+) (string, error) {
+	projectIDs, ok := groupProjectsMap[group.ID]
 	if !ok {
-		return "", fmt.Errorf("missing lagoon-projects attribute")
+		return "", fmt.Errorf("missing project group ID %s in groupProjectsMap",
+			group.ID)
 	}
-	if len(pAttr) != 1 || !isInt(pAttr[0]) {
-		return "", fmt.Errorf("invalid lagoon-projects attribute")
+	if len(projectIDs) != 1 {
+		return "", fmt.Errorf("too many projects in group ID %s: %d", group.ID,
+			len(projectIDs))
 	}
-	return fmt.Sprintf("p%s", pAttr[0]), nil
+	if projectIDs[0] < 0 {
+		return "", fmt.Errorf("invalid project ID in group ID %s: %d", group.ID,
+			projectIDs[0])
+	}
+	return fmt.Sprintf("p%d", projectIDs[0]), nil
 }
 
 // generateProjectGroupRole constructs an opensearch.Role from the given
 // keycloak group corresponding to a Lagoon project group.
-func generateProjectGroupRole(group keycloak.Group) (
-	string, *opensearch.Role, error) {
-	name, err := projectGroupRoleName(group)
+func generateProjectGroupRole(
+	group keycloak.Group,
+	groupProjectsMap map[string][]int,
+) (string, *opensearch.Role, error) {
+	name, err := projectGroupRoleName(group, groupProjectsMap)
 	if err != nil {
 		return "", nil,
 			fmt.Errorf("couldn't generate project group role name: %v", err)
@@ -108,40 +119,20 @@ func generateProjectGroupRole(group keycloak.Group) (
 	}, nil
 }
 
-// projectIDsForGroup parses the lagoon-projects attribute on the given group
-// and returns a slice of project IDs.
-func projectIDsForGroup(group keycloak.Group) ([]int, error) {
-	// get lagoon-projects attribute
-	lpa, ok := group.Attributes["lagoon-projects"]
-	if !ok {
-		return nil, fmt.Errorf("missing lagoon-projects attribute")
-	}
-	if len(lpa) != 1 {
-		return nil, fmt.Errorf("invalid lagoon-projects attribute")
-	}
-	// get the project IDs
-	var buf bytes.Buffer
-	if _, err := fmt.Fprintf(&buf, "[%s]", lpa[0]); err != nil {
-		return nil,
-			fmt.Errorf("couldn't format lagoon-projects attribute: %v", err)
-	}
-	var pids []int
-	if err := json.Unmarshal(buf.Bytes(), &pids); err != nil {
-		return nil,
-			fmt.Errorf("couldn't unmarshal lagoon-projects attribute: %v", err)
-	}
-	return pids, nil
-}
-
 // generateRegularGroupRole constructs an opensearch.Role from the given
 // keycloak group corresponding to a Lagoon group.
-func generateRegularGroupRole(log *zap.Logger, projectNames map[int]string,
-	group keycloak.Group) (string, *opensearch.Role, error) {
-	pids, err := projectIDsForGroup(group)
-	if err != nil {
-		return "", nil, fmt.Errorf("couldn't get project IDs for group: %v", err)
+func generateRegularGroupRole(
+	log *zap.Logger,
+	group keycloak.Group,
+	projectNames map[int]string,
+	groupProjectsMap map[string][]int,
+) (string, *opensearch.Role, error) {
+	pids, ok := groupProjectsMap[group.ID]
+	if !ok {
+		return "", nil, fmt.Errorf("missing project group ID %s in groupProjectsMap",
+			group.ID)
 	}
-	// calculate index patterns from lagoon-projects attribute
+	// calculate index patterns from project IDs
 	indexPatterns := generateIndexPermissionPatterns(log, pids, projectNames)
 	// the Opensearch API is picky about the structure of create group requests,
 	// so ensure that the index_permissions field is only set if there are any
@@ -190,6 +181,7 @@ func generateRoles(
 	log *zap.Logger,
 	groups []keycloak.Group,
 	projectNames map[int]string,
+	groupProjectsMap map[string][]int,
 ) map[string]opensearch.Role {
 	roles := map[string]opensearch.Role{}
 	var name string
@@ -197,14 +189,15 @@ func generateRoles(
 	var err error
 	for _, group := range groups {
 		if isProjectGroup(log, group) {
-			name, role, err = generateProjectGroupRole(group)
+			name, role, err = generateProjectGroupRole(group, groupProjectsMap)
 			if err != nil {
 				log.Warn("couldn't generate role for project group",
 					zap.String("group name", group.Name), zap.Error(err))
 				continue
 			}
 		} else {
-			name, role, err = generateRegularGroupRole(log, projectNames, group)
+			name, role, err =
+				generateRegularGroupRole(log, group, projectNames, groupProjectsMap)
 			if err != nil {
 				log.Warn("couldn't generate role for regular group",
 					zap.String("group name", group.Name), zap.Error(err))
@@ -261,13 +254,20 @@ func filterRoles(
 }
 
 // syncRoles reconciles Opensearch roles with Lagoon keycloak and projects.
-func syncRoles(ctx context.Context, log *zap.Logger, groups []keycloak.Group,
-	projectNames map[int]string, roles map[string]opensearch.Role,
-	o OpensearchService, dryRun bool) {
+func syncRoles(
+	ctx context.Context,
+	log *zap.Logger,
+	groups []keycloak.Group,
+	projectNames map[int]string,
+	roles map[string]opensearch.Role,
+	groupProjectsMap map[string][]int,
+	o OpensearchService,
+	dryRun bool,
+) {
 	// ignore non-lagoon roles
 	existing := filterRoles(roles)
 	// generate the roles required by Lagoon
-	required := generateRoles(log, groups, projectNames)
+	required := generateRoles(log, groups, projectNames, groupProjectsMap)
 	// calculate roles to add/remove
 	toCreate, toDelete := calculateRoleDiff(existing, required)
 	var err error

@@ -59,13 +59,16 @@ func calculateRoleMappingDiff(
 //
 // Any groups which are not recognized as project groups are assumed to be
 // Lagoon groups.
-func generateRolesMapping(log *zap.Logger,
-	groups []keycloak.Group) map[string]opensearch.RoleMapping {
+func generateRolesMapping(
+	log *zap.Logger,
+	groups []keycloak.Group,
+	groupProjectsMap map[string][]int,
+) map[string]opensearch.RoleMapping {
 	rolesmapping := map[string]opensearch.RoleMapping{}
 	for _, group := range groups {
 		// figure out if this is a regular group or project group
 		if isProjectGroup(log, group) {
-			name, err := projectGroupRoleName(group)
+			name, err := projectGroupRoleName(group, groupProjectsMap)
 			if err != nil {
 				log.Warn("couldn't generate project group role name", zap.Error(err),
 					zap.String("group name", group.Name))
@@ -121,6 +124,7 @@ func syncRolesMapping(
 	log *zap.Logger,
 	groups []keycloak.Group,
 	roles map[string]opensearch.Role,
+	groupProjectsMap map[string][]int,
 	o OpensearchService,
 	dryRun bool,
 ) {
@@ -133,7 +137,7 @@ func syncRolesMapping(
 	// ignore non-lagoon rolesmapping
 	existing = filterRolesMapping(existing, roles)
 	// generate the rolesmapping required by Lagoon
-	required := generateRolesMapping(log, groups)
+	required := generateRolesMapping(log, groups, groupProjectsMap)
 	// calculate rolesmapping to add/remove
 	toCreate, toDelete := calculateRoleMappingDiff(existing, required)
 	for _, name := range toDelete {

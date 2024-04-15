@@ -59,8 +59,9 @@ func TestGenerateIndexPermissionPatterns(t *testing.T) {
 
 func TestGenerateRoles(t *testing.T) {
 	type generateRolesInput struct {
-		groups       []keycloak.Group
-		projectNames map[int]string
+		groups           []keycloak.Group
+		projectNames     map[int]string
+		groupProjectsMap map[string][]int
 	}
 	type generateRolesOutput struct {
 		roles map[string]opensearch.Role
@@ -76,10 +77,6 @@ func TestGenerateRoles(t *testing.T) {
 						ID: "f6697da3-016a-43cd-ba9f-3f5b91b45302",
 						GroupUpdateRepresentation: keycloak.GroupUpdateRepresentation{
 							Name: "drupal-example",
-							Attributes: map[string][]string{
-								"group-lagoon-project-ids": {`{"drupal-example":[31,36,34,25,35]}`},
-								"lagoon-projects":          {`31,36,34,25,35`},
-							},
 						},
 					},
 				},
@@ -88,6 +85,9 @@ func TestGenerateRoles(t *testing.T) {
 					34: "somelongerprojectname",
 					35: "drupal10-prerelease",
 					36: "delta-backend",
+				},
+				groupProjectsMap: map[string][]int{
+					"f6697da3-016a-43cd-ba9f-3f5b91b45302": {31, 36, 34, 25, 35},
 				},
 			},
 			expect: generateRolesOutput{
@@ -132,8 +132,7 @@ func TestGenerateRoles(t *testing.T) {
 						GroupUpdateRepresentation: keycloak.GroupUpdateRepresentation{
 							Name: "project-beta-ui",
 							Attributes: map[string][]string{
-								"lagoon-projects": {`27`},
-								"type":            {`project-default-group`},
+								"type": {`project-default-group`},
 							},
 						},
 					},
@@ -142,6 +141,9 @@ func TestGenerateRoles(t *testing.T) {
 					26: "abc",
 					27: "beta-ui",
 					48: "somelongprojectname",
+				},
+				groupProjectsMap: map[string][]int{
+					"3fc60c90-b72d-4704-8a57-80438adac98d": {27},
 				},
 			},
 			expect: generateRolesOutput{
@@ -175,7 +177,8 @@ func TestGenerateRoles(t *testing.T) {
 	log := zap.Must(zap.NewDevelopment(zap.AddStacktrace(zap.ErrorLevel)))
 	for name, tc := range testCases {
 		t.Run(name, func(tt *testing.T) {
-			roles := sync.GenerateRoles(log, tc.input.groups, tc.input.projectNames)
+			roles := sync.GenerateRoles(
+				log, tc.input.groups, tc.input.projectNames, tc.input.groupProjectsMap)
 			assert.Equal(tt, tc.expect.roles, roles, "roles")
 		})
 	}

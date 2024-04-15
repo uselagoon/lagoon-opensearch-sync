@@ -11,8 +11,9 @@ import (
 )
 
 type generateIndexPatternsForGroupInput struct {
-	group        keycloak.Group
-	projectNames map[int]string
+	group            keycloak.Group
+	projectNames     map[int]string
+	groupProjectsMap map[string][]int
 }
 
 type generateIndexPatternsForGroupOutput struct {
@@ -31,10 +32,6 @@ func TestGenerateIndexPatternsForGroup(t *testing.T) {
 					ID: "f6697da3-016a-43cd-ba9f-3f5b91b45302",
 					GroupUpdateRepresentation: keycloak.GroupUpdateRepresentation{
 						Name: "drupal-example",
-						Attributes: map[string][]string{
-							"group-lagoon-project-ids": {`{"drupal-example":[31,34,35]}`},
-							"lagoon-projects":          {`31,34,35`},
-						},
 					},
 				},
 				projectNames: map[int]string{
@@ -42,6 +39,9 @@ func TestGenerateIndexPatternsForGroup(t *testing.T) {
 					34: "somelongerprojectname",
 					35: "drupal10-prerelease",
 					36: "delta-backend",
+				},
+				groupProjectsMap: map[string][]int{
+					"f6697da3-016a-43cd-ba9f-3f5b91b45302": {31, 34, 35},
 				},
 			},
 			expect: generateIndexPatternsForGroupOutput{
@@ -71,10 +71,6 @@ func TestGenerateIndexPatternsForGroup(t *testing.T) {
 					ID: "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
 					GroupUpdateRepresentation: keycloak.GroupUpdateRepresentation{
 						Name: "drupal-example2",
-						Attributes: map[string][]string{
-							"group-lagoon-project-ids": {`{"drupal-example":[31,35,44]}`},
-							"lagoon-projects":          {`31,35,44`},
-						},
 					},
 				},
 				projectNames: map[int]string{
@@ -82,6 +78,9 @@ func TestGenerateIndexPatternsForGroup(t *testing.T) {
 					34: "somelongerprojectname",
 					35: "drupal10-prerelease",
 					36: "delta-backend",
+				},
+				groupProjectsMap: map[string][]int{
+					"aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee": {31, 35, 44},
 				},
 			},
 			expect: generateIndexPatternsForGroupOutput{
@@ -106,7 +105,7 @@ func TestGenerateIndexPatternsForGroup(t *testing.T) {
 	for name, tc := range testCases {
 		t.Run(name, func(tt *testing.T) {
 			indexPatterns, err := sync.GenerateIndexPatternsForGroup(log, tc.input.group,
-				tc.input.projectNames, false)
+				tc.input.projectNames, tc.input.groupProjectsMap, false)
 			if (err == nil && tc.expect.err != nil) ||
 				(err != nil && tc.expect.err == nil) {
 				tt.Fatalf("got err:\n%v\nexpected err:\n%v\n", err, tc.expect.err)
@@ -376,9 +375,10 @@ func TestCalculateIndexPatternDiff(t *testing.T) {
 
 func TestGenerateIndexPatterns(t *testing.T) {
 	type generateIndexPatternsInput struct {
-		groups          []keycloak.Group
-		projectNames    map[int]string
-		legacyDelimiter bool
+		groups           []keycloak.Group
+		projectNames     map[int]string
+		groupProjectsMap map[string][]int
+		legacyDelimiter  bool
 	}
 	var testCases = map[string]struct {
 		input  generateIndexPatternsInput
@@ -391,10 +391,6 @@ func TestGenerateIndexPatterns(t *testing.T) {
 						ID: "08fef83d-cde7-43a5-8bd2-a18cf440214a",
 						GroupUpdateRepresentation: keycloak.GroupUpdateRepresentation{
 							Name: "foocorp",
-							Attributes: map[string][]string{
-								"group-lagoon-project-ids": {`{"foocorp":[3133,34435]}`},
-								"lagoon-projects":          {`3133,34435`},
-							},
 						},
 					},
 					{
@@ -402,15 +398,17 @@ func TestGenerateIndexPatterns(t *testing.T) {
 						GroupUpdateRepresentation: keycloak.GroupUpdateRepresentation{
 							Name: "project-drupal12-base",
 							Attributes: map[string][]string{
-								"group-lagoon-project-ids": {`{"project-drupal12-base":[34435]}`},
-								"lagoon-projects":          {`34435`},
-								"type":                     {`project-default-group`},
+								"type": {`project-default-group`},
 							},
 						},
 					},
 				},
 				projectNames: map[int]string{
 					34435: "drupal12-base",
+				},
+				groupProjectsMap: map[string][]int{
+					"08fef83d-cde7-43a5-8bd2-a18cf440214a": {3133, 34435},
+					"9f92af94-a7ee-4759-83bb-2b983bd30142": {34435},
 				},
 				legacyDelimiter: false,
 			},
@@ -446,10 +444,6 @@ func TestGenerateIndexPatterns(t *testing.T) {
 						ID: "08fef83d-cde7-43a5-8bd2-a18cf440214a",
 						GroupUpdateRepresentation: keycloak.GroupUpdateRepresentation{
 							Name: "foocorp",
-							Attributes: map[string][]string{
-								"group-lagoon-project-ids": {`{"foocorp":[3133,34435]}`},
-								"lagoon-projects":          {`3133,34435`},
-							},
 						},
 					},
 					{
@@ -457,15 +451,17 @@ func TestGenerateIndexPatterns(t *testing.T) {
 						GroupUpdateRepresentation: keycloak.GroupUpdateRepresentation{
 							Name: "project-drupal12-base",
 							Attributes: map[string][]string{
-								"group-lagoon-project-ids": {`{"project-drupal12-base":[34435]}`},
-								"lagoon-projects":          {`34435`},
-								"type":                     {`project-default-group`},
+								"type": {`project-default-group`},
 							},
 						},
 					},
 				},
 				projectNames: map[int]string{
 					34435: "drupal12-base",
+				},
+				groupProjectsMap: map[string][]int{
+					"08fef83d-cde7-43a5-8bd2-a18cf440214a": {3133, 34435},
+					"9f92af94-a7ee-4759-83bb-2b983bd30142": {34435},
 				},
 				legacyDelimiter: true,
 			},
@@ -499,7 +495,7 @@ func TestGenerateIndexPatterns(t *testing.T) {
 	for name, tc := range testCases {
 		t.Run(name, func(tt *testing.T) {
 			indexPatterns := sync.GenerateIndexPatterns(
-				log, tc.input.groups, tc.input.projectNames,
+				log, tc.input.groups, tc.input.projectNames, tc.input.groupProjectsMap,
 				tc.input.legacyDelimiter)
 			if !reflect.DeepEqual(indexPatterns, tc.expect) {
 				tt.Fatalf("got:\n%v\nexpected:\n%v\n", indexPatterns, tc.expect)
