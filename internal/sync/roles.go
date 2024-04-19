@@ -215,7 +215,9 @@ func generateRoles(
 				continue
 			}
 		}
-		roles[name] = *role
+		if role != nil {
+			roles[name] = *role
+		}
 	}
 	return roles
 }
