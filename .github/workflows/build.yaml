@@ -10,10 +10,6 @@ jobs:
       contents: read
       packages: write
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        binary:
-        - lagoon-opensearch-sync
     steps:
     - uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.2
       with:
@@ -38,9 +34,9 @@ jobs:
       id: docker_metadata
       uses: docker/metadata-action@8e5442c4ef9f78752691e2d8f8d19755c6f78e81 # v5.5.1
       with:
-        images: ghcr.io/${{ github.repository }}/${{ matrix.binary }}
+        images: ghcr.io/${{ github.repository }}
     - run: echo "GITHUB_REPOSITORY_NAME=$(basename ${{ github.repository }})" >> "$GITHUB_ENV"
-    - name: Build and push ${{ matrix.binary }} container image
+    - name: Build and push container image
       if: github.actor != 'dependabot[bot]'
       uses: docker/build-push-action@2cdde995de11925a030ce8070c3d77a52ffcf1c0 # v5.3.0
       with:
@@ -48,5 +44,5 @@ jobs:
         tags: ${{ steps.docker_metadata.outputs.tags }}
         labels: ${{ steps.docker_metadata.outputs.labels }}
         file: Dockerfile
-        build-args: BINARY=${{ matrix.binary }}
-        context: dist/${{ matrix.binary }}_linux_amd64_v1
+        build-args: BINARY=lagoon-opensearch-sync
+        context: dist/lagoon-opensearch-sync_linux_amd64_v1
