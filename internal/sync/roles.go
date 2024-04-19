@@ -58,6 +58,17 @@ func isProjectGroup(log *zap.Logger, group keycloak.Group) bool {
 	return true
 }
 
+// isLagoonGroup inspects the given group to determine if it is a Lagoon group.
+//
+// It checks if the group ID appears in the groupProjectsMap.
+func isLagoonGroup(
+	group keycloak.Group,
+	groupProjectsMap map[string][]int,
+) bool {
+	_, ok := groupProjectsMap[group.ID]
+	return ok
+}
+
 // projectGroupRoleName generates the name of a project group role from the
 // ID of the group's project.
 func projectGroupRoleName(
@@ -175,8 +186,8 @@ func generateRegularGroupRole(
 // generateRoles returns a slice of roles generated from the given slice of
 // keycloak Groups.
 //
-// Any groups which are not recognized as project groups are assumed to be
-// Lagoon groups.
+// Any groups which are not recognized as either project groups or regular
+// Lagoon groups are ignored.
 func generateRoles(
 	log *zap.Logger,
 	groups []keycloak.Group,
@@ -195,7 +206,7 @@ func generateRoles(
 					zap.String("group name", group.Name), zap.Error(err))
 				continue
 			}
-		} else {
+		} else if isLagoonGroup(group, groupProjectsMap) {
 			name, role, err =
 				generateRegularGroupRole(log, group, projectNames, groupProjectsMap)
 			if err != nil {

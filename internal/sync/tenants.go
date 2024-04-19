@@ -57,10 +57,11 @@ func calculateTenantDiff(existing, required map[string]opensearch.Tenant) (
 func generateTenants(
 	log *zap.Logger,
 	groups []keycloak.Group,
+	groupProjectsMap map[string][]int,
 ) map[string]opensearch.Tenant {
 	tenants := map[string]opensearch.Tenant{}
 	for _, group := range groups {
-		if isProjectGroup(log, group) {
+		if !isLagoonGroup(group, groupProjectsMap) || isProjectGroup(log, group) {
 			continue
 		}
 		tenants[group.Name] = opensearch.Tenant{
@@ -90,8 +91,14 @@ func filterTenants(
 }
 
 // syncTenants reconciles Opensearch tenants with Lagoon keycloak groups.
-func syncTenants(ctx context.Context, log *zap.Logger, groups []keycloak.Group,
-	o OpensearchService, dryRun bool) {
+func syncTenants(
+	ctx context.Context,
+	log *zap.Logger,
+	groups []keycloak.Group,
+	groupProjectsMap map[string][]int,
+	o OpensearchService,
+	dryRun bool,
+) {
 	// get tenants from Opensearch
 	existing, err := o.Tenants(ctx)
 	if err != nil {
@@ -101,7 +108,7 @@ func syncTenants(ctx context.Context, log *zap.Logger, groups []keycloak.Group,
 	// ignore non-lagoon tenants
 	existing = filterTenants(existing)
 	// generate the tenants required by Lagoon
-	required := generateTenants(log, groups)
+	required := generateTenants(log, groups, groupProjectsMap)
 	// calculate tenants to add/remove
 	toCreate, toDelete := calculateTenantDiff(existing, required)
 	for _, name := range toDelete {

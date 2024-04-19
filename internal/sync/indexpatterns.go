@@ -179,7 +179,7 @@ func generateIndexPatterns(
 	var patterns []string
 	var err error
 	for _, group := range groups {
-		if isProjectGroup(log, group) {
+		if !isLagoonGroup(group, groupProjectsMap) || isProjectGroup(log, group) {
 			continue
 		}
 		patterns, err = generateIndexPatternsForGroup(log, group, projectNames,

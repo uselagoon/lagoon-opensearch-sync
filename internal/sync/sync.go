@@ -108,7 +108,7 @@ func Sync(ctx context.Context, log *zap.Logger, l LagoonDBService,
 	for _, object := range objects {
 		switch object {
 		case "tenants":
-			syncTenants(ctx, log, groupsSansGlobal, o, dryRun)
+			syncTenants(ctx, log, groupsSansGlobal, groupProjectsMap, o, dryRun)
 		case "roles":
 			syncRoles(ctx, log, groups, projectNames, roles, groupProjectsMap, o, dryRun)
 		case "rolesmapping":
