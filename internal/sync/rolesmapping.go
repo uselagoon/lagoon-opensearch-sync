@@ -59,13 +59,16 @@ func calculateRoleMappingDiff(
 //
 // Any groups which are not recognized as either project groups or regular
 // Lagoon groups are ignored.
-func generateRolesMapping(log *zap.Logger,
-	groups []keycloak.Group) map[string]opensearch.RoleMapping {
+func generateRolesMapping(
+	log *zap.Logger,
+	groups []keycloak.Group,
+	groupProjectsMap map[string][]int,
+) map[string]opensearch.RoleMapping {
 	rolesmapping := map[string]opensearch.RoleMapping{}
 	for _, group := range groups {
 		// figure out if this is a regular group or project group
 		if isProjectGroup(log, group) {
-			name, err := projectGroupRoleName(group)
+			name, err := projectGroupRoleName(group, groupProjectsMap)
 			if err != nil {
 				log.Warn("couldn't generate project group role name", zap.Error(err),
 					zap.String("group name", group.Name))
@@ -79,7 +82,7 @@ func generateRolesMapping(log *zap.Logger,
 					Users:           []string{},
 				},
 			}
-		} else if isLagoonGroup(group) {
+		} else if isLagoonGroup(group, groupProjectsMap) {
 			rolesmapping[group.Name] = opensearch.RoleMapping{
 				RoleMappingPermissions: opensearch.RoleMappingPermissions{
 					BackendRoles:    []string{group.Name},
@@ -116,9 +119,15 @@ func filterRolesMapping(rolesmapping map[string]opensearch.RoleMapping,
 
 // syncRolesmapping reconciles Opensearch rolesmapping with Lagoon keycloak
 // groups.
-func syncRolesMapping(ctx context.Context, log *zap.Logger, groups []keycloak.Group,
-	projectNames map[int]string, roles map[string]opensearch.Role,
-	o OpensearchService, dryRun bool) {
+func syncRolesMapping(
+	ctx context.Context,
+	log *zap.Logger,
+	groups []keycloak.Group,
+	roles map[string]opensearch.Role,
+	groupProjectsMap map[string][]int,
+	o OpensearchService,
+	dryRun bool,
+) {
 	// get rolesmapping from Opensearch
 	existing, err := o.RolesMapping(ctx)
 	if err != nil {
@@ -128,7 +137,7 @@ func syncRolesMapping(ctx context.Context, log *zap.Logger, groups []keycloak.Gr
 	// ignore non-lagoon rolesmapping
 	existing = filterRolesMapping(existing, roles)
 	// generate the rolesmapping required by Lagoon
-	required := generateRolesMapping(log, groups)
+	required := generateRolesMapping(log, groups, groupProjectsMap)
 	// calculate rolesmapping to add/remove
 	toCreate, toDelete := calculateRoleMappingDiff(existing, required)
 	for _, name := range toDelete {

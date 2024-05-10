@@ -86,13 +86,17 @@ func (cmd *SyncCmd) Run(log *zap.Logger) error {
 		return nil
 	}
 	// continue running in a loop
-	tick := time.NewTicker(cmd.Period)
-	for range tick.C {
-		err = sync.Sync(ctx, log, l, k, o, d, cmd.DryRun, cmd.Objects,
-			cmd.LegacyIndexPatternDelimiter)
-		if err != nil {
-			return err
+	ticker := time.NewTicker(cmd.Period)
+	for {
+		select {
+		case <-ctx.Done():
+			return nil
+		case <-ticker.C:
+			err = sync.Sync(ctx, log, l, k, o, d, cmd.DryRun, cmd.Objects,
+				cmd.LegacyIndexPatternDelimiter)
+			if err != nil {
+				return err
+			}
 		}
 	}
-	return nil
 }

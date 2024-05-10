@@ -21,6 +21,7 @@ type KeycloakService interface {
 // LagoonDBService defines the Lagoon database service interface.
 type LagoonDBService interface {
 	Projects(context.Context) ([]lagoondb.Project, error)
+	GroupProjectsMap(context.Context) (map[string][]int, error)
 }
 
 // OpensearchService defines the Opensearch service interface.
@@ -59,6 +60,11 @@ func Sync(ctx context.Context, log *zap.Logger, l LagoonDBService,
 	projects, err := l.Projects(ctx)
 	if err != nil {
 		return fmt.Errorf("couldn't get projects: %v", err)
+	}
+	// get group project membership map from Lagoon
+	groupProjectsMap, err := l.GroupProjectsMap(ctx)
+	if err != nil {
+		return fmt.Errorf("couldn't get group projects map: %v", err)
 	}
 	// https://github.com/uselagoon/lagoon/blob/
 	// 	7dd4eb3b695bd507f25de5d7ea49d6601a229b87/services/api/src/resources/
@@ -102,14 +108,14 @@ func Sync(ctx context.Context, log *zap.Logger, l LagoonDBService,
 	for _, object := range objects {
 		switch object {
 		case "tenants":
-			syncTenants(ctx, log, groupsSansGlobal, o, dryRun)
+			syncTenants(ctx, log, groupsSansGlobal, groupProjectsMap, o, dryRun)
 		case "roles":
-			syncRoles(ctx, log, groups, projectNames, roles, o, dryRun)
+			syncRoles(ctx, log, groups, projectNames, roles, groupProjectsMap, o, dryRun)
 		case "rolesmapping":
-			syncRolesMapping(ctx, log, groups, projectNames, roles, o, dryRun)
+			syncRolesMapping(ctx, log, groups, roles, groupProjectsMap, o, dryRun)
 		case "indexpatterns":
-			syncIndexPatterns(ctx, log, groupsSansGlobal, projectNames, o, d, dryRun,
-				legacyIndexPatternDelimiter)
+			syncIndexPatterns(ctx, log, groupsSansGlobal, projectNames, groupProjectsMap,
+				o, d, dryRun, legacyIndexPatternDelimiter)
 		case "indextemplates":
 			syncIndexTemplates(ctx, log, o, dryRun)
 		default:

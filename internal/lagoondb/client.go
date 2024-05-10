@@ -1,3 +1,4 @@
+// Package lagoondb implements a client for the Lagoon API database.
 package lagoondb
 
 import (
@@ -20,6 +21,13 @@ type Project struct {
 	Name string `db:"name"`
 }
 
+// groupProjectMapping maps Lagoon group ID to project ID.
+// This type is only used for database unmarshalling.
+type groupProjectMapping struct {
+	GroupID   string `db:"group_id"`
+	ProjectID int    `db:"project_id"`
+}
+
 // ErrNoResult is returned by client methods if there is no result.
 var ErrNoResult = errors.New("no rows in result set")
 
@@ -36,8 +44,7 @@ func NewClient(ctx context.Context, dsn string) (*Client, error) {
 	return &Client{db: db}, nil
 }
 
-// Projects returns the Environment associated with the given
-// Namespace name (on Openshift this is the project name).
+// Projects returns a slice of all Projects in the Lagoon API DB.
 func (c *Client) Projects(ctx context.Context) ([]Project, error) {
 	// run query
 	var projects []Project
@@ -51,4 +58,29 @@ func (c *Client) Projects(ctx context.Context) ([]Project, error) {
 		return nil, err
 	}
 	return projects, nil
+}
+
+// GroupProjectsMap returns a map of Group (UU)IDs to Project IDs.
+// This denotes Project Group membership in Lagoon.
+func (c *Client) GroupProjectsMap(
+	ctx context.Context,
+) (map[string][]int, error) {
+	var gpms []groupProjectMapping
+	err := c.db.SelectContext(ctx, &gpms, `
+	SELECT group_id, project_id
+	FROM kc_group_projects`)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, ErrNoResult
+		}
+		return nil, err
+	}
+	groupProjectsMap := map[string][]int{}
+	// no need to check for duplicates here since the table has:
+	// UNIQUE KEY `group_project` (`group_id`,`project_id`)
+	for _, gpm := range gpms {
+		groupProjectsMap[gpm.GroupID] =
+			append(groupProjectsMap[gpm.GroupID], gpm.ProjectID)
+	}
+	return groupProjectsMap, nil
 }
