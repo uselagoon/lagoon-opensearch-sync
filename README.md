@@ -46,3 +46,27 @@ The deployment requires:
 
 This tool can be used to debug Opensearch/Lagoon integration.
 For debugging commands see `/lagoon-opensearch-sync --help`.
+
+## Known problems
+
+### API errors with Opensearch < v2.2.0
+
+If you see errors like this:
+
+```
+2024-05-10T01:41:37.766Z	WARN	sync/tenants.go:121	couldn't delete tenant	{"error": "bad delete tenant response: 500\n{\"status\":\"INTERNAL_SERVER_ERROR\",\"message\":\"Error [opensearch-cluster-data-0][10.204.8.41:9300][indices:data/write/bulk[s]]\"}"}
+```
+
+```
+2024-05-10T01:49:41.950Z	ERROR	sync/indextemplates.go:81	couldn't get index templates from Opensearch	{"error": "couldn't get index templates from Opensearch API: bad index template response: 500\n{\"error\":{\"root_cause\":[{\"type\":\"exception\",\"reason\":\"java.io.OptionalDataException\"}],\"type\":\"exception\",\"reason\":\"java.io.OptionalDataException\",\"caused_by\":{\"type\":\"i_o_exception\",\"reason\":null}},\"status\":500}"}
+```
+
+It is likely caused by [a problem](https://github.com/opensearch-project/security/issues/1961) with the Opensearch Security plugin < v2.2.0.
+
+You can work around it by clearing the cache:
+
+```bash
+curl -ksSL -u "$USER_AUTH" -XDELETE 'https://localhost:9200/_plugins/_security/api/cache'
+```
+
+Or by upgrading to a supported version of Opensearch.
