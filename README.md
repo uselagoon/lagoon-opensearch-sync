@@ -40,7 +40,15 @@ The deployment requires:
 | `KEYCLOAK_CLIENT_SECRET`         | Client secret of `lagoon-opensearch-sync` Keycloak client. |                                                                             |
 | `OPENSEARCH_ADMIN_PASSWORD`      | Password for the Opensearch `admin` user.                  |                                                                             |
 
-3. Command `/lagoon-opensearch-sync`.
+3. If you are utilising a read-only connection to the api-db, either via a read-replica, or dedicated account:
+
+| Name                             | Description                                                | Example                                                                     |
+| ---                              | ---                                                        | ---                                                                         |
+| `API_DB_RO_ADDRESS`                 | Internal service name of an API DB read-only replica.                       | `lagoon-core-api-db`                                                        |
+| `API_DB_RO_USERNAME`                | Read-only user for the API DB.                                    |  |
+| `API_DB_RO_PASSWORD`                | Password for the read-only user for the API DB.                                    |    |
+
+4. Command `/lagoon-opensearch-sync`.
 
 ## Advanced usage
 

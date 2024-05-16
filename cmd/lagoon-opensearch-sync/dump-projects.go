@@ -13,10 +13,10 @@ import (
 
 // DumpProjectsCmd represents the `dump-projects` command.
 type DumpProjectsCmd struct {
-	APIDBAddress  string `kong:"required,env='API_DB_ADDRESS',help='Lagoon API DB Address (host[:port])'"`
+	APIDBAddress  string `kong:"required,env='API_DB_RO_ADDRESS,API_DB_ADDRESS',help='Lagoon API DB Address (host[:port])'"`
 	APIDBDatabase string `kong:"default='infrastructure',env='API_DB_DATABASE',help='Lagoon API DB Database Name'"`
-	APIDBPassword string `kong:"required,env='API_DB_PASSWORD',help='Lagoon API DB Password'"`
-	APIDBUsername string `kong:"default='api',env='API_DB_USERNAME',help='Lagoon API DB Username'"`
+	APIDBPassword string `kong:"required,env='API_DB_RO_PASSWORD,API_DB_PASSWORD',help='Lagoon API DB Password'"`
+	APIDBUsername string `kong:"default='api',env='API_DB_RO_USERNAME,API_DB_USERNAME',help='Lagoon API DB Username'"`
 }
 
 // Run the dump-projects command.

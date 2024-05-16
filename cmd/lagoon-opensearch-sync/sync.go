@@ -24,10 +24,10 @@ type SyncCmd struct {
 	Objects                     []string      `kong:"enum='tenants,roles,rolesmapping,indexpatterns,indextemplates',default='tenants,roles,rolesmapping,indexpatterns,indextemplates',help='Opensearch objects which will be synchronized'"`
 	LegacyIndexPatternDelimiter bool          `kong:"default='false',help='Use the legacy -* index pattern delimiter instead of -_-*'"`
 	// lagoon DB client fields
-	APIDBAddress  string `kong:"required,env='API_DB_ADDRESS',help='Lagoon API DB Address (host[:port])'"`
+	APIDBAddress  string `kong:"required,env='API_DB_RO_ADDRESS,API_DB_ADDRESS',help='Lagoon API DB Address (host[:port])'"`
 	APIDBDatabase string `kong:"default='infrastructure',env='API_DB_DATABASE',help='Lagoon API DB Database Name'"`
-	APIDBPassword string `kong:"required,env='API_DB_PASSWORD',help='Lagoon API DB Password'"`
-	APIDBUsername string `kong:"default='api',env='API_DB_USERNAME',help='Lagoon API DB Username'"`
+	APIDBPassword string `kong:"required,env='API_DB_RO_PASSWORD,API_DB_PASSWORD',help='Lagoon API DB Password'"`
+	APIDBUsername string `kong:"default='api',env='API_DB_RO_USERNAME,API_DB_USERNAME',help='Lagoon API DB Username'"`
 	// keycloak client fields
 	KeycloakClientID     string `kong:"default='lagoon-opensearch-sync',env='KEYCLOAK_CLIENT_ID',help='Keycloak OAuth2 Client ID'"`
 	KeycloakClientSecret string `kong:"required,env='KEYCLOAK_CLIENT_SECRET',help='Keycloak OAuth2 Client Secret'"`
