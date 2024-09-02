@@ -71,11 +71,11 @@ jobs:
       env:
         ARTIFACTS: ${{steps.goreleaser.outputs.artifacts}}
     # attest archives
-    - uses: actions/attest-build-provenance@210c1913531870065f03ce1f9440dd87bc0938cd # v1.4.0
+    - uses: actions/attest-build-provenance@6149ea5740be74af77f260b9db67e633f6b0a9a1 # v1.4.2
       with:
         subject-path: "dist/*.tar.gz"
     # attest images
-    - uses: actions/attest-build-provenance@210c1913531870065f03ce1f9440dd87bc0938cd # v1.4.0
+    - uses: actions/attest-build-provenance@6149ea5740be74af77f260b9db67e633f6b0a9a1 # v1.4.2
       with:
         subject-digest: ${{steps.image_metadata.outputs.digest}}
         subject-name: ${{steps.image_metadata.outputs.name}}
