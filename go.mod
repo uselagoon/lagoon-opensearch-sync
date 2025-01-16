@@ -4,13 +4,13 @@ go 1.22.1
 
 require (
 	github.com/alecthomas/assert v1.0.0
-	github.com/alecthomas/kong v1.5.0
-	github.com/coreos/go-oidc/v3 v3.11.0
+	github.com/alecthomas/kong v1.6.1
+	github.com/coreos/go-oidc/v3 v3.12.0
 	github.com/davecgh/go-spew v1.1.1
 	github.com/go-sql-driver/mysql v1.8.1
 	github.com/jmoiron/sqlx v1.4.0
 	go.uber.org/zap v1.27.0
-	golang.org/x/oauth2 v0.24.0
+	golang.org/x/oauth2 v0.25.0
 )
 
 require (
