@@ -21,6 +21,6 @@ require (
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/sergi/go-diff v1.2.0 // indirect
 	go.uber.org/multierr v1.10.0 // indirect
-	golang.org/x/crypto v0.25.0 // indirect
-	golang.org/x/sys v0.22.0 // indirect
+	golang.org/x/crypto v0.31.0 // indirect
+	golang.org/x/sys v0.28.0 // indirect
 )
