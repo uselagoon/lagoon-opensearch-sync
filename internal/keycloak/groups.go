@@ -3,6 +3,7 @@ package keycloak
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -53,5 +54,13 @@ func (c *Client) Groups(ctx context.Context) ([]Group, error) {
 		return nil, fmt.Errorf("couldn't get groups from Keycloak API: %v", err)
 	}
 	var groups []Group
+	if err = json.Unmarshal(data, &groups); err != nil {
+		return nil, fmt.Errorf("couldn't unmarshal groups from Keycloak API: %v", err)
+	}
+	if len(groups) == 0 {
+		// https://github.com/uselagoon/lagoon-opensearch-sync/issues/150
+		return nil,
+			errors.New("empty groups response from Keycloak. Permissions issue?")
+	}
 	return groups, json.Unmarshal(data, &groups)
 }
