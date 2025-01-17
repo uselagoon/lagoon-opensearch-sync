@@ -70,7 +70,7 @@ func TestGenerateRoles(t *testing.T) {
 		input  generateRolesInput
 		expect generateRolesOutput
 	}{
-		"generate roles for regular group": {
+		"generate roles for regular group and projects": {
 			input: generateRolesInput{
 				groups: []keycloak.Group{
 					{
@@ -121,10 +121,98 @@ func TestGenerateRoles(t *testing.T) {
 							},
 						},
 					},
+					"p31": {
+						RolePermissions: opensearch.RolePermissions{
+							ClusterPermissions: []string{},
+							IndexPermissions: []opensearch.IndexPermission{
+								{
+									AllowedActions: []string{
+										"read",
+										"indices:monitor/settings/get",
+									},
+									IndexPatterns: []string{
+										"/^(application|container|lagoon|router)-logs-drupal9-base-_-.+/",
+									},
+								},
+							},
+							TenantPermissions: []opensearch.TenantPermission{
+								{
+									AllowedActions: []string{"kibana_all_read"},
+									TenantPatterns: []string{"global_tenant"},
+								},
+							},
+						},
+					},
+					"p34": {
+						RolePermissions: opensearch.RolePermissions{
+							ClusterPermissions: []string{},
+							IndexPermissions: []opensearch.IndexPermission{
+								{
+									AllowedActions: []string{
+										"read",
+										"indices:monitor/settings/get",
+									},
+									IndexPatterns: []string{
+										"/^(application|container|lagoon|router)-logs-somelongerprojectname-_-.+/",
+									},
+								},
+							},
+							TenantPermissions: []opensearch.TenantPermission{
+								{
+									AllowedActions: []string{"kibana_all_read"},
+									TenantPatterns: []string{"global_tenant"},
+								},
+							},
+						},
+					},
+					"p35": {
+						RolePermissions: opensearch.RolePermissions{
+							ClusterPermissions: []string{},
+							IndexPermissions: []opensearch.IndexPermission{
+								{
+									AllowedActions: []string{
+										"read",
+										"indices:monitor/settings/get",
+									},
+									IndexPatterns: []string{
+										"/^(application|container|lagoon|router)-logs-drupal10-prerelease-_-.+/",
+									},
+								},
+							},
+							TenantPermissions: []opensearch.TenantPermission{
+								{
+									AllowedActions: []string{"kibana_all_read"},
+									TenantPatterns: []string{"global_tenant"},
+								},
+							},
+						},
+					},
+					"p36": {
+						RolePermissions: opensearch.RolePermissions{
+							ClusterPermissions: []string{},
+							IndexPermissions: []opensearch.IndexPermission{
+								{
+									AllowedActions: []string{
+										"read",
+										"indices:monitor/settings/get",
+									},
+									IndexPatterns: []string{
+										"/^(application|container|lagoon|router)-logs-delta-backend-_-.+/",
+									},
+								},
+							},
+							TenantPermissions: []opensearch.TenantPermission{
+								{
+									AllowedActions: []string{"kibana_all_read"},
+									TenantPatterns: []string{"global_tenant"},
+								},
+							},
+						},
+					},
 				},
 			},
 		},
-		"generate roles for project group": {
+		"generate roles for projects ignoring project group": {
 			input: generateRolesInput{
 				groups: []keycloak.Group{
 					{
@@ -148,6 +236,28 @@ func TestGenerateRoles(t *testing.T) {
 			},
 			expect: generateRolesOutput{
 				roles: map[string]opensearch.Role{
+					"p26": {
+						RolePermissions: opensearch.RolePermissions{
+							ClusterPermissions: []string{},
+							IndexPermissions: []opensearch.IndexPermission{
+								{
+									AllowedActions: []string{
+										"read",
+										"indices:monitor/settings/get",
+									},
+									IndexPatterns: []string{
+										"/^(application|container|lagoon|router)-logs-abc-_-.+/",
+									},
+								},
+							},
+							TenantPermissions: []opensearch.TenantPermission{
+								{
+									AllowedActions: []string{"kibana_all_read"},
+									TenantPatterns: []string{"global_tenant"},
+								},
+							},
+						},
+					},
 					"p27": {
 						RolePermissions: opensearch.RolePermissions{
 							ClusterPermissions: []string{},
@@ -159,6 +269,121 @@ func TestGenerateRoles(t *testing.T) {
 									},
 									IndexPatterns: []string{
 										"/^(application|container|lagoon|router)-logs-beta-ui-_-.+/",
+									},
+								},
+							},
+							TenantPermissions: []opensearch.TenantPermission{
+								{
+									AllowedActions: []string{"kibana_all_read"},
+									TenantPatterns: []string{"global_tenant"},
+								},
+							},
+						},
+					},
+					"p48": {
+						RolePermissions: opensearch.RolePermissions{
+							ClusterPermissions: []string{},
+							IndexPermissions: []opensearch.IndexPermission{
+								{
+									AllowedActions: []string{
+										"read",
+										"indices:monitor/settings/get",
+									},
+									IndexPatterns: []string{
+										"/^(application|container|lagoon|router)-logs-somelongprojectname-_-.+/",
+									},
+								},
+							},
+							TenantPermissions: []opensearch.TenantPermission{
+								{
+									AllowedActions: []string{"kibana_all_read"},
+									TenantPatterns: []string{"global_tenant"},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		"generate roles for multi-project project group": {
+			input: generateRolesInput{
+				groups: []keycloak.Group{
+					{
+						ID: "3fc60c90-b72d-4704-8a57-80438adac98d",
+						GroupUpdateRepresentation: keycloak.GroupUpdateRepresentation{
+							Name: "project-beta-ui",
+							Attributes: map[string][]string{
+								"type": {`project-default-group`},
+							},
+						},
+					},
+				},
+				projectNames: map[int]string{
+					26: "abc",
+					27: "beta-ui",
+					48: "somelongprojectname",
+				},
+				groupProjectsMap: map[string][]int{
+					"3fc60c90-b72d-4704-8a57-80438adac98d": {48, 27, 26},
+				},
+			},
+			expect: generateRolesOutput{
+				roles: map[string]opensearch.Role{
+					"p26": {
+						RolePermissions: opensearch.RolePermissions{
+							ClusterPermissions: []string{},
+							IndexPermissions: []opensearch.IndexPermission{
+								{
+									AllowedActions: []string{
+										"read",
+										"indices:monitor/settings/get",
+									},
+									IndexPatterns: []string{
+										"/^(application|container|lagoon|router)-logs-abc-_-.+/",
+									},
+								},
+							},
+							TenantPermissions: []opensearch.TenantPermission{
+								{
+									AllowedActions: []string{"kibana_all_read"},
+									TenantPatterns: []string{"global_tenant"},
+								},
+							},
+						},
+					},
+					"p27": {
+						RolePermissions: opensearch.RolePermissions{
+							ClusterPermissions: []string{},
+							IndexPermissions: []opensearch.IndexPermission{
+								{
+									AllowedActions: []string{
+										"read",
+										"indices:monitor/settings/get",
+									},
+									IndexPatterns: []string{
+										"/^(application|container|lagoon|router)-logs-beta-ui-_-.+/",
+									},
+								},
+							},
+							TenantPermissions: []opensearch.TenantPermission{
+								{
+									AllowedActions: []string{"kibana_all_read"},
+									TenantPatterns: []string{"global_tenant"},
+								},
+							},
+						},
+					},
+					"p48": {
+						RolePermissions: opensearch.RolePermissions{
+							ClusterPermissions: []string{},
+							IndexPermissions: []opensearch.IndexPermission{
+								{
+									AllowedActions: []string{
+										"read",
+										"indices:monitor/settings/get",
+									},
+									IndexPatterns: []string{
+										"/^(application|container|lagoon|router)-logs-somelongprojectname-_-.+/",
 									},
 								},
 							},
