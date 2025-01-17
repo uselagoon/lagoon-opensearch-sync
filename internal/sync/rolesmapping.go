@@ -2,6 +2,7 @@ package sync
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/uselagoon/lagoon-opensearch-sync/internal/keycloak"
 	"github.com/uselagoon/lagoon-opensearch-sync/internal/opensearch"
@@ -55,34 +56,21 @@ func calculateRoleMappingDiff(
 }
 
 // generateRolesMapping returns a slice of rolesmapping generated from the
-// given slice of keycloak Groups.
+// given slice of keycloak Groups, and the projectNames map.
 //
 // Any groups which are not recognized as either project groups or regular
 // Lagoon groups are ignored.
+//
+// All projectNames map entries generate a single rolesmapping.
 func generateRolesMapping(
 	log *zap.Logger,
 	groups []keycloak.Group,
+	projectNames map[int]string,
 	groupProjectsMap map[string][]int,
 ) map[string]opensearch.RoleMapping {
 	rolesmapping := map[string]opensearch.RoleMapping{}
 	for _, group := range groups {
-		// figure out if this is a regular group or project group
-		if isProjectGroup(log, group) {
-			name, err := projectGroupRoleName(group, groupProjectsMap)
-			if err != nil {
-				log.Warn("couldn't generate project group role name", zap.Error(err),
-					zap.String("group name", group.Name))
-				continue
-			}
-			rolesmapping[name] = opensearch.RoleMapping{
-				RoleMappingPermissions: opensearch.RoleMappingPermissions{
-					BackendRoles:    []string{name},
-					AndBackendRoles: []string{},
-					Hosts:           []string{},
-					Users:           []string{},
-				},
-			}
-		} else if isLagoonGroup(group, groupProjectsMap) {
+		if isLagoonGroup(group, groupProjectsMap) && !isProjectGroup(log, group) {
 			rolesmapping[group.Name] = opensearch.RoleMapping{
 				RoleMappingPermissions: opensearch.RoleMappingPermissions{
 					BackendRoles:    []string{group.Name},
@@ -91,6 +79,17 @@ func generateRolesMapping(
 					Users:           []string{},
 				},
 			}
+		}
+	}
+	for pid := range projectNames {
+		roleName := fmt.Sprintf("p%d", pid)
+		rolesmapping[roleName] = opensearch.RoleMapping{
+			RoleMappingPermissions: opensearch.RoleMappingPermissions{
+				BackendRoles:    []string{roleName},
+				AndBackendRoles: []string{},
+				Hosts:           []string{},
+				Users:           []string{},
+			},
 		}
 	}
 	return rolesmapping
@@ -123,6 +122,7 @@ func syncRolesMapping(
 	ctx context.Context,
 	log *zap.Logger,
 	groups []keycloak.Group,
+	projectNames map[int]string,
 	roles map[string]opensearch.Role,
 	groupProjectsMap map[string][]int,
 	o OpensearchService,
@@ -137,7 +137,7 @@ func syncRolesMapping(
 	// ignore non-lagoon rolesmapping
 	existing = filterRolesMapping(existing, roles)
 	// generate the rolesmapping required by Lagoon
-	required := generateRolesMapping(log, groups, groupProjectsMap)
+	required := generateRolesMapping(log, groups, projectNames, groupProjectsMap)
 	// calculate rolesmapping to add/remove
 	toCreate, toDelete := calculateRoleMappingDiff(existing, required)
 	for _, name := range toDelete {

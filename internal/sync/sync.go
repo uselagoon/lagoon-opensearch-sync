@@ -112,7 +112,7 @@ func Sync(ctx context.Context, log *zap.Logger, l LagoonDBService,
 		case "roles":
 			syncRoles(ctx, log, groups, projectNames, roles, groupProjectsMap, o, dryRun)
 		case "rolesmapping":
-			syncRolesMapping(ctx, log, groups, roles, groupProjectsMap, o, dryRun)
+			syncRolesMapping(ctx, log, groups, projectNames, roles, groupProjectsMap, o, dryRun)
 		case "indexpatterns":
 			syncIndexPatterns(ctx, log, groupsSansGlobal, projectNames, groupProjectsMap,
 				o, d, dryRun, legacyIndexPatternDelimiter)
