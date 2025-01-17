@@ -3,7 +3,7 @@ package sync_test
 import (
 	"testing"
 
-	"github.com/alecthomas/assert"
+	"github.com/alecthomas/assert/v2"
 	"github.com/uselagoon/lagoon-opensearch-sync/internal/keycloak"
 	"github.com/uselagoon/lagoon-opensearch-sync/internal/opensearch"
 	"github.com/uselagoon/lagoon-opensearch-sync/internal/sync"
