@@ -1,18 +1,64 @@
 package keycloak_test
 
 import (
-	"encoding/json"
+	"bytes"
+	"context"
+	"io"
+	"net/http"
+	"net/http/httptest"
 	"os"
-	"reflect"
 	"testing"
 
+	"github.com/alecthomas/assert/v2"
 	"github.com/uselagoon/lagoon-opensearch-sync/internal/keycloak"
 )
 
-func TestGroupsUnmarshal(t *testing.T) {
+// newTestGroupsServer sets up a mock keycloak which responds with
+// appropriate group JSON data to exercise Groups.
+func newTestGroupsServer(tt *testing.T, testDataPath string) *httptest.Server {
+	// load the discovery JSON first, because the mux closure needs to
+	// reference its buffer
+	discoveryBuf, err := os.ReadFile("testdata/realm.oidc.discovery.json")
+	if err != nil {
+		tt.Fatal(err)
+		return nil
+	}
+	// configure router with the URLs that OIDC discovery and JWKS require
+	mux := http.NewServeMux()
+	mux.HandleFunc("/auth/realms/lagoon/.well-known/openid-configuration",
+		func(w http.ResponseWriter, r *http.Request) {
+			d := bytes.NewBuffer(discoveryBuf)
+			_, err = io.Copy(w, d)
+			if err != nil {
+				tt.Fatal(err)
+			}
+		})
+	// configure the "all groups" path
+	mux.HandleFunc("/auth/admin/realms/lagoon/groups",
+		func(w http.ResponseWriter, r *http.Request) {
+			f, err := os.Open(testDataPath)
+			if err != nil {
+				tt.Fatal(err)
+				return
+			}
+			_, err = io.Copy(w, f)
+			if err != nil {
+				tt.Fatal(err)
+			}
+		})
+	ts := httptest.NewServer(mux)
+	// now replace the example URL in the discovery JSON with the actual
+	// httptest server URL
+	discoveryBuf = bytes.ReplaceAll(discoveryBuf,
+		[]byte("https://keycloak.example.com"), []byte(ts.URL))
+	return ts
+}
+
+func TestGroups(t *testing.T) {
 	var testCases = map[string]struct {
-		input  string
-		expect []keycloak.Group
+		input       string
+		expect      []keycloak.Group
+		expectError bool
 	}{
 		"unmarshal groups": {
 			input: "testdata/groups.json",
@@ -110,20 +156,36 @@ func TestGroupsUnmarshal(t *testing.T) {
 				},
 			},
 		},
+		// https://github.com/uselagoon/lagoon-opensearch-sync/issues/150
+		"empty groups error response": {
+			input:       "testdata/groups.empty.json",
+			expectError: true,
+		},
 	}
 	for name, tc := range testCases {
 		t.Run(name, func(tt *testing.T) {
-			jb, err := os.ReadFile(tc.input)
+			ts := newTestGroupsServer(tt, tc.input)
+			defer ts.Close()
+			ctx := context.Background()
+			k, err := keycloak.NewClientCredentialsClient(
+				ctx,
+				ts.URL,
+				"test-client-id",
+				"test-client-secret",
+			)
 			if err != nil {
 				tt.Fatal(err)
 			}
-			var groups []keycloak.Group
-			if err = json.Unmarshal(jb, &groups); err != nil {
-				tt.Fatal(err)
+			// override internal client credentials HTTP client for testing
+			k.UseDefaultHTTPClient()
+			// execute test
+			groups, err := k.Groups(ctx)
+			if tc.expectError {
+				assert.Error(tt, err, name)
+			} else {
+				assert.NoError(tt, err, name)
 			}
-			if !reflect.DeepEqual(tc.expect, groups) {
-				tt.Fatalf("expected %v, got %v", tc.expect, groups)
-			}
+			assert.Equal(tt, tc.expect, groups, name)
 		})
 	}
 }
