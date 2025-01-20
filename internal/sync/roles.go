@@ -3,7 +3,6 @@ package sync
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/uselagoon/lagoon-opensearch-sync/internal/keycloak"
 	"github.com/uselagoon/lagoon-opensearch-sync/internal/opensearch"
@@ -69,40 +68,13 @@ func isLagoonGroup(
 	return ok
 }
 
-// projectGroupRoleName generates the name of a project group role from the
-// ID of the group's project.
-func projectGroupRoleName(
-	group keycloak.Group,
-	groupProjectsMap map[string][]int,
-) (string, error) {
-	projectIDs, ok := groupProjectsMap[group.ID]
-	if !ok {
-		return "", fmt.Errorf("missing project group ID %s in groupProjectsMap",
-			group.ID)
-	}
-	if len(projectIDs) != 1 {
-		return "", fmt.Errorf("too many projects in group ID %s: %d", group.ID,
-			len(projectIDs))
-	}
-	if projectIDs[0] < 0 {
-		return "", fmt.Errorf("invalid project ID in group ID %s: %d", group.ID,
-			projectIDs[0])
-	}
-	return fmt.Sprintf("p%d", projectIDs[0]), nil
-}
-
-// generateProjectGroupRole constructs an opensearch.Role from the given
-// keycloak group corresponding to a Lagoon project group.
-func generateProjectGroupRole(
-	group keycloak.Group,
-	groupProjectsMap map[string][]int,
-) (string, *opensearch.Role, error) {
-	name, err := projectGroupRoleName(group, groupProjectsMap)
-	if err != nil {
-		return "", nil,
-			fmt.Errorf("couldn't generate project group role name: %v", err)
-	}
-	return name, &opensearch.Role{
+// generateProjectRole constructs an opensearch.Role from the given
+// project ID and project name.
+func generateProjectRole(
+	id int,
+	name string,
+) (string, *opensearch.Role) {
+	return fmt.Sprintf("p%d", id), &opensearch.Role{
 		RolePermissions: opensearch.RolePermissions{
 			// use an empty slice instead of omitting this entirely because the
 			// Opensearch API errors if this field is omitted.
@@ -115,8 +87,7 @@ func generateProjectGroupRole(
 					},
 					IndexPatterns: []string{
 						fmt.Sprintf(
-							`/^(application|container|lagoon|router)-logs-%s-_-.+/`,
-							strings.TrimPrefix(group.Name, "project-")),
+							`/^(application|container|lagoon|router)-logs-%s-_-.+/`, name),
 					},
 				},
 			},
@@ -127,7 +98,7 @@ func generateProjectGroupRole(
 				},
 			},
 		},
-	}, nil
+	}
 }
 
 // generateRegularGroupRole constructs an opensearch.Role from the given
@@ -184,10 +155,12 @@ func generateRegularGroupRole(
 }
 
 // generateRoles returns a slice of roles generated from the given slice of
-// keycloak Groups.
+// keycloak Groups, and the projectNames map.
 //
 // Any groups which are not recognized as either project groups or regular
 // Lagoon groups are ignored.
+//
+// All projectNames map entries generate a single role.
 func generateRoles(
 	log *zap.Logger,
 	groups []keycloak.Group,
@@ -199,14 +172,7 @@ func generateRoles(
 	var role *opensearch.Role
 	var err error
 	for _, group := range groups {
-		if isProjectGroup(log, group) {
-			name, role, err = generateProjectGroupRole(group, groupProjectsMap)
-			if err != nil {
-				log.Warn("couldn't generate role for project group",
-					zap.String("group name", group.Name), zap.Error(err))
-				continue
-			}
-		} else if isLagoonGroup(group, groupProjectsMap) {
+		if isLagoonGroup(group, groupProjectsMap) && !isProjectGroup(log, group) {
 			name, role, err =
 				generateRegularGroupRole(log, group, projectNames, groupProjectsMap)
 			if err != nil {
@@ -218,6 +184,10 @@ func generateRoles(
 		if role != nil {
 			roles[name] = *role
 		}
+	}
+	for pid, pname := range projectNames {
+		name, role = generateProjectRole(pid, pname)
+		roles[name] = *role
 	}
 	return roles
 }
