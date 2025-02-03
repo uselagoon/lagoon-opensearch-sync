@@ -4,7 +4,7 @@ go 1.22.1
 
 require (
 	github.com/alecthomas/assert/v2 v2.11.0
-	github.com/alecthomas/kong v1.6.1
+	github.com/alecthomas/kong v1.7.0
 	github.com/coreos/go-oidc/v3 v3.12.0
 	github.com/davecgh/go-spew v1.1.1
 	github.com/go-sql-driver/mysql v1.8.1
