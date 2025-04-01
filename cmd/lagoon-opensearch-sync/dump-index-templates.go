@@ -26,7 +26,7 @@ func (cmd *DumpIndexTemplatesCmd) Run(log *zap.Logger) error {
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGTERM)
 	defer stop()
 	// init the opensearch client
-	o, err := opensearch.NewClient(ctx, log, cmd.OpensearchBaseURL,
+	o, err := opensearch.NewClient(log, cmd.OpensearchBaseURL,
 		cmd.OpensearchUsername, cmd.OpensearchPassword, cmd.OpensearchCACertificate)
 	if err != nil {
 		return fmt.Errorf("couldn't init opensearch client: %v", err)

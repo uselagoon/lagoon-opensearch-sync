@@ -65,13 +65,13 @@ func (cmd *SyncCmd) Run(log *zap.Logger) error {
 		return fmt.Errorf("couldn't init keycloak client: %v", err)
 	}
 	// init the opensearch client
-	o, err := opensearch.NewClient(ctx, log, cmd.OpensearchBaseURL,
+	o, err := opensearch.NewClient(log, cmd.OpensearchBaseURL,
 		cmd.OpensearchUsername, cmd.OpensearchPassword, cmd.OpensearchCACertificate)
 	if err != nil {
 		return fmt.Errorf("couldn't init opensearch client: %v", err)
 	}
 	// init the opensearch dashboards client
-	d, err := dashboards.NewClient(ctx, cmd.OpensearchDashboardsBaseURL,
+	d, err := dashboards.NewClient(cmd.OpensearchDashboardsBaseURL,
 		cmd.OpensearchUsername, cmd.OpensearchPassword)
 	if err != nil {
 		return fmt.Errorf("couldn't init opensearch client: %v", err)

@@ -2,7 +2,6 @@
 package opensearch
 
 import (
-	"context"
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
@@ -20,7 +19,7 @@ type Client struct {
 }
 
 // NewClient creates a new Opensearch client.
-func NewClient(ctx context.Context, log *zap.Logger, baseURL, username,
+func NewClient(log *zap.Logger, baseURL, username,
 	password, caCertificate string) (*Client, error) {
 	// parse URL
 	u, err := url.Parse(baseURL)
