@@ -42,7 +42,7 @@ func (c *Client) RawRolesMapping(ctx context.Context) ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("couldn't get rolesmapping: %v", err)
 	}
-	defer res.Body.Close()
+	defer res.Body.Close() // nolint: errcheck
 	if res.StatusCode > 299 {
 		body, _ := io.ReadAll(res.Body)
 		return nil, fmt.Errorf("bad rolesmapping response: %d\n%s",
@@ -87,7 +87,7 @@ func (c *Client) CreateRoleMapping(ctx context.Context, name string,
 	if err != nil {
 		return fmt.Errorf("couldn't create rolemapping: %v", err)
 	}
-	defer res.Body.Close()
+	defer res.Body.Close() // nolint: errcheck
 	if res.StatusCode > 299 {
 		body, _ := io.ReadAll(res.Body)
 		return fmt.Errorf("bad create rolemapping response: %d\n%s",
@@ -111,7 +111,7 @@ func (c *Client) DeleteRoleMapping(ctx context.Context, name string) error {
 	if err != nil {
 		return fmt.Errorf("couldn't delete rolemapping: %v", err)
 	}
-	defer res.Body.Close()
+	defer res.Body.Close() // nolint: errcheck
 	if res.StatusCode > 299 {
 		body, _ := io.ReadAll(res.Body)
 		return fmt.Errorf("bad delete rolemapping response: %d\n%s", res.StatusCode, body)
