@@ -2,7 +2,6 @@
 package dashboards
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -15,8 +14,7 @@ type Client struct {
 }
 
 // NewClient creates a new Opensearch Dashboards client.
-func NewClient(ctx context.Context,
-	baseURL, username, password string) (*Client, error) {
+func NewClient(baseURL, username, password string) (*Client, error) {
 	// parse URL
 	u, err := url.Parse(baseURL)
 	if err != nil {

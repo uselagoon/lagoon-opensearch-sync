@@ -58,7 +58,7 @@ func (c *Client) CreateIndexPattern(ctx context.Context,
 	if err != nil {
 		return fmt.Errorf("request error: %v", err)
 	}
-	defer res.Body.Close()
+	defer res.Body.Close() // nolint: errcheck
 	if res.StatusCode > 299 {
 		body, _ := io.ReadAll(res.Body)
 		return fmt.Errorf(
@@ -97,7 +97,7 @@ func (c *Client) DeleteIndexPattern(ctx context.Context,
 	if err != nil {
 		return fmt.Errorf("request error: %v", err)
 	}
-	defer res.Body.Close()
+	defer res.Body.Close() // nolint: errcheck
 	if res.StatusCode > 299 {
 		body, _ := io.ReadAll(res.Body)
 		return fmt.Errorf("bad response: %d\n%s", res.StatusCode, body)
