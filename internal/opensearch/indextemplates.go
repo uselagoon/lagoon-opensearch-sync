@@ -80,7 +80,7 @@ func (c *Client) RawIndexTemplates(ctx context.Context) ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("couldn't get index template: %v", err)
 	}
-	defer res.Body.Close() // nolint: errcheck
+	defer res.Body.Close()
 	if res.StatusCode > 299 {
 		body, _ := io.ReadAll(res.Body)
 		return nil, fmt.Errorf("bad index template response: %d\n%s",
@@ -128,7 +128,7 @@ func (c *Client) CreateIndexTemplate(ctx context.Context, name string,
 	if err != nil {
 		return fmt.Errorf("couldn't create index template: %v", err)
 	}
-	defer res.Body.Close() // nolint: errcheck
+	defer res.Body.Close()
 	if res.StatusCode > 299 {
 		body, _ := io.ReadAll(res.Body)
 		return fmt.Errorf("bad create index template response: %d\n%s",
@@ -152,7 +152,7 @@ func (c *Client) DeleteIndexTemplate(ctx context.Context, name string) error {
 	if err != nil {
 		return fmt.Errorf("couldn't delete index template: %v", err)
 	}
-	defer res.Body.Close() // nolint: errcheck
+	defer res.Body.Close()
 	if res.StatusCode > 299 {
 		body, _ := io.ReadAll(res.Body)
 		return fmt.Errorf("bad delete index template response: %d\n%s",

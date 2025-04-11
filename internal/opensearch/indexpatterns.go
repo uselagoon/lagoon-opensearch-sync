@@ -122,7 +122,7 @@ func (c *Client) RawIndexPatterns(ctx context.Context,
 	if err != nil {
 		return nil, fmt.Errorf("couldn't get indexPatterns: %v", err)
 	}
-	defer res.Body.Close() // nolint: errcheck
+	defer res.Body.Close()
 	if res.StatusCode > 299 {
 		body, _ := io.ReadAll(res.Body)
 		return nil, fmt.Errorf("bad indexPatterns response: %d\n%s",

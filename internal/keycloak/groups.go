@@ -39,7 +39,7 @@ func (c *Client) RawGroups(ctx context.Context) ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("couldn't get groups: %v", err)
 	}
-	defer res.Body.Close() // nolint: errcheck
+	defer res.Body.Close()
 	if res.StatusCode > 299 {
 		body, _ := io.ReadAll(res.Body)
 		return nil, fmt.Errorf("bad groups response: %d\n%s", res.StatusCode, body)
