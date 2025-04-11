@@ -55,7 +55,7 @@ func (c *Client) RawRoles(ctx context.Context) ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("couldn't get roles: %v", err)
 	}
-	defer res.Body.Close() // nolint: errcheck
+	defer res.Body.Close()
 	if res.StatusCode > 299 {
 		body, _ := io.ReadAll(res.Body)
 		return nil, fmt.Errorf("bad roles response: %d\n%s", res.StatusCode, body)
@@ -96,7 +96,7 @@ func (c *Client) CreateRole(ctx context.Context, name string,
 	if err != nil {
 		return fmt.Errorf("couldn't create role: %v", err)
 	}
-	defer res.Body.Close() // nolint: errcheck
+	defer res.Body.Close()
 	if res.StatusCode > 299 {
 		body, _ := io.ReadAll(res.Body)
 		return fmt.Errorf("bad create role response: %d\n%s", res.StatusCode, body)
@@ -118,7 +118,7 @@ func (c *Client) DeleteRole(ctx context.Context, name string) error {
 	if err != nil {
 		return fmt.Errorf("couldn't delete role: %v", err)
 	}
-	defer res.Body.Close() // nolint: errcheck
+	defer res.Body.Close()
 	if res.StatusCode > 299 {
 		body, _ := io.ReadAll(res.Body)
 		return fmt.Errorf("bad delete role response: %d\n%s", res.StatusCode, body)
