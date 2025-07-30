@@ -42,6 +42,10 @@ The deployment requires:
 
 3. Command `/lagoon-opensearch-sync`.
 
+## Index templates
+
+To manually create index templates, they can be prefixed with `custom-` so that they will be ignored during the index template sync and not deleted.
+
 ## Advanced usage
 
 This tool can be used to debug Opensearch/Lagoon integration.
