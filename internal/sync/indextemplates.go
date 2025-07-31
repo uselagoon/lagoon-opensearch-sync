@@ -2,10 +2,13 @@ package sync
 
 import (
 	"context"
+	"strings"
 
 	"github.com/uselagoon/lagoon-opensearch-sync/internal/opensearch"
 	"go.uber.org/zap"
 )
+
+const INDEX_TEMPLATE_IGNORE_PREFIX = "custom-"
 
 // calculateIndexTemplateDiff returns a map of opensearch index templates which
 // should be created, and a slice of index template names which should be
@@ -24,6 +27,9 @@ func calculateIndexTemplateDiff(existing,
 	// calculate index templates to delete
 	var toDelete []string
 	for name, eIndexTemplate := range existing {
+		if strings.HasPrefix(name, INDEX_TEMPLATE_IGNORE_PREFIX) {
+			continue
+		}
 		rIndexTemplate, ok := required[name]
 		if !ok || !indexTemplatesEqual(rIndexTemplate, eIndexTemplate) {
 			toDelete = append(toDelete, name)
