@@ -42,9 +42,16 @@ The deployment requires:
 
 3. Command `/lagoon-opensearch-sync`.
 
-## Index templates
+### Index patterns
 
-To manually create index templates, they can be prefixed with `custom-` so that they will be ignored during the index template sync and not deleted.
+This tool ensures that the index patterns associated with Lagoon projects remain mapped 1:1.
+This means that if an administrator creates a custom index pattern in a tenant, it will be removed.
+The only exception to this is the `admin_tenant`- if custom index patterns are created in the `admin_tenant` they will not be removed.
+
+### Index templates
+
+Similarly, this tool configures index templates suitable for Lagoon and will remove other index templates.
+To avoid removal of manually created custom index templates, they can be named with the prefix `custom-`.
 
 ## Advanced usage
 
