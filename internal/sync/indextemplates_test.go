@@ -82,7 +82,8 @@ func TestCalculateIndexTemplateDiff(t *testing.T) {
 	}
 	for name, tc := range testCases {
 		t.Run(name, func(tt *testing.T) {
-			toCreate, toDelete := calculateIndexTemplateDiff(tc.input.existing, tc.input.required)
+			toCreate, toDelete :=
+				calculateIndexTemplateDiff(tc.input.existing, tc.input.required)
 			if !reflect.DeepEqual(toCreate, tc.expect.toCreate) {
 				tt.Fatalf("got:\n%v\nexpected:\n%v\n", toCreate,
 					tc.expect.toCreate)

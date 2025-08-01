@@ -8,7 +8,9 @@ import (
 	"go.uber.org/zap"
 )
 
-const INDEX_TEMPLATE_IGNORE_PREFIX = "custom-"
+// default name prefix which will make opensearch-sync avoid removing the given
+// index template
+const defaultIndexTemplateIgnorePrefix = "custom-"
 
 // calculateIndexTemplateDiff returns a map of opensearch index templates which
 // should be created, and a slice of index template names which should be
@@ -27,7 +29,7 @@ func calculateIndexTemplateDiff(existing,
 	// calculate index templates to delete
 	var toDelete []string
 	for name, eIndexTemplate := range existing {
-		if strings.HasPrefix(name, INDEX_TEMPLATE_IGNORE_PREFIX) {
+		if strings.HasPrefix(name, defaultIndexTemplateIgnorePrefix) {
 			continue
 		}
 		rIndexTemplate, ok := required[name]
