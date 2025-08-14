@@ -89,6 +89,7 @@ func generateProjectRole(
 						fmt.Sprintf(
 							`/^(application|container|lagoon|router)-logs-%s-_-.+/`, name),
 					},
+					MaskedFields: []string{},
 				},
 			},
 			TenantPermissions: []opensearch.TenantPermission{
@@ -130,6 +131,7 @@ func generateRegularGroupRole(
 					"indices:monitor/settings/get",
 				},
 				IndexPatterns: indexPatterns,
+				MaskedFields:  []string{},
 			},
 		}
 	}
