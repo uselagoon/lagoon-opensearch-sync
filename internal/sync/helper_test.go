@@ -8,6 +8,8 @@ var (
 	GenerateIndexPatterns           = generateIndexPatterns
 	GenerateIndexPatternsForGroup   = generateIndexPatternsForGroup
 	GenerateIndexPermissionPatterns = generateIndexPermissionPatterns
+	GenerateProjectRole             = generateProjectRole
+	GenerateRegularGroupRole        = generateRegularGroupRole
 	GenerateRoles                   = generateRoles
 	HashPrefix                      = hashPrefix
 )

@@ -1009,3 +1009,122 @@ func TestCalculateRoleDiff(t *testing.T) {
 		})
 	}
 }
+
+func TestGenerateRegularGroupRole(t *testing.T) {
+	type generateRoleInput struct {
+		group            keycloak.Group
+		projectNames     map[int]string
+		groupProjectsMap map[string][]int
+	}
+	var testCases = map[string]struct {
+		input  generateRoleInput
+		expect opensearch.Role
+	}{
+		"masked_fields is not null": {
+			input: generateRoleInput{
+				group: keycloak.Group{
+					ID: "49f93046-e326-4d99-92e1-41eee24faf84",
+					GroupUpdateRepresentation: keycloak.GroupUpdateRepresentation{
+						Name: "drooplrox",
+					},
+				},
+				projectNames: map[int]string{
+					31: "drupal11-base",
+					34: "short",
+				},
+				groupProjectsMap: map[string][]int{
+					"49f93046-e326-4d99-92e1-41eee24faf84": {31, 34},
+				},
+			},
+			expect: opensearch.Role{
+				RolePermissions: opensearch.RolePermissions{
+					ClusterPermissions: []string{
+						"cluster:admin/opendistro/reports/instance/list",
+						"cluster:admin/opendistro/reports/instance/get",
+						"cluster:admin/opendistro/reports/menu/download",
+					},
+					IndexPermissions: []opensearch.IndexPermission{
+						{
+							AllowedActions: []string{
+								"read",
+								"indices:monitor/settings/get",
+							},
+							IndexPatterns: []string{
+								"/^(application|container|lagoon|router)-logs-drupal11-base-_-.+/",
+								"/^(application|container|lagoon|router)-logs-short-_-.+/",
+							},
+							MaskedFields: []string{},
+						},
+					},
+					TenantPermissions: []opensearch.TenantPermission{
+						{
+							AllowedActions: []string{"kibana_all_write"},
+							TenantPatterns: []string{"drooplrox"},
+						},
+					},
+				},
+			},
+		},
+	}
+	log := zap.Must(zap.NewDevelopment(zap.AddStacktrace(zap.ErrorLevel)))
+	for name, tc := range testCases {
+		t.Run(name, func(tt *testing.T) {
+			_, role, err := sync.GenerateRegularGroupRole(
+				log,
+				tc.input.group,
+				tc.input.projectNames,
+				tc.input.groupProjectsMap,
+			)
+			assert.NoError(tt, err, name)
+			assert.Equal(tt, tc.expect, *role, name)
+			assert.True(tt, role.IndexPermissions[0].MaskedFields != nil, name)
+		})
+	}
+}
+
+func TestGenerateProjectRole(t *testing.T) {
+	type generateRoleInput struct {
+		id   int
+		name string
+	}
+	var testCases = map[string]struct {
+		input  generateRoleInput
+		expect opensearch.Role
+	}{
+		"masked_fields is not null": {
+			input: generateRoleInput{
+				id:   123,
+				name: "pets-com",
+			},
+			expect: opensearch.Role{
+				RolePermissions: opensearch.RolePermissions{
+					IndexPermissions: []opensearch.IndexPermission{
+						{
+							AllowedActions: []string{
+								"read",
+								"indices:monitor/settings/get",
+							},
+							IndexPatterns: []string{
+								"/^(application|container|lagoon|router)-logs-pets-com-_-.+/",
+							},
+							MaskedFields: []string{},
+						},
+					},
+					TenantPermissions: []opensearch.TenantPermission{
+						{
+							AllowedActions: []string{"kibana_all_read"},
+							TenantPatterns: []string{"global_tenant"},
+						},
+					},
+				},
+			},
+		},
+	}
+	for name, tc := range testCases {
+		t.Run(name, func(tt *testing.T) {
+			_, role := sync.GenerateProjectRole(tc.input.id, tc.input.name)
+			assert.Equal(tt, tc.expect, *role, name)
+			assert.True(tt, role.IndexPermissions[0].MaskedFields != nil, name)
+		})
+	}
+}
