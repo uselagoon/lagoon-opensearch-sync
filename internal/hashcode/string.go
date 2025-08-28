@@ -10,12 +10,15 @@ import "strconv"
 // https://docs.oracle.com/javase/6/docs/api/java/lang/String.html#hashCode()
 // https://web.archive.org/web/20130703081745/http://www.cogs.susx.ac.uk/courses/dats/notes/html/node114.html
 //
-// Note that the result of this hash must be cast to a 32-bit int and formateed
+// Note that the result of this hash must be cast to a 32-bit int and formatted
 // to base-10 to match Java semantics:
 //
 //	strconv.FormatInt(int64(int32(h.Sum32())), 10)
 //
-// StringHash implements the hash.Hash32 interface from the Go standard library.
+// See the String() convenience function that implements this.
+//
+// StringHash implements the hash.Hash32, and fmt.Stringer interfaces from the
+// Go standard library.
 type StringHash uint32
 
 // NewStringHash returns a new zero-valued StringHash.
