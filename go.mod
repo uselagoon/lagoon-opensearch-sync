@@ -2,8 +2,6 @@ module github.com/uselagoon/lagoon-opensearch-sync
 
 go 1.23.0
 
-toolchain go1.24.1
-
 require (
 	github.com/alecthomas/assert/v2 v2.11.0
 	github.com/alecthomas/kong v1.12.1
