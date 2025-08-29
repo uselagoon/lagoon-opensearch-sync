@@ -4,10 +4,9 @@ import (
 	"bytes"
 	"encoding/json"
 	"os"
-	"reflect"
 	"testing"
 
-	"github.com/davecgh/go-spew/spew"
+	"github.com/alecthomas/assert/v2"
 	"github.com/uselagoon/lagoon-opensearch-sync/internal/opensearch"
 )
 
@@ -67,10 +66,7 @@ func TestTenantsUnmarshal(t *testing.T) {
 			if err = decoder.Decode(&tenants); err != nil {
 				tt.Fatal(err)
 			}
-			if !reflect.DeepEqual(tc.expect, tenants) {
-				tt.Fatalf("expected:\n%s\ngot\n%s\n",
-					spew.Sdump(tc.expect), spew.Sdump(tenants))
-			}
+			assert.Equal(tt, tc.expect, tenants, name)
 		})
 	}
 }

@@ -4,10 +4,9 @@ import (
 	"bytes"
 	"encoding/json"
 	"os"
-	"reflect"
 	"testing"
 
-	"github.com/davecgh/go-spew/spew"
+	"github.com/alecthomas/assert/v2"
 	"github.com/uselagoon/lagoon-opensearch-sync/internal/opensearch"
 )
 
@@ -69,10 +68,7 @@ func TestIndexTemplatesUnmarshal(t *testing.T) {
 				tt.Fatal(err)
 			}
 			itm := opensearch.IndexTemplatesMap(&its)
-			if !reflect.DeepEqual(tc.expect, itm) {
-				tt.Fatalf("expected:\n%s\ngot\n%s\n",
-					spew.Sdump(tc.expect), spew.Sdump(itm))
-			}
+			assert.Equal(tt, tc.expect, itm, name)
 		})
 	}
 }
