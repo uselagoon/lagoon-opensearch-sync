@@ -18,14 +18,14 @@ jobs:
       with:
         go-version: stable
     - run: echo "GOVERSION=$(go version)" >> "$GITHUB_ENV"
-    - uses: goreleaser/goreleaser-action@9c156ee8a17a598857849441385a2041ef570552 # v6.3.0
+    - uses: goreleaser/goreleaser-action@e435ccd777264be153ace6237001ef4d979d3a7a # v6.4.0
       id: goreleaser
       with:
         version: latest
         args: build --clean --verbose --single-target --snapshot
     - name: Login to GHCR
       if: github.actor != 'dependabot[bot]'
-      uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3.4.0
+      uses: docker/login-action@184bdaa0721073962dff0199f1fb9940f07167d1 # v3.5.0
       with:
         registry: ghcr.io
         username: ${{ github.repository_owner }}
@@ -33,7 +33,7 @@ jobs:
     - name: Get Docker metadata
       if: github.actor != 'dependabot[bot]'
       id: docker_metadata
-      uses: docker/metadata-action@902fa8ec7d6ecbf8d84d538b9b233a880e428804 # v5.7.0
+      uses: docker/metadata-action@c1e51972afc2121e065aed6d45c65596fe445f3f # v5.8.0
       with:
         images: ghcr.io/${{ github.repository }}
     - run: echo "GITHUB_REPOSITORY_NAME=$(basename ${{ github.repository }})" >> "$GITHUB_ENV"
