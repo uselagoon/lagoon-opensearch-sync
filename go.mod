@@ -1,6 +1,6 @@
 module github.com/uselagoon/lagoon-opensearch-sync
 
-go 1.23.0
+go 1.24.0
 
 require (
 	github.com/alecthomas/assert/v2 v2.11.0
@@ -9,7 +9,7 @@ require (
 	github.com/go-sql-driver/mysql v1.9.3
 	github.com/jmoiron/sqlx v1.4.0
 	go.uber.org/zap v1.27.0
-	golang.org/x/oauth2 v0.30.0
+	golang.org/x/oauth2 v0.31.0
 )
 
 require (
