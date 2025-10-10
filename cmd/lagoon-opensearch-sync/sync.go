@@ -23,6 +23,7 @@ type SyncCmd struct {
 	Period                      time.Duration `kong:"default='8m',help='Period between synchronisation polls'"`
 	Objects                     []string      `kong:"enum='tenants,roles,rolesmapping,indexpatterns,indextemplates',default='tenants,roles,rolesmapping,indexpatterns,indextemplates',help='Opensearch objects which will be synchronized'"`
 	LegacyIndexPatternDelimiter bool          `kong:"default='false',help='Use the legacy -* index pattern delimiter instead of -_-*'"`
+	HTTPClientTimeout           time.Duration `kong:"default='30s',env='HTTP_CLIENT_TIMEOUT',help='HTTP client timeout for API requests'"`
 	// lagoon DB client fields
 	APIDBAddress  string `kong:"required,env='API_DB_ADDRESS',help='Lagoon API DB Address (host[:port])'"`
 	APIDBDatabase string `kong:"default='infrastructure',env='API_DB_DATABASE',help='Lagoon API DB Database Name'"`
@@ -66,13 +67,13 @@ func (cmd *SyncCmd) Run(log *zap.Logger) error {
 	}
 	// init the opensearch client
 	o, err := opensearch.NewClient(log, cmd.OpensearchBaseURL,
-		cmd.OpensearchUsername, cmd.OpensearchPassword, cmd.OpensearchCACertificate)
+		cmd.OpensearchUsername, cmd.OpensearchPassword, cmd.OpensearchCACertificate, cmd.HTTPClientTimeout)
 	if err != nil {
 		return fmt.Errorf("couldn't init opensearch client: %v", err)
 	}
 	// init the opensearch dashboards client
 	d, err := dashboards.NewClient(cmd.OpensearchDashboardsBaseURL,
-		cmd.OpensearchUsername, cmd.OpensearchPassword)
+		cmd.OpensearchUsername, cmd.OpensearchPassword, cmd.HTTPClientTimeout)
 	if err != nil {
 		return fmt.Errorf("couldn't init opensearch client: %v", err)
 	}

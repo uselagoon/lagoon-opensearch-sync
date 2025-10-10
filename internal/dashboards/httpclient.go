@@ -18,10 +18,10 @@ func (art *AuthenticatedRoundTripper) RoundTrip(req *http.Request) (*http.Respon
 	return http.DefaultTransport.RoundTrip(req)
 }
 
-func httpClient(username, password string) *http.Client {
+func httpClient(username, password string, timeout time.Duration) *http.Client {
 	// construct http.Client with automatic basic auth
 	return &http.Client{
-		Timeout: 30 * time.Second,
+		Timeout: timeout,
 		Transport: &AuthenticatedRoundTripper{
 			username: username,
 			password: password,

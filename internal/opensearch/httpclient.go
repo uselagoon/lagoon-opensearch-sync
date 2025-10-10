@@ -23,12 +23,12 @@ func (art *AuthenticatedRoundTripper) RoundTrip(req *http.Request) (*http.Respon
 }
 
 // ca is the PEM encoded CA certificate
-func httpClient(username, password string, ca *x509.Certificate) *http.Client {
+func httpClient(username, password string, ca *x509.Certificate, timeout time.Duration) *http.Client {
 	cp := x509.NewCertPool()
 	cp.AddCert(ca)
 	// construct http.Client with custom CA and automatic basic auth
 	return &http.Client{
-		Timeout: 30 * time.Second,
+		Timeout: timeout,
 		Transport: &AuthenticatedRoundTripper{
 			roundTripper: &http.Transport{
 				TLSClientConfig: &tls.Config{
