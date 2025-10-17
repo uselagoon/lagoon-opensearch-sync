@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"time"
 
 	"go.uber.org/zap"
 )
@@ -20,7 +21,7 @@ type Client struct {
 
 // NewClient creates a new Opensearch client.
 func NewClient(log *zap.Logger, baseURL, username,
-	password, caCertificate string) (*Client, error) {
+	password, caCertificate string, timeout time.Duration) (*Client, error) {
 	// parse URL
 	u, err := url.Parse(baseURL)
 	if err != nil {
@@ -38,7 +39,7 @@ func NewClient(log *zap.Logger, baseURL, username,
 	// construct client
 	return &Client{
 		baseURL:    u,
-		httpClient: httpClient(username, password, ca),
+		httpClient: httpClient(username, password, ca, timeout),
 		log:        log,
 	}, nil
 }
