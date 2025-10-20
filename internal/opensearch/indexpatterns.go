@@ -15,9 +15,9 @@ import (
 	"go.uber.org/zap"
 )
 
-// maximum size of search results returned by Opensearch
-// https://opensearch.org/docs/latest/opensearch/ux/#scroll-search
-const searchSize = 10000
+// Maximum size of search results returned by Opensearch.
+// https://docs.opensearch.org/latest/search-plugins/searching-data/paginate/
+const searchSizeMax = 10000
 
 var (
 	// indexName matches the raw name of an index-pattern index name and its
@@ -42,6 +42,7 @@ type IndexPattern struct {
 	ID     string `json:"_id"`
 	Index  string `json:"_index"`
 	Source Source `json:"_source"`
+	Sort   []int  `json:"sort"`
 }
 
 // SearchHits represents the array of hits in a search result.
@@ -62,18 +63,19 @@ type SearchQuery struct {
 // SearchBody represents the body of an Opensearch search request.
 type SearchBody struct {
 	Query       SearchQuery                  `json:"query"`
-	SearchAfter []string                     `json:"search_after,omitempty"`
+	SearchAfter []int                        `json:"search_after,omitempty"`
 	Size        uint                         `json:"size"`
 	Sort        map[string]map[string]string `json:"sort"`
 }
 
 // newSearchBody returns an Opensearch search request body.
-// If after is given it populates the search_after field.
-func newSearchBody(after string) (*bytes.Buffer, error) {
-	var searchAfter []string
-	if len(after) > 0 {
-		searchAfter = append(searchAfter, after)
-	}
+//
+// searchSize populates the size field, and controls the number of results
+// returned. The Maximum value accepted by the Opensearch API is 10000.
+//
+// searchAfter populates the search_after field, and allows paging through
+// results.
+func newSearchBody(searchSize uint, searchAfter []int) (*bytes.Buffer, error) {
 	body := SearchBody{
 		Query: SearchQuery{
 			Term: map[string]map[string]string{
@@ -83,7 +85,7 @@ func newSearchBody(after string) (*bytes.Buffer, error) {
 			},
 		},
 		SearchAfter: searchAfter,
-		Size:        10000, // Opensearch query max
+		Size:        searchSize,
 		Sort: map[string]map[string]string{
 			"updated_at": {
 				"order": "asc",
@@ -96,13 +98,19 @@ func newSearchBody(after string) (*bytes.Buffer, error) {
 }
 
 // RawIndexPatterns returns the raw JSON index patterns representation from the
-// Opensearch API. The after parameter allows specifying a search_after date.
-// If after is an empty string, search_after is omitted from the Opensearch API
-// request.
-// https://opensearch.org/docs/latest/opensearch/ux/#paginate-results
-func (c *Client) RawIndexPatterns(ctx context.Context,
-	after string) ([]byte, error) {
-	buf, err := newSearchBody(after)
+// Opensearch API. The searchAfter parameter allows specifying a search_after
+// date.
+//
+// If searchAfter is empty or nil, search_after is omitted from the Opensearch
+// API request, and results will be returned from the "first page".
+//
+// https://docs.opensearch.org/latest/search-plugins/searching-data/paginate/
+func (c *Client) RawIndexPatterns(
+	ctx context.Context,
+	searchSize uint,
+	searchAfter []int,
+) ([]byte, error) {
+	buf, err := newSearchBody(searchSize, searchAfter)
 	if err != nil {
 		return nil, fmt.Errorf("couldn't construct search body: %v", err)
 	}
@@ -114,10 +122,6 @@ func (c *Client) RawIndexPatterns(ctx context.Context,
 		return nil, fmt.Errorf("couldn't construct indexPatterns request: %v", err)
 	}
 	req.Header.Set("Content-Type", "application/json")
-	q := req.URL.Query()
-	q.Add("q", "type:index-pattern")
-	q.Add("size", strconv.Itoa(searchSize))
-	req.URL.RawQuery = q.Encode()
 	res, err := c.httpClient.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("couldn't get indexPatterns: %v", err)
@@ -179,26 +183,28 @@ func indexMaxMigration(hits []IndexPattern) (map[string]int, error) {
 // It fills out the map according to the index patterns that it finds, and
 // returns the number of search results found in data, the updated at date on
 // the last search result in data, and an error (if any).
-func parseIndexPatterns(data []byte,
-	indexPatterns map[string]map[string][]string) (int, string, error) {
+func parseIndexPatterns(
+	data []byte,
+	indexPatterns map[string]map[string][]string,
+) (int, []int, error) {
 	// unpack all index patterns
 	var s SearchResult
 	if err := json.Unmarshal(data, &s); err != nil {
-		return 0, "", fmt.Errorf(
+		return 0, nil, fmt.Errorf(
 			"couldn't unmarshal index patterns search result: %v", err)
 	}
 	// handle the case of zero index patterns
 	if len(s.Hits.Hits) == 0 {
-		return 0, "1970-01-01T00:00:00Z", nil
+		return 0, nil, nil
 	}
 	maxMigration, err := indexMaxMigration(s.Hits.Hits)
 	if err != nil {
-		return 0, "", fmt.Errorf("couldn't get max migrations: %v", err)
+		return 0, nil, fmt.Errorf("couldn't get max migrations: %v", err)
 	}
 	for _, hit := range s.Hits.Hits {
 		index, migration, err := parseIndexName(hit.Index)
 		if err != nil {
-			return 0, "", fmt.Errorf("couldn't parse index name %s: %v", hit.Index, err)
+			return 0, nil, fmt.Errorf("couldn't parse index name %s: %v", hit.Index, err)
 		}
 		if maxMigration[index] != migration {
 			// ignore old migrations of indices
@@ -217,7 +223,7 @@ func parseIndexPatterns(data []byte,
 		indexPatterns[index][hit.Source.IndexPattern.Title] =
 			append(indexPatterns[index][hit.Source.IndexPattern.Title], patternID)
 	}
-	return len(s.Hits.Hits), s.Hits.Hits[len(s.Hits.Hits)-1].Source.UpdatedAt, nil
+	return len(s.Hits.Hits), s.Hits.Hits[len(s.Hits.Hits)-1].Sort, nil
 }
 
 // IndexPatterns returns all Opensearch index patterns as a map of index names
@@ -226,27 +232,27 @@ func parseIndexPatterns(data []byte,
 func (c *Client) IndexPatterns(ctx context.Context) (
 	map[string]map[string][]string, error) {
 	indexPatterns := map[string]map[string][]string{}
-	var after string
+	var searchAfter []int
 	for {
-		rawIndexPatterns, err := c.RawIndexPatterns(ctx, after)
+		rawIndexPatterns, err := c.RawIndexPatterns(ctx, searchSizeMax, searchAfter)
 		if err != nil {
 			return nil,
 				fmt.Errorf("couldn't get index patterns from Opensearch API: %v", err)
 		}
-		searchResultSize, lastUpdatedAt, err :=
+		searchResultSize, lastSortField, err :=
 			parseIndexPatterns(rawIndexPatterns, indexPatterns)
 		if err != nil {
 			return nil,
 				fmt.Errorf("couldn't parse index patterns: %v", err)
 		}
-		if searchResultSize < searchSize {
+		if searchResultSize < searchSizeMax {
 			c.log.Debug("got all index patterns, returning result",
 				zap.Int("hits", searchResultSize))
 			break // we have got all the index patterns...
 		}
 		// ...otherwise we need to do another request
 		c.log.Debug("partial index pattern search response: scrolling results")
-		after = lastUpdatedAt
+		searchAfter = lastSortField
 	}
 	return indexPatterns, nil
 }

@@ -75,7 +75,7 @@ func TestParseIndexPatterns(t *testing.T) {
 	type parseIndexPatternsResponse struct {
 		indexPatterns map[string]map[string][]string
 		length        int
-		lastUpdatedAt string
+		lastSortField []int
 	}
 
 	var testCases = map[string]struct {
@@ -176,7 +176,7 @@ func TestParseIndexPatterns(t *testing.T) {
 					},
 				},
 				length:        76,
-				lastUpdatedAt: "2022-05-18T03:52:40.628Z",
+				lastSortField: []int{1652845960628},
 			},
 		},
 		"unmarshal indexpatterns post migration": {
@@ -271,7 +271,7 @@ func TestParseIndexPatterns(t *testing.T) {
 					},
 				},
 				length:        152,
-				lastUpdatedAt: "2022-12-02T17:18:31.585Z",
+				lastSortField: []int{1670001511585},
 			},
 		},
 		"handle multiple kibana indices": {
@@ -288,7 +288,7 @@ func TestParseIndexPatterns(t *testing.T) {
 					},
 				},
 				length:        9,
-				lastUpdatedAt: "2023-05-02T07:54:24.736Z",
+				lastSortField: []int{1683014064736},
 			},
 		},
 	}
@@ -300,10 +300,10 @@ func TestParseIndexPatterns(t *testing.T) {
 				tt.Fatal(err)
 			}
 			indexPatterns := map[string]map[string][]string{}
-			length, lastUpdatedAt, err :=
+			length, lastSortField, err :=
 				opensearch.ParseIndexPatterns(data, indexPatterns)
 			assert.Equal(tt, length, tc.expect.length, "index pattern length")
-			assert.Equal(tt, lastUpdatedAt, tc.expect.lastUpdatedAt, "last updated at")
+			assert.Equal(tt, lastSortField, tc.expect.lastSortField, "last sort field")
 			assert.NoError(tt, err, "parseIndexPatterns error")
 			assert.Equal(tt, indexPatterns, tc.expect.indexPatterns, "index patterns")
 		})

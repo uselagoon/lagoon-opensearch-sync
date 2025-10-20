@@ -1449,7 +1449,10 @@
           "type": "index-pattern",
           "updated_at": "2022-05-18T03:52:40.628Z"
         },
-        "_type": "_doc"
+        "_type": "_doc",
+        "sort" : [
+          1652845960628
+        ]
       }
     ],
     "max_score": 1.4916549,
