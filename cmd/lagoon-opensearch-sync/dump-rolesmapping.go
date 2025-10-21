@@ -18,7 +18,7 @@ type DumpRolesmappingCmd struct {
 	OpensearchPassword      string        `kong:"required,env='OPENSEARCH_ADMIN_PASSWORD',help='Opensearch admin password'"`
 	OpensearchBaseURL       string        `kong:"required,env='OPENSEARCH_BASE_URL',help='Opensearch Base URL'"`
 	OpensearchCACertificate string        `kong:"required,env='OPENSEARCH_CA_CERTIFICATE',help='Opensearch CA Certificate'"`
-	HTTPClientTimeout       time.Duration `kong:"default='30s',env='HTTP_CLIENT_TIMEOUT',help='HTTP client timeout for API requests'"`
+	OpensearchClientTimeout time.Duration `kong:"default='30s',env='OPENSEARCH_CLIENT_TIMEOUT',help='Opensearch HTTP client request timeout'"`
 	Raw                     bool          `kong:"help='Dump the raw JSON recevied from the backend service.'"`
 }
 
@@ -28,8 +28,14 @@ func (cmd *DumpRolesmappingCmd) Run(log *zap.Logger) error {
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGTERM)
 	defer stop()
 	// init the opensearch client
-	o, err := opensearch.NewClient(log, cmd.OpensearchBaseURL,
-		cmd.OpensearchUsername, cmd.OpensearchPassword, cmd.OpensearchCACertificate, cmd.HTTPClientTimeout)
+	o, err := opensearch.NewClient(
+		log,
+		cmd.OpensearchBaseURL,
+		cmd.OpensearchUsername,
+		cmd.OpensearchPassword,
+		cmd.OpensearchCACertificate,
+		cmd.OpensearchClientTimeout,
+	)
 	if err != nil {
 		return fmt.Errorf("couldn't init opensearch client: %v", err)
 	}

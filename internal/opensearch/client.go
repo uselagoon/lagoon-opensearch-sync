@@ -20,8 +20,14 @@ type Client struct {
 }
 
 // NewClient creates a new Opensearch client.
-func NewClient(log *zap.Logger, baseURL, username,
-	password, caCertificate string, timeout time.Duration) (*Client, error) {
+func NewClient(
+	log *zap.Logger,
+	baseURL,
+	username,
+	password,
+	caCertificate string,
+	timeout time.Duration,
+) (*Client, error) {
 	// parse URL
 	u, err := url.Parse(baseURL)
 	if err != nil {

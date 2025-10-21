@@ -15,7 +15,12 @@ type Client struct {
 }
 
 // NewClient creates a new Opensearch Dashboards client.
-func NewClient(baseURL, username, password string, timeout time.Duration) (*Client, error) {
+func NewClient(
+	baseURL,
+	username,
+	password string,
+	timeout time.Duration,
+) (*Client, error) {
 	// parse URL
 	u, err := url.Parse(baseURL)
 	if err != nil {

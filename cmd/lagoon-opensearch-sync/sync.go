@@ -23,7 +23,6 @@ type SyncCmd struct {
 	Period                      time.Duration `kong:"default='8m',help='Period between synchronisation polls'"`
 	Objects                     []string      `kong:"enum='tenants,roles,rolesmapping,indexpatterns,indextemplates',default='tenants,roles,rolesmapping,indexpatterns,indextemplates',help='Opensearch objects which will be synchronized'"`
 	LegacyIndexPatternDelimiter bool          `kong:"default='false',help='Use the legacy -* index pattern delimiter instead of -_-*'"`
-	HTTPClientTimeout           time.Duration `kong:"default='30s',env='HTTP_CLIENT_TIMEOUT',help='HTTP client timeout for API requests'"`
 	// lagoon DB client fields
 	APIDBAddress  string `kong:"required,env='API_DB_ADDRESS',help='Lagoon API DB Address (host[:port])'"`
 	APIDBDatabase string `kong:"default='infrastructure',env='API_DB_DATABASE',help='Lagoon API DB Database Name'"`
@@ -34,12 +33,14 @@ type SyncCmd struct {
 	KeycloakClientSecret string `kong:"required,env='KEYCLOAK_CLIENT_SECRET',help='Keycloak OAuth2 Client Secret'"`
 	KeycloakBaseURL      string `kong:"required,env='KEYCLOAK_BASE_URL',help='Keycloak Base URL'"`
 	// opensearch client fields
-	OpensearchUsername      string `kong:"default='admin',env='OPENSEARCH_ADMIN_USERNAME',help='Opensearch admin user'"`
-	OpensearchPassword      string `kong:"required,env='OPENSEARCH_ADMIN_PASSWORD',help='Opensearch admin password'"`
-	OpensearchBaseURL       string `kong:"required,env='OPENSEARCH_BASE_URL',help='Opensearch Base URL'"`
-	OpensearchCACertificate string `kong:"required,env='OPENSEARCH_CA_CERTIFICATE',help='Opensearch CA Certificate'"`
+	OpensearchUsername      string        `kong:"default='admin',env='OPENSEARCH_ADMIN_USERNAME',help='Opensearch admin user'"`
+	OpensearchPassword      string        `kong:"required,env='OPENSEARCH_ADMIN_PASSWORD',help='Opensearch admin password'"`
+	OpensearchBaseURL       string        `kong:"required,env='OPENSEARCH_BASE_URL',help='Opensearch Base URL'"`
+	OpensearchCACertificate string        `kong:"required,env='OPENSEARCH_CA_CERTIFICATE',help='Opensearch CA Certificate'"`
+	OpensearchClientTimeout time.Duration `kong:"default='30s',env='OPENSEARCH_CLIENT_TIMEOUT',help='Opensearch HTTP client request timeout'"`
 	// dashboards client fields
-	OpensearchDashboardsBaseURL string `kong:"required,env='OPENSEARCH_DASHBOARDS_BASE_URL',help='Opensearch Dashboards Base URL'"`
+	OpensearchDashboardsBaseURL       string        `kong:"required,env='OPENSEARCH_DASHBOARDS_BASE_URL',help='Opensearch Dashboards Base URL'"`
+	OpensearchDashboardsClientTimeout time.Duration `kong:"default='30s',env='OPENSEARCH_DASHBOARDS_CLIENT_TIMEOUT',help='Opensearch Dashboards HTTP client request timeout'"`
 }
 
 // Run the sync command.
@@ -66,14 +67,24 @@ func (cmd *SyncCmd) Run(log *zap.Logger) error {
 		return fmt.Errorf("couldn't init keycloak client: %v", err)
 	}
 	// init the opensearch client
-	o, err := opensearch.NewClient(log, cmd.OpensearchBaseURL,
-		cmd.OpensearchUsername, cmd.OpensearchPassword, cmd.OpensearchCACertificate, cmd.HTTPClientTimeout)
+	o, err := opensearch.NewClient(
+		log,
+		cmd.OpensearchBaseURL,
+		cmd.OpensearchUsername,
+		cmd.OpensearchPassword,
+		cmd.OpensearchCACertificate,
+		cmd.OpensearchClientTimeout,
+	)
 	if err != nil {
 		return fmt.Errorf("couldn't init opensearch client: %v", err)
 	}
 	// init the opensearch dashboards client
-	d, err := dashboards.NewClient(cmd.OpensearchDashboardsBaseURL,
-		cmd.OpensearchUsername, cmd.OpensearchPassword, cmd.HTTPClientTimeout)
+	d, err := dashboards.NewClient(
+		cmd.OpensearchDashboardsBaseURL,
+		cmd.OpensearchUsername,
+		cmd.OpensearchPassword,
+		cmd.OpensearchDashboardsClientTimeout,
+	)
 	if err != nil {
 		return fmt.Errorf("couldn't init opensearch client: %v", err)
 	}
