@@ -174,41 +174,35 @@ func indexMaxMigration(hits []IndexPattern) (map[string]int, error) {
 	return maxMigration, nil
 }
 
-// parseIndexPatterns takes the raw index patterns search results as a JSON
-// blob, and a map to store results.
-// It fills out the map according to the index patterns that it finds, and
-// returns the number of search results found in data, the updated at date on
-// the last search result in data, and an error (if any).
+// parseIndexPatterns takes a slice of IndexPattern query results.
+//
+// It returns a map of Index Names (corresponding to tenants) to a map of Index
+// Pattern titles to a slice of corresponding Index Pattern IDs.
 func parseIndexPatterns(
-	data []byte,
-	indexPatterns map[string]map[string][]string,
-) (int, []int, error) {
-	// unpack all index patterns
-	var s SearchResult
-	if err := json.Unmarshal(data, &s); err != nil {
-		return 0, nil, fmt.Errorf(
-			"couldn't unmarshal index patterns search result: %v", err)
-	}
+	hits []IndexPattern,
+) (map[string]map[string][]string, error) {
+	// initialise the results map
+	var indexPatterns = map[string]map[string][]string{}
 	// handle the case of zero index patterns
-	if len(s.Hits.Hits) == 0 {
-		return 0, nil, nil
+	if len(hits) == 0 {
+		return indexPatterns, nil
 	}
-	maxMigration, err := indexMaxMigration(s.Hits.Hits)
+	maxMigration, err := indexMaxMigration(hits)
 	if err != nil {
-		return 0, nil, fmt.Errorf("couldn't get max migrations: %v", err)
+		return nil, fmt.Errorf("couldn't get max migrations: %v", err)
 	}
-	for _, hit := range s.Hits.Hits {
-		index, migration, err := parseIndexName(hit.Index)
+	for _, hit := range hits {
+		indexName, migration, err := parseIndexName(hit.Index)
 		if err != nil {
-			return 0, nil, fmt.Errorf("couldn't parse index name %s: %v", hit.Index, err)
+			return nil, fmt.Errorf("couldn't parse index name %s: %v", hit.Index, err)
 		}
-		if maxMigration[index] != migration {
+		if maxMigration[indexName] != migration {
 			// ignore old migrations of indices
 			continue
 		}
 		// initialize the nested map
-		if indexPatterns[index] == nil {
-			indexPatterns[index] = map[string][]string{}
+		if indexPatterns[indexName] == nil {
+			indexPatterns[indexName] = map[string][]string{}
 		}
 		// search results prefix ID with "index-pattern:", which is stripped here
 		// because the prefix is not used when referring to the index pattern by ID
@@ -216,10 +210,10 @@ func parseIndexPatterns(
 		patternID := strings.TrimPrefix(hit.ID, "index-pattern:")
 		// Multiple identically named index patterns may be added to a single
 		// tenant, so map the index pattern names to a slice of IDs.
-		indexPatterns[index][hit.Source.IndexPattern.Title] =
-			append(indexPatterns[index][hit.Source.IndexPattern.Title], patternID)
+		indexPatterns[indexName][hit.Source.IndexPattern.Title] =
+			append(indexPatterns[indexName][hit.Source.IndexPattern.Title], patternID)
 	}
-	return len(s.Hits.Hits), s.Hits.Hits[len(s.Hits.Hits)-1].Sort, nil
+	return indexPatterns, nil
 }
 
 // IndexPatterns returns all Opensearch index patterns as a map of index names
@@ -227,28 +221,30 @@ func parseIndexPatterns(
 // index pattern IDs, which is set if the index pattern exists in the tenant.
 func (c *Client) IndexPatterns(ctx context.Context) (
 	map[string]map[string][]string, error) {
-	indexPatterns := map[string]map[string][]string{}
 	var searchAfter []int
+	var s SearchResult
+	var rawResults []IndexPattern
 	for {
-		rawIndexPatterns, err := c.RawIndexPatterns(ctx, c.searchSize, searchAfter)
+		data, err := c.RawIndexPatterns(ctx, c.searchSize, searchAfter)
 		if err != nil {
 			return nil,
 				fmt.Errorf("couldn't get index patterns from Opensearch API: %v", err)
 		}
-		searchResultSize, lastSortField, err :=
-			parseIndexPatterns(rawIndexPatterns, indexPatterns)
-		if err != nil {
-			return nil,
-				fmt.Errorf("couldn't parse index patterns: %v", err)
+		// unpack index patterns in query result
+		if err := json.Unmarshal(data, &s); err != nil {
+			return nil, fmt.Errorf(
+				"couldn't unmarshal index patterns search result: %v", err)
 		}
-		if searchResultSize < int(c.searchSize) {
-			c.log.Debug("got all index patterns, returning result",
-				zap.Int("hits", searchResultSize))
-			break // we have got all the index patterns...
+		rawResults = append(rawResults, s.Hits.Hits...)
+		// unpack index patterns in query result
+		if len(s.Hits.Hits) < int(c.searchSize) {
+			c.log.Debug("got all index patterns, parsing result",
+				zap.Int("hits", len(rawResults)))
+			// we have got all the index patterns...
+			return parseIndexPatterns(rawResults)
 		}
 		// ...otherwise we need to do another request
 		c.log.Debug("partial index pattern search response: scrolling results")
-		searchAfter = lastSortField
+		searchAfter = s.Hits.Hits[len(s.Hits.Hits)-1].Sort
 	}
-	return indexPatterns, nil
 }

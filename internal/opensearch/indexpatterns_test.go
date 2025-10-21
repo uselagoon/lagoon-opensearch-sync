@@ -302,11 +302,18 @@ func TestParseIndexPatterns(t *testing.T) {
 			if err != nil {
 				tt.Fatal(err)
 			}
-			indexPatterns := map[string]map[string][]string{}
-			length, lastSortField, err :=
-				opensearch.ParseIndexPatterns(data, indexPatterns)
-			assert.Equal(tt, length, tc.expect.length, "index pattern length")
-			assert.Equal(tt, lastSortField, tc.expect.lastSortField, "last sort field")
+
+			var s opensearch.SearchResult
+			assert.NoError(tt, json.Unmarshal(data, &s), "json unmarshal")
+
+			assert.Equal(tt, len(s.Hits.Hits), tc.expect.length, "index pattern length")
+			assert.Equal(
+				tt,
+				s.Hits.Hits[len(s.Hits.Hits)-1].Sort,
+				tc.expect.lastSortField,
+				"last sort field")
+
+			indexPatterns, err := opensearch.ParseIndexPatterns(s.Hits.Hits)
 			assert.NoError(tt, err, "parseIndexPatterns error")
 			assert.Equal(tt, indexPatterns, tc.expect.indexPatterns, "index patterns")
 		})
