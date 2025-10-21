@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"time"
 )
 
 // Client is an Opensearch Dashboards client.
@@ -14,7 +15,12 @@ type Client struct {
 }
 
 // NewClient creates a new Opensearch Dashboards client.
-func NewClient(baseURL, username, password string) (*Client, error) {
+func NewClient(
+	baseURL,
+	username,
+	password string,
+	timeout time.Duration,
+) (*Client, error) {
 	// parse URL
 	u, err := url.Parse(baseURL)
 	if err != nil {
@@ -23,6 +29,6 @@ func NewClient(baseURL, username, password string) (*Client, error) {
 	// construct client
 	return &Client{
 		baseURL:    u,
-		httpClient: httpClient(username, password),
+		httpClient: httpClient(username, password, timeout),
 	}, nil
 }
