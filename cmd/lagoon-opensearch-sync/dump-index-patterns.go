@@ -18,6 +18,8 @@ type DumpIndexPatternsCmd struct {
 	OpensearchBaseURL       string `kong:"required,env='OPENSEARCH_BASE_URL',help='Opensearch Base URL'"`
 	OpensearchCACertificate string `kong:"required,env='OPENSEARCH_CA_CERTIFICATE',help='Opensearch CA Certificate'"`
 	Raw                     bool   `kong:"help='Dump the raw JSON recevied from the backend service.'"`
+	RawSearchSize           uint   `kong:"default='10000',help='Set the size field of the search query, which controls the number of results returned.'"`
+	RawSearchAfter          []int  `kong:"help='Set the search_after field of the query, which controls the query cursor. See Opensearch docs for details.'"`
 }
 
 // Run the dump-index-patterns command.
@@ -32,7 +34,7 @@ func (cmd *DumpIndexPatternsCmd) Run(log *zap.Logger) error {
 		return fmt.Errorf("couldn't init opensearch client: %v", err)
 	}
 	if cmd.Raw {
-		data, err := o.RawIndexPatterns(ctx, "")
+		data, err := o.RawIndexPatterns(ctx, cmd.RawSearchSize, cmd.RawSearchAfter)
 		fmt.Println(string(data))
 		return err
 	}
