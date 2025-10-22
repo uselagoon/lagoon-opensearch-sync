@@ -15,10 +15,6 @@ import (
 	"go.uber.org/zap"
 )
 
-// Maximum size of search results returned by Opensearch.
-// https://docs.opensearch.org/latest/search-plugins/searching-data/paginate/
-const searchSizeMax = 10000
-
 var (
 	// indexName matches the raw name of an index-pattern index name and its
 	// migration number
@@ -234,7 +230,7 @@ func (c *Client) IndexPatterns(ctx context.Context) (
 	indexPatterns := map[string]map[string][]string{}
 	var searchAfter []int
 	for {
-		rawIndexPatterns, err := c.RawIndexPatterns(ctx, searchSizeMax, searchAfter)
+		rawIndexPatterns, err := c.RawIndexPatterns(ctx, c.searchSize, searchAfter)
 		if err != nil {
 			return nil,
 				fmt.Errorf("couldn't get index patterns from Opensearch API: %v", err)
@@ -245,7 +241,7 @@ func (c *Client) IndexPatterns(ctx context.Context) (
 			return nil,
 				fmt.Errorf("couldn't parse index patterns: %v", err)
 		}
-		if searchResultSize < searchSizeMax {
+		if searchResultSize < int(c.searchSize) {
 			c.log.Debug("got all index patterns, returning result",
 				zap.Int("hits", searchResultSize))
 			break // we have got all the index patterns...
