@@ -3,6 +3,9 @@ package opensearch_test
 import (
 	"bytes"
 	"encoding/json"
+	"io"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"testing"
 
@@ -306,6 +309,48 @@ func TestParseIndexPatterns(t *testing.T) {
 			assert.Equal(tt, lastSortField, tc.expect.lastSortField, "last sort field")
 			assert.NoError(tt, err, "parseIndexPatterns error")
 			assert.Equal(tt, indexPatterns, tc.expect.indexPatterns, "index patterns")
+		})
+	}
+}
+
+func TestSplitMigration(t *testing.T) {
+	var testCases = map[string]struct {
+		input  []string
+		expect map[string]map[string][]string
+	}{
+		"migration split across two pages": {
+			input: []string{
+				"testdata/indexpatternsSplitMigration0.json",
+				"testdata/indexpatternsSplitMigration1.json",
+			},
+			expect: map[string]map[string][]string{
+				"1589690574_amazeeiointernal": {
+					"application-logs-*": {"application-logs-*"},
+				},
+			},
+		},
+	}
+	for name, tc := range testCases {
+		t.Run(name, func(tt *testing.T) {
+			// configure router to return the input data in sequence
+			respIdx := 0
+			mux := http.NewServeMux()
+			mux.HandleFunc("/.kibana*/_search",
+				func(w http.ResponseWriter, r *http.Request) {
+					data, err := os.ReadFile(tc.input[respIdx])
+					assert.NoError(tt, err, name)
+					_, err = io.Copy(w, bytes.NewBuffer(data))
+					assert.NoError(tt, err, name)
+					respIdx++
+				})
+			ts := httptest.NewServer(mux)
+			// init opensearch client with a searchSize of 3 to match the testdata
+			client, err := opensearch.NewTestClient(ts.URL, 3)
+			assert.NoError(tt, err, name)
+			// run test and check results
+			indexPatterns, err := client.IndexPatterns(t.Context())
+			assert.NoError(tt, err, name)
+			assert.Equal(tt, tc.expect, indexPatterns, name)
 		})
 	}
 }
