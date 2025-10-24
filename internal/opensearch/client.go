@@ -12,11 +12,16 @@ import (
 	"go.uber.org/zap"
 )
 
+// Maximum size of search results returned by Opensearch.
+// https://docs.opensearch.org/latest/search-plugins/searching-data/paginate/
+const searchSizeMax = 10000
+
 // Client is an Opensearch client.
 type Client struct {
 	baseURL    *url.URL
 	httpClient *http.Client
 	log        *zap.Logger
+	searchSize uint
 }
 
 // NewClient creates a new Opensearch client.
@@ -47,5 +52,6 @@ func NewClient(
 		baseURL:    u,
 		httpClient: httpClient(username, password, ca, timeout),
 		log:        log,
+		searchSize: searchSizeMax,
 	}, nil
 }
