@@ -48,7 +48,7 @@ func TestCalculateIndexTemplateDiff(t *testing.T) {
 				toDelete: nil,
 			},
 		},
-		"delete index template": {
+		"keep unknown index template": {
 			input: input{
 				existing: map[string]opensearch.IndexTemplate{
 					"routerlogs":       {Name: "routerlogs"},
@@ -60,9 +60,7 @@ func TestCalculateIndexTemplateDiff(t *testing.T) {
 			},
 			expect: output{
 				toCreate: map[string]opensearch.IndexTemplate{},
-				toDelete: []string{
-					"manually-created",
-				},
+				toDelete: nil,
 			},
 		},
 		"keep custom index template": {
@@ -77,6 +75,41 @@ func TestCalculateIndexTemplateDiff(t *testing.T) {
 			expect: output{
 				toCreate: map[string]opensearch.IndexTemplate{},
 				toDelete: nil,
+			},
+		},
+		"replace unequal index temlate": {
+			input: input{
+				existing: map[string]opensearch.IndexTemplate{
+					"routerlogs": {
+						Name: "routerlogs",
+						IndexTemplateDefinition: opensearch.IndexTemplateDefinition{
+							IndexPatterns: []string{"foo"},
+						},
+					},
+					"manually-created": {Name: "manually-created"},
+				},
+				required: map[string]opensearch.IndexTemplate{
+					"routerlogs": {
+						Name: "routerlogs",
+						IndexTemplateDefinition: opensearch.IndexTemplateDefinition{
+							IndexPatterns: []string{"bar"},
+						},
+					},
+					"manually-created": {Name: "manually-created"},
+				},
+			},
+			expect: output{
+				toCreate: map[string]opensearch.IndexTemplate{
+					"routerlogs": {
+						Name: "routerlogs",
+						IndexTemplateDefinition: opensearch.IndexTemplateDefinition{
+							IndexPatterns: []string{"bar"},
+						},
+					},
+				},
+				toDelete: []string{
+					"routerlogs",
+				},
 			},
 		},
 	}

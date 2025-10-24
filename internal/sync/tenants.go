@@ -118,7 +118,9 @@ func syncTenants(
 		}
 		err = o.DeleteTenant(ctx, name)
 		if err != nil {
-			log.Warn("couldn't delete tenant", zap.Error(err))
+			log.Warn("couldn't delete tenant",
+				zap.String("name", name),
+				zap.Error(err))
 			continue
 		}
 		log.Info("deleted tenant", zap.String("name", name))
@@ -130,7 +132,9 @@ func syncTenants(
 		}
 		err = o.CreateTenant(ctx, name, &tenant)
 		if err != nil {
-			log.Warn("couldn't create tenant", zap.Error(err))
+			log.Warn("couldn't create tenant",
+				zap.String("name", name),
+				zap.Error(err))
 			continue
 		}
 		log.Info("created tenant", zap.String("name", name))
