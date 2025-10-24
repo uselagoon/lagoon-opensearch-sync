@@ -117,6 +117,9 @@ func (c *Client) RawIndexPatterns(
 	if err != nil {
 		return nil, fmt.Errorf("couldn't construct indexPatterns request: %v", err)
 	}
+	q := req.URL.Query()
+	q.Add("allow_partial_search_results", "false")
+	req.URL.RawQuery = q.Encode()
 	req.Header.Set("Content-Type", "application/json")
 	res, err := c.httpClient.Do(req)
 	if err != nil {
