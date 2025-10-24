@@ -50,8 +50,9 @@ The only exception to this is the `admin_tenant`- if custom index patterns are c
 
 ### Index templates
 
-Similarly, this tool configures index templates suitable for Lagoon and will remove other index templates.
-To avoid removal of manually created custom index templates, they can be named with the prefix `custom-`.
+This tool maintains index templates for Lagoon, but does not touch index templates it doesn't recognise.
+
+Currently it maintains a `routerlogs` index template only.
 
 ## Advanced usage
 

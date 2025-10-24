@@ -2,19 +2,18 @@ package sync
 
 import (
 	"context"
-	"strings"
 
 	"github.com/uselagoon/lagoon-opensearch-sync/internal/opensearch"
 	"go.uber.org/zap"
 )
 
-// default name prefix which will make opensearch-sync avoid removing the given
-// index template
-const defaultIndexTemplateIgnorePrefix = "custom-"
-
 // calculateIndexTemplateDiff returns a map of opensearch index templates which
 // should be created, and a slice of index template names which should be
 // deleted, in order to reconcile existing with required.
+//
+// This logic will only replace "lagoon-owned" index templates. It will not
+// touch index templates it does not know about. Currently "lagoon-owned" index
+// templates are only "routerlogs".
 func calculateIndexTemplateDiff(existing,
 	required map[string]opensearch.IndexTemplate) (
 	map[string]opensearch.IndexTemplate, []string) {
@@ -29,11 +28,14 @@ func calculateIndexTemplateDiff(existing,
 	// calculate index templates to delete
 	var toDelete []string
 	for name, eIndexTemplate := range existing {
-		if strings.HasPrefix(name, defaultIndexTemplateIgnorePrefix) {
-			continue
-		}
+		// check if this index template is required by lagoon
 		rIndexTemplate, ok := required[name]
-		if !ok || !indexTemplatesEqual(rIndexTemplate, eIndexTemplate) {
+		if !ok {
+			continue // this is an unrecognized index template: don't touch it
+		}
+		if !indexTemplatesEqual(rIndexTemplate, eIndexTemplate) {
+			// this index template is owned by lagoon but the contents are not equal
+			// to expected: delete and recreate.
 			toDelete = append(toDelete, name)
 		}
 	}
