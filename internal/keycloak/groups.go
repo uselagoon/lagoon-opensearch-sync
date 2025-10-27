@@ -33,6 +33,7 @@ func (c *Client) RawGroups(ctx context.Context) ([]byte, error) {
 		return nil, fmt.Errorf("couldn't construct groups request: %v", err)
 	}
 	q := req.URL.Query()
+	q.Add("subGroupsCount", "false")
 	q.Add("briefRepresentation", "false")
 	req.URL.RawQuery = q.Encode()
 	res, err := c.httpClient.Do(req)
