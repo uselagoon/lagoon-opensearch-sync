@@ -3,6 +3,7 @@ package sync
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/uselagoon/lagoon-opensearch-sync/internal/keycloak"
 	"github.com/uselagoon/lagoon-opensearch-sync/internal/opensearch"
@@ -95,13 +96,13 @@ func generateRolesMapping(
 	return rolesmapping
 }
 
-// given a map of opensearch rolesmapping, return those that are not reserved
-// or hidden.
+// given a map of opensearch rolesmapping, return those that are not reserved,
+// hidden or custom.
 func filterRolesMapping(rolesmapping map[string]opensearch.RoleMapping,
 	roles map[string]opensearch.Role) map[string]opensearch.RoleMapping {
 	valid := map[string]opensearch.RoleMapping{}
 	for name, rolemapping := range rolesmapping {
-		if rolemapping.Reserved || rolemapping.Hidden {
+		if rolemapping.Reserved || rolemapping.Hidden || strings.HasPrefix(name, ROLE_IGNORE_PREFIX) {
 			continue
 		}
 		// for some reason even a "reserved" RoleMapping can have reserved=false,

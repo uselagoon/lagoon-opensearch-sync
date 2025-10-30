@@ -5,6 +5,8 @@ package sync
 var (
 	CalculateIndexPatternDiff       = calculateIndexPatternDiff
 	CalculateRoleDiff               = calculateRoleDiff
+	FilterRoles                     = filterRoles
+	FilterRolesMapping              = filterRolesMapping
 	GenerateIndexPatterns           = generateIndexPatterns
 	GenerateIndexPatternsForGroup   = generateIndexPatternsForGroup
 	GenerateIndexPermissionPatterns = generateIndexPermissionPatterns
