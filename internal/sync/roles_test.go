@@ -1180,7 +1180,7 @@ func TestFilterRoles(t *testing.T) {
 						},
 					},
 				},
-				"custom-role": {
+				"custom_role": {
 					RolePermissions: opensearch.RolePermissions{
 						IndexPermissions: []opensearch.IndexPermission{
 							{

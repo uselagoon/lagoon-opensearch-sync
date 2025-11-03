@@ -10,6 +10,8 @@ import (
 	"go.uber.org/zap"
 )
 
+const rolemappingIgnorePrefix = "custom_"
+
 // rolesMappingEqual checks the fields Lagoon cares about for functional
 // equality.
 func rolesMappingEqual(a, b opensearch.RoleMapping) bool {
@@ -102,7 +104,7 @@ func filterRolesMapping(rolesmapping map[string]opensearch.RoleMapping,
 	roles map[string]opensearch.Role) map[string]opensearch.RoleMapping {
 	valid := map[string]opensearch.RoleMapping{}
 	for name, rolemapping := range rolesmapping {
-		if rolemapping.Reserved || rolemapping.Hidden || strings.HasPrefix(name, ROLE_IGNORE_PREFIX) {
+		if rolemapping.Reserved || rolemapping.Hidden || strings.HasPrefix(name, rolemappingIgnorePrefix) {
 			continue
 		}
 		// for some reason even a "reserved" RoleMapping can have reserved=false,

@@ -10,7 +10,7 @@ import (
 	"go.uber.org/zap"
 )
 
-const ROLE_IGNORE_PREFIX = "custom-"
+const roleIgnorePrefix = "custom_"
 
 // generateIndexPermissionPatterns returns a slice of index pattern strings
 // in regular expressions format generated from the given slice of project IDs.
@@ -233,7 +233,7 @@ func filterRoles(
 	roles map[string]opensearch.Role) map[string]opensearch.Role {
 	valid := map[string]opensearch.Role{}
 	for name, role := range roles {
-		if role.Static || role.Reserved || strings.HasPrefix(name, ROLE_IGNORE_PREFIX) {
+		if role.Static || role.Reserved || strings.HasPrefix(name, roleIgnorePrefix) {
 			continue
 		}
 		valid[name] = role

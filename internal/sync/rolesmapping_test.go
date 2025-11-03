@@ -32,7 +32,7 @@ func TestFilterRolesMapping(t *testing.T) {
 							Users: []string{"test-user"},
 						},
 					},
-					"custom-role": {
+					"custom_role": {
 						RoleMappingPermissions: opensearch.RoleMappingPermissions{
 							Users: []string{"test-user"},
 						},
@@ -88,7 +88,7 @@ func TestFilterRolesMapping(t *testing.T) {
 							},
 						},
 					},
-					"custom-role": {
+					"custom_role": {
 						RolePermissions: opensearch.RolePermissions{
 							IndexPermissions: []opensearch.IndexPermission{
 								{
