@@ -59,6 +59,10 @@ Currently it maintains a `routerlogs` index template only.
 This tool can be used to debug Opensearch/Lagoon integration.
 For debugging commands see `/lagoon-opensearch-sync --help`.
 
+## Custom roles and role mappings
+
+Custom roles can be manually created when prefixd with `custom_`. In this way, they will be ignored during the sync and not get deleted.
+
 ## Known problems
 
 ### API errors with Opensearch < v2.2.0

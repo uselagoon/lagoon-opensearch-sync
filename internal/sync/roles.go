@@ -3,11 +3,14 @@ package sync
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/uselagoon/lagoon-opensearch-sync/internal/keycloak"
 	"github.com/uselagoon/lagoon-opensearch-sync/internal/opensearch"
 	"go.uber.org/zap"
 )
+
+const roleIgnorePrefix = "custom_"
 
 // generateIndexPermissionPatterns returns a slice of index pattern strings
 // in regular expressions format generated from the given slice of project IDs.
@@ -224,13 +227,13 @@ func calculateRoleDiff(existing, required map[string]opensearch.Role) (
 	return toCreate, toDelete
 }
 
-// given a map of opensearch roles, return those that are not static or
-// reserved.
+// given a map of opensearch roles, return those that are not static,
+// reserved or custom.
 func filterRoles(
 	roles map[string]opensearch.Role) map[string]opensearch.Role {
 	valid := map[string]opensearch.Role{}
 	for name, role := range roles {
-		if role.Static || role.Reserved {
+		if role.Static || role.Reserved || strings.HasPrefix(name, roleIgnorePrefix) {
 			continue
 		}
 		valid[name] = role

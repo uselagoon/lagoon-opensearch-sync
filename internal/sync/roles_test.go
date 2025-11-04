@@ -1128,3 +1128,130 @@ func TestGenerateProjectRole(t *testing.T) {
 		})
 	}
 }
+
+func TestFilterRoles(t *testing.T) {
+	var testCases = map[string]struct {
+		input  map[string]opensearch.Role
+		expect map[string]opensearch.Role
+	}{
+		"filter static, reserved and custom roles": {
+			input: map[string]opensearch.Role{
+				"static-role": {
+					Static: true,
+					RolePermissions: opensearch.RolePermissions{
+						IndexPermissions: []opensearch.IndexPermission{
+							{
+								AllowedActions: []string{
+									"read",
+								},
+								IndexPatterns: []string{
+									"/^(application|container|lagoon|router)-logs-pets-com-_-.+/",
+								},
+								MaskedFields: []string{},
+							},
+						},
+						TenantPermissions: []opensearch.TenantPermission{
+							{
+								AllowedActions: []string{"kibana_all_read"},
+								TenantPatterns: []string{"global_tenant"},
+							},
+						},
+					},
+				},
+				"reserved-role": {
+					Reserved: true,
+					RolePermissions: opensearch.RolePermissions{
+						IndexPermissions: []opensearch.IndexPermission{
+							{
+								AllowedActions: []string{
+									"read",
+								},
+								IndexPatterns: []string{
+									"/^(application|container|lagoon|router)-logs-pets-com-_-.+/",
+								},
+								MaskedFields: []string{},
+							},
+						},
+						TenantPermissions: []opensearch.TenantPermission{
+							{
+								AllowedActions: []string{"kibana_all_read"},
+								TenantPatterns: []string{"global_tenant"},
+							},
+						},
+					},
+				},
+				"custom_role": {
+					RolePermissions: opensearch.RolePermissions{
+						IndexPermissions: []opensearch.IndexPermission{
+							{
+								AllowedActions: []string{
+									"read",
+								},
+								IndexPatterns: []string{
+									"/^(application|container|lagoon|router)-logs-pets-com-_-.+/",
+								},
+								MaskedFields: []string{},
+							},
+						},
+						TenantPermissions: []opensearch.TenantPermission{
+							{
+								AllowedActions: []string{"kibana_all_read"},
+								TenantPatterns: []string{"global_tenant"},
+							},
+						},
+					},
+				},
+				"drupal-role": {
+					RolePermissions: opensearch.RolePermissions{
+						IndexPermissions: []opensearch.IndexPermission{
+							{
+								AllowedActions: []string{
+									"read",
+								},
+								IndexPatterns: []string{
+									"/^(application|container|lagoon|router)-logs-pets-com-_-.+/",
+								},
+								MaskedFields: []string{},
+							},
+						},
+						TenantPermissions: []opensearch.TenantPermission{
+							{
+								AllowedActions: []string{"kibana_all_read"},
+								TenantPatterns: []string{"global_tenant"},
+							},
+						},
+					},
+				},
+			},
+			expect: map[string]opensearch.Role{
+				"drupal-role": {
+					RolePermissions: opensearch.RolePermissions{
+						IndexPermissions: []opensearch.IndexPermission{
+							{
+								AllowedActions: []string{
+									"read",
+								},
+								IndexPatterns: []string{
+									"/^(application|container|lagoon|router)-logs-pets-com-_-.+/",
+								},
+								MaskedFields: []string{},
+							},
+						},
+						TenantPermissions: []opensearch.TenantPermission{
+							{
+								AllowedActions: []string{"kibana_all_read"},
+								TenantPatterns: []string{"global_tenant"},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	for name, tc := range testCases {
+		t.Run(name, func(tt *testing.T) {
+			filteredRoles := sync.FilterRoles(tc.input)
+			assert.Equal(tt, tc.expect, filteredRoles, "filteredRoles")
+		})
+	}
+}
