@@ -35,7 +35,11 @@ func generateIndexPermissionPatterns(
 			continue
 		}
 		patterns = append(patterns,
-			fmt.Sprintf(`/^(application|container|lagoon|router)-logs-%s-_-.+/`, name))
+			fmt.Sprintf(`application-logs-%s-_-*`, name),
+			fmt.Sprintf(`container-logs-%s-_-*`, name),
+			fmt.Sprintf(`lagoon-logs-%s-_-*`, name),
+			fmt.Sprintf(`router-logs-%s-_-*`, name),
+		)
 	}
 	return patterns
 }
@@ -89,8 +93,10 @@ func generateProjectRole(
 						"indices:monitor/settings/get",
 					},
 					IndexPatterns: []string{
-						fmt.Sprintf(
-							`/^(application|container|lagoon|router)-logs-%s-_-.+/`, name),
+						fmt.Sprintf(`application-logs-%s-_-*`, name),
+						fmt.Sprintf(`container-logs-%s-_-*`, name),
+						fmt.Sprintf(`lagoon-logs-%s-_-*`, name),
+						fmt.Sprintf(`router-logs-%s-_-*`, name),
 					},
 					MaskedFields: []string{},
 				},
