@@ -106,20 +106,26 @@ func Sync(ctx context.Context, log *zap.Logger, l LagoonDBService,
 		return fmt.Errorf("couldn't get roles: %v", err)
 	}
 	for _, object := range objects {
-		switch object {
-		case "tenants":
-			syncTenants(ctx, log, groupsSansGlobal, groupProjectsMap, o, dryRun)
-		case "roles":
-			syncRoles(ctx, log, groups, projectNames, roles, groupProjectsMap, o, dryRun)
-		case "rolesmapping":
-			syncRolesMapping(ctx, log, groups, projectNames, roles, groupProjectsMap, o, dryRun)
-		case "indexpatterns":
-			syncIndexPatterns(ctx, log, groupsSansGlobal, projectNames, groupProjectsMap,
-				o, d, dryRun, legacyIndexPatternDelimiter)
-		case "indextemplates":
-			syncIndexTemplates(ctx, log, o, dryRun)
+		select {
+		case <-ctx.Done():
+			log.Debug("exiting sync loop early due to context cancellation")
+			return nil
 		default:
-			log.Warn("sync object not implemented", zap.String("object", object))
+			switch object {
+			case "tenants":
+				syncTenants(ctx, log, groupsSansGlobal, groupProjectsMap, o, dryRun)
+			case "roles":
+				syncRoles(ctx, log, groups, projectNames, roles, groupProjectsMap, o, dryRun)
+			case "rolesmapping":
+				syncRolesMapping(ctx, log, groups, projectNames, roles, groupProjectsMap, o, dryRun)
+			case "indexpatterns":
+				syncIndexPatterns(ctx, log, groupsSansGlobal, projectNames, groupProjectsMap,
+					o, d, dryRun, legacyIndexPatternDelimiter)
+			case "indextemplates":
+				syncIndexTemplates(ctx, log, o, dryRun)
+			default:
+				log.Warn("sync object not implemented", zap.String("object", object))
+			}
 		}
 	}
 	return nil
