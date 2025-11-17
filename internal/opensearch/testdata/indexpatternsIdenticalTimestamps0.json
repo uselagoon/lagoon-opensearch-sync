@@ -1,0 +1,80 @@
+{
+  "took": 264,
+  "timed_out": false,
+  "num_reduce_phases": 2,
+  "_shards": {
+    "total": 861,
+    "successful": 861,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": {
+      "value": 3,
+      "relation": "gte"
+    },
+    "max_score": null,
+    "hits": [
+      {
+        "_index": ".kibana_-1878760932_bartenant_2",
+        "_id": "index-pattern:application-logs-foosite-au-_-*",
+        "_score": null,
+        "_source": {
+          "index-pattern": {
+            "title": "application-logs-foosite-au-_-*",
+            "timeFieldName": "@timestamp"
+          },
+          "type": "index-pattern",
+          "references": [],
+          "migrationVersion": {
+            "index-pattern": "7.6.0"
+          },
+          "updated_at": "2024-12-27T01:45:29.908Z"
+        },
+        "sort": [
+          1735263929908
+        ]
+      },
+      {
+        "_index": ".kibana_-1878760932_bartenant_3",
+        "_id": "index-pattern:application-logs-foosite-au-_-*",
+        "_score": null,
+        "_source": {
+          "index-pattern": {
+            "title": "application-logs-foosite-au-_-*",
+            "timeFieldName": "@timestamp"
+          },
+          "type": "index-pattern",
+          "references": [],
+          "migrationVersion": {
+            "index-pattern": "7.6.0"
+          },
+          "updated_at": "2024-12-27T01:45:29.908Z"
+        },
+        "sort": [
+          1735263929908
+        ]
+      },
+      {
+        "_index": ".kibana_-1878760932_bartenant_2",
+        "_id": "index-pattern:router-logs-foosite-au-_-*",
+        "_score": null,
+        "_source": {
+          "index-pattern": {
+            "title": "router-logs-foosite-au-_-*",
+            "timeFieldName": "@timestamp"
+          },
+          "type": "index-pattern",
+          "references": [],
+          "migrationVersion": {
+            "index-pattern": "7.6.0"
+          },
+          "updated_at": "2024-12-27T01:46:03.224Z"
+        },
+        "sort": [
+          1735263963224
+        ]
+      }
+    ]
+  }
+}
