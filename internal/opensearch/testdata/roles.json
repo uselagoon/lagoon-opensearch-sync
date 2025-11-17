@@ -130,9 +130,18 @@
         ],
         "fls": [],
         "index_patterns": [
-          "/^(application|container|lagoon|router)-logs-drupal9-base-_-.+/",
-          "/^(application|container|lagoon|router)-logs-drupal10-prerelease-_-.+/",
-          "/^(application|container|lagoon|router)-logs-drupal9-solr-_-.+/"
+          "application-logs-drupal9-base-_-*",
+          "container-logs-drupal9-base-_-*",
+          "lagoon-logs-drupal9-base-_-*",
+          "router-logs-drupal9-base-_-*",
+          "application-logs-drupal10-prerelease-_-*",
+          "container-logs-drupal10-prerelease-_-*",
+          "lagoon-logs-drupal10-prerelease-_-*",
+          "router-logs-drupal10-prerelease-_-*",
+          "application-logs-drupal9-solr-_-*",
+          "container-logs-drupal9-solr-_-*",
+          "lagoon-logs-drupal9-solr-_-*",
+          "router-logs-drupal9-solr-_-*"
         ],
         "masked_fields": []
       }
@@ -163,10 +172,22 @@
         ],
         "fls": [],
         "index_patterns": [
-          "/^(application|container|lagoon|router)-logs-drupal9-solr-_-.+/",
-          "/^(application|container|lagoon|router)-logs-react-example-_-.+/",
-          "/^(application|container|lagoon|router)-logs-drupal10-prerelease-_-.+/",
-          "/^(application|container|lagoon|router)-logs-drupal-example-_-.+/"
+          "application-logs-drupal9-solr-_-*",
+          "container-logs-drupal9-solr-_-*",
+          "lagoon-logs-drupal9-solr-_-*",
+          "router-logs-drupal9-solr-_-*",
+          "application-logs-react-example-_-*",
+          "container-logs-react-example-_-*",
+          "lagoon-logs-react-example-_-*",
+          "router-logs-react-example-_-*",
+          "application-logs-drupal10-prerelease-_-*",
+          "container-logs-drupal10-prerelease-_-*",
+          "lagoon-logs-drupal10-prerelease-_-*",
+          "router-logs-drupal10-prerelease-_-*",
+          "application-logs-drupal-example-_-*",
+          "container-logs-drupal-example-_-*",
+          "lagoon-logs-drupal-example-_-*",
+          "router-logs-drupal-example-_-*"
         ],
         "masked_fields": []
       }
@@ -441,7 +462,10 @@
         ],
         "fls": [],
         "index_patterns": [
-          "/^(application|container|lagoon|router)-logs-drupal-example-_-.+/"
+          "application-logs-drupal-example-_-*",
+          "container-logs-drupal-example-_-*",
+          "lagoon-logs-drupal-example-_-*",
+          "router-logs-drupal-example-_-*"
         ],
         "masked_fields": []
       }
@@ -472,7 +496,10 @@
         ],
         "fls": [],
         "index_patterns": [
-          "/^(application|container|lagoon|router)-logs-lagoon-website-_-.+/"
+          "application-logs-lagoon-website-_-*",
+          "container-logs-lagoon-website-_-*",
+          "lagoon-logs-lagoon-website-_-*",
+          "router-logs-lagoon-website-_-*"
         ],
         "masked_fields": []
       }
@@ -503,7 +530,10 @@
         ],
         "fls": [],
         "index_patterns": [
-          "/^(application|container|lagoon|router)-logs-ckan-lagoon-_-.+/"
+          "application-logs-ckan-lagoon-_-*",
+          "container-logs-ckan-lagoon-_-*",
+          "lagoon-logs-ckan-lagoon-_-*",
+          "router-logs-ckan-lagoon-_-*"
         ],
         "masked_fields": []
       }
@@ -534,7 +564,10 @@
         ],
         "fls": [],
         "index_patterns": [
-          "/^(application|container|lagoon|router)-logs-beta-ui-_-.+/"
+          "application-logs-beta-ui-_-*",
+          "container-logs-beta-ui-_-*",
+          "lagoon-logs-beta-ui-_-*",
+          "router-logs-beta-ui-_-*"
         ],
         "masked_fields": []
       }
@@ -565,7 +598,10 @@
         ],
         "fls": [],
         "index_patterns": [
-          "/^(application|container|lagoon|router)-logs-fastly-controller-testing-_-.+/"
+          "application-logs-fastly-controller-testing-_-*",
+          "container-logs-fastly-controller-testing-_-*",
+          "lagoon-logs-fastly-controller-testing-_-*",
+          "router-logs-fastly-controller-testing-_-*"
         ],
         "masked_fields": []
       }
@@ -596,7 +632,10 @@
         ],
         "fls": [],
         "index_patterns": [
-          "/^(application|container|lagoon|router)-logs-drupal9-base-_-.+/"
+          "application-logs-drupal9-base-_-*",
+          "container-logs-drupal9-base-_-*",
+          "lagoon-logs-drupal9-base-_-*",
+          "router-logs-drupal9-base-_-*"
         ],
         "masked_fields": []
       }
@@ -627,7 +666,10 @@
         ],
         "fls": [],
         "index_patterns": [
-          "/^(application|container|lagoon|router)-logs-react-example-_-.+/"
+          "application-logs-react-example-_-*",
+          "container-logs-react-example-_-*",
+          "lagoon-logs-react-example-_-*",
+          "router-logs-react-example-_-*"
         ],
         "masked_fields": []
       }
@@ -658,7 +700,10 @@
         ],
         "fls": [],
         "index_patterns": [
-          "/^(application|container|lagoon|router)-logs-drupal9-solr-_-.+/"
+          "application-logs-drupal9-solr-_-*",
+          "container-logs-drupal9-solr-_-*",
+          "lagoon-logs-drupal9-solr-_-*",
+          "router-logs-drupal9-solr-_-*"
         ],
         "masked_fields": []
       }
@@ -689,7 +734,10 @@
         ],
         "fls": [],
         "index_patterns": [
-          "/^(application|container|lagoon|router)-logs-drupal10-prerelease-_-.+/"
+          "application-logs-drupal10-prerelease-_-*",
+          "container-logs-drupal10-prerelease-_-*",
+          "lagoon-logs-drupal10-prerelease-_-*",
+          "router-logs-drupal10-prerelease-_-*"
         ],
         "masked_fields": []
       }
@@ -720,7 +768,10 @@
         ],
         "fls": [],
         "index_patterns": [
-          "/^(application|container|lagoon|router)-logs-test6-drupal-example-simple-_-.+/"
+          "application-logs-test6-drupal-example-simple-_-*",
+          "container-logs-test6-drupal-example-simple-_-*",
+          "lagoon-logs-test6-drupal-example-simple-_-*",
+          "router-logs-test6-drupal-example-simple-_-*"
         ],
         "masked_fields": []
       }
@@ -751,7 +802,10 @@
         ],
         "fls": [],
         "index_patterns": [
-          "/^(application|container|lagoon|router)-logs-example-ruby-on-rails-_-.+/"
+          "application-logs-example-ruby-on-rails-_-*",
+          "container-logs-example-ruby-on-rails-_-*",
+          "lagoon-logs-example-ruby-on-rails-_-*",
+          "router-logs-example-ruby-on-rails-_-*"
         ],
         "masked_fields": []
       }
