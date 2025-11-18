@@ -3,10 +3,12 @@ package opensearch_test
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"slices"
 	"testing"
 
 	"github.com/alecthomas/assert/v2"
@@ -345,6 +347,75 @@ func TestSplitMigration(t *testing.T) {
 			mux.HandleFunc("/.kibana*/_search",
 				func(w http.ResponseWriter, r *http.Request) {
 					data, err := os.ReadFile(tc.input[respIdx])
+					assert.NoError(tt, err, name)
+					_, err = io.Copy(w, bytes.NewBuffer(data))
+					assert.NoError(tt, err, name)
+					respIdx++
+				})
+			ts := httptest.NewServer(mux)
+			// init opensearch client with a searchSize of 3 to match the testdata
+			client, err := opensearch.NewTestClient(ts.URL, 3)
+			assert.NoError(tt, err, name)
+			// run test and check results
+			indexPatterns, err := client.IndexPatterns(t.Context())
+			assert.NoError(tt, err, name)
+			assert.Equal(tt, tc.expect, indexPatterns, name)
+		})
+	}
+}
+
+func TestIdenticalSortValue(t *testing.T) {
+	var testCases = map[string]struct {
+		input []struct {
+			expectSearchAfter []int
+			responseDataPath  string
+		}
+		expect map[string]map[string][]string
+	}{
+		"identical sort values split across pages": {
+			input: []struct {
+				expectSearchAfter []int
+				responseDataPath  string
+			}{
+				{
+					responseDataPath: "testdata/indexpatternsIdenticalTimestamps0.json",
+				},
+				{
+					expectSearchAfter: []int{1735263963223},
+					responseDataPath:  "testdata/indexpatternsIdenticalTimestamps1.json",
+				},
+			},
+			expect: map[string]map[string][]string{
+				"-1878760932_bartenant": {
+					"router-logs-foosite-au-_-*":      {"router-logs-foosite-au-_-*"},
+					"application-logs-foosite-au-_-*": {"application-logs-foosite-au-_-*"},
+				},
+			},
+		},
+	}
+	for name, tc := range testCases {
+		t.Run(name, func(tt *testing.T) {
+			// configure router to return the input data in sequence
+			respIdx := 0
+			mux := http.NewServeMux()
+			mux.HandleFunc("/.kibana*/_search",
+				func(w http.ResponseWriter, r *http.Request) {
+					// inspect request body
+					body, err := io.ReadAll(r.Body)
+					assert.NoError(tt, err, name)
+					var query opensearch.SearchBody
+					err = json.Unmarshal(body, &query)
+					assert.NoError(tt, err, name)
+					if !slices.Equal(tc.input[respIdx].expectSearchAfter, query.SearchAfter) {
+						http.Error(w,
+							fmt.Sprintf("unexpected searchAfter value: expected %v, got %v",
+								tc.input[respIdx].expectSearchAfter,
+								query.SearchAfter),
+							http.StatusBadRequest)
+						return
+					}
+					// construct response
+					data, err := os.ReadFile(tc.input[respIdx].responseDataPath)
 					assert.NoError(tt, err, name)
 					_, err = io.Copy(w, bytes.NewBuffer(data))
 					assert.NoError(tt, err, name)

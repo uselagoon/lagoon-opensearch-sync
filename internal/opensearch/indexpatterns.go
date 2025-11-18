@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"path"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -213,8 +214,17 @@ func parseIndexPatterns(
 		patternID := strings.TrimPrefix(hit.ID, "index-pattern:")
 		// Multiple identically named index patterns may be added to a single
 		// tenant, so map the index pattern names to a slice of IDs.
-		indexPatterns[indexName][hit.Source.IndexPattern.Title] =
-			append(indexPatterns[indexName][hit.Source.IndexPattern.Title], patternID)
+		//
+		// The IndexPatterns() pagination logic can result in duplicate search
+		// results being passed to this function in `hits`, so avoid adding the
+		// same index pattern ID multiple times here.
+		if !slices.Contains(
+			indexPatterns[indexName][hit.Source.IndexPattern.Title],
+			patternID,
+		) {
+			indexPatterns[indexName][hit.Source.IndexPattern.Title] =
+				append(indexPatterns[indexName][hit.Source.IndexPattern.Title], patternID)
+		}
 	}
 	return indexPatterns, nil
 }
@@ -249,5 +259,18 @@ func (c *Client) IndexPatterns(ctx context.Context) (
 		// ...otherwise we need to do another request
 		c.log.Debug("partial index pattern search response: scrolling results")
 		searchAfter = s.Hits.Hits[len(s.Hits.Hits)-1].Sort
+		// Decrement the searchAfter value, so the next page of results starts with
+		// results containing the same sort value as the last results of this page.
+		//
+		// This ensures that when results which contain the same sort value are
+		// split across page boundaries, none are skipped when requesting the next
+		// page. Instead, some results around page boundaries may be duplicated.
+		// However, this result duplication is accounted for in
+		// parseIndexPatterns(), which deduplicates index pattern IDs.
+		if len(searchAfter) != 1 || searchAfter[0] < 1 {
+			return nil, fmt.Errorf("unexpected sort value: %v (length %d)",
+				searchAfter, len(searchAfter))
+		}
+		searchAfter[0]--
 	}
 }
