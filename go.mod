@@ -15,7 +15,7 @@ require (
 require (
 	filippo.io/edwards25519 v1.1.1 // indirect
 	github.com/alecthomas/repr v0.5.2 // indirect
-	github.com/go-jose/go-jose/v4 v4.1.3 // indirect
+	github.com/go-jose/go-jose/v4 v4.1.4 // indirect
 	github.com/hexops/gotextdiff v1.0.3 // indirect
 	go.uber.org/multierr v1.10.0 // indirect
 )
