@@ -89,11 +89,13 @@ func (cmd *SyncCmd) Run(log *zap.Logger) error {
 		return fmt.Errorf("couldn't init opensearch client: %v", err)
 	}
 	// run sync immediately
+	log.Debug("Starting sync")
 	err = sync.Sync(ctx, log, l, k, o, d, cmd.DryRun, cmd.Objects,
 		cmd.LegacyIndexPatternDelimiter)
 	if err != nil {
 		return err
 	}
+	log.Debug("Sync completed", zap.Duration("period", cmd.Period))
 	if cmd.Once {
 		return nil
 	}
@@ -104,11 +106,13 @@ func (cmd *SyncCmd) Run(log *zap.Logger) error {
 		case <-ctx.Done():
 			return nil
 		case <-ticker.C:
+			log.Debug("Starting sync")
 			err = sync.Sync(ctx, log, l, k, o, d, cmd.DryRun, cmd.Objects,
 				cmd.LegacyIndexPatternDelimiter)
 			if err != nil {
 				return err
 			}
+			log.Debug("Sync completed", zap.Duration("period", cmd.Period))
 		}
 	}
 }
