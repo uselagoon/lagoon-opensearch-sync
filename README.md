@@ -63,6 +63,37 @@ For debugging commands see `/lagoon-opensearch-sync --help`.
 
 Custom roles can be manually created when prefixd with `custom_`. In this way, they will be ignored during the sync and not get deleted.
 
+## Persistent role mapping
+
+While the above approach prevents the normal sync action from removing user created roles and mappings it does not persist them across actions that require the running of `securityadmin.sh` to apply updates/changes to `roles`. This type of action wipes the current roles and role_mappings and creates them from scratch using the values stored in the relevant YAML file located in `/usr/share/opensearch/config/opensearch-security/*.yml` as the single source of truth.
+
+To overcome this you need to add entries into the relavant config via IaC or simililar.
+
+For example to create a prometheus exporter role with appropriate rights to scrape metrics, something like the following could be added.
+
+```yaml
+# /usr/share/opensearch/config/opensearch-security/roles.yml
+prometheus_exporter:
+  reserved: true
+  cluster_permissions:
+  - cluster_monitor
+  - cluster:admin/snapshot/status
+  - cluster:admin/snapshot/get
+  - cluster:admin/repository/get
+  index_permissions:
+  - index_patterns:
+    - "*"
+    allowed_actions:
+    - indices_monitor
+    - indices:admin/mappings/get
+
+# /usr/share/opensearch/config/opensearch-security/roles_mapping.yml
+prometheus_exporter:
+  reserved: true
+  users:
+  - prometheusexporter
+```
+
 ## Known problems
 
 ### API errors with Opensearch < v2.2.0
@@ -86,3 +117,5 @@ curl -ksSL -u "$USER_AUTH" -XDELETE 'https://localhost:9200/_plugins/_security/a
 ```
 
 Or by upgrading to a supported version of Opensearch.
+
+
