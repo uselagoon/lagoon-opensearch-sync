@@ -3,11 +3,14 @@ package keycloak_test
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"strconv"
 	"testing"
+	"time"
 
 	"github.com/alecthomas/assert/v2"
 	"github.com/uselagoon/lagoon-opensearch-sync/internal/keycloak"
@@ -43,6 +46,84 @@ func newTestGroupsServer(tt *testing.T, testDataPath string) *httptest.Server {
 			}
 			_, err = io.Copy(w, f)
 			if err != nil {
+				tt.Fatal(err)
+			}
+		})
+	ts := httptest.NewServer(mux)
+	// now replace the example URL in the discovery JSON with the actual
+	// httptest server URL
+	discoveryBuf = bytes.ReplaceAll(discoveryBuf,
+		[]byte("https://keycloak.example.com"), []byte(ts.URL))
+	return ts
+}
+
+// newTestPaginatedGroupsServer sets up a mock keycloak which serves the
+// groups in testDataPath split into pages according to the first/max query
+// parameters of each request, to exercise Groups' pagination logic.
+//
+// If requestedFirsts is non-nil, the "first" value of each request made to
+// the groups endpoint is appended to it, so tests can assert on the
+// sequence of pagination requests made.
+func newTestPaginatedGroupsServer(
+	tt *testing.T,
+	testDataPath string,
+	requestedFirsts *[]uint,
+) *httptest.Server {
+	// load the discovery JSON first, because the mux closure needs to
+	// reference its buffer
+	discoveryBuf, err := os.ReadFile("testdata/realm.oidc.discovery.json")
+	if err != nil {
+		tt.Fatal(err)
+		return nil
+	}
+	// load the full set of groups up front, so they can be sliced into pages
+	// on demand
+	data, err := os.ReadFile(testDataPath)
+	if err != nil {
+		tt.Fatal(err)
+		return nil
+	}
+	var allGroups []json.RawMessage
+	if err = json.Unmarshal(data, &allGroups); err != nil {
+		tt.Fatal(err)
+		return nil
+	}
+	// configure router with the URLs that OIDC discovery and JWKS require
+	mux := http.NewServeMux()
+	mux.HandleFunc("/auth/realms/lagoon/.well-known/openid-configuration",
+		func(w http.ResponseWriter, r *http.Request) {
+			d := bytes.NewBuffer(discoveryBuf)
+			_, err = io.Copy(w, d)
+			if err != nil {
+				tt.Fatal(err)
+			}
+		})
+	// configure the "all groups" path to serve a page of allGroups based on
+	// the first/max query parameters of the request
+	mux.HandleFunc("/auth/admin/realms/lagoon/groups",
+		func(w http.ResponseWriter, r *http.Request) {
+			first, err := strconv.ParseUint(r.URL.Query().Get("first"), 10, 64)
+			if err != nil {
+				tt.Fatal(err)
+				return
+			}
+			max, err := strconv.ParseUint(r.URL.Query().Get("max"), 10, 64)
+			if err != nil {
+				tt.Fatal(err)
+				return
+			}
+			if requestedFirsts != nil {
+				*requestedFirsts = append(*requestedFirsts, uint(first))
+			}
+			page := []json.RawMessage{}
+			if int(first) < len(allGroups) {
+				end := int(first) + int(max)
+				if end > len(allGroups) {
+					end = len(allGroups)
+				}
+				page = allGroups[int(first):end]
+			}
+			if err = json.NewEncoder(w).Encode(page); err != nil {
 				tt.Fatal(err)
 			}
 		})
@@ -172,6 +253,8 @@ func TestGroups(t *testing.T) {
 				ts.URL,
 				"test-client-id",
 				"test-client-secret",
+				30*time.Second,
+				100,
 			)
 			if err != nil {
 				tt.Fatal(err)
@@ -188,4 +271,83 @@ func TestGroups(t *testing.T) {
 			assert.Equal(tt, tc.expect, groups, name)
 		})
 	}
+}
+
+// TestGroupsPagination exercises the pagination loop in Groups(), using
+// testdata/groups.json (which contains 9 groups) split into pages according
+// to each test case's groupsPageSize.
+func TestGroupsPagination(t *testing.T) {
+	var testCases = map[string]struct {
+		groupsPageSize uint
+		expectFirsts   []uint
+	}{
+		"partial last page": {
+			// 9 groups in pages of 6: [0,6) then [6,9) (a short page), so
+			// pagination stops after 2 requests.
+			groupsPageSize: 6,
+			expectFirsts:   []uint{0, 6},
+		},
+		"exact multiple of page size": {
+			// 9 groups in pages of 3: [0,3) [3,6) [6,9) (all full pages), so an
+			// additional request is required at first=9 to discover there are no
+			// more results.
+			groupsPageSize: 3,
+			expectFirsts:   []uint{0, 3, 6, 9},
+		},
+		"page size larger than total": {
+			// a single request at first=0 returns all 9 groups, which is fewer
+			// than groupsPageSize, so pagination stops immediately.
+			groupsPageSize: 100,
+			expectFirsts:   []uint{0},
+		},
+	}
+	for name, tc := range testCases {
+		t.Run(name, func(tt *testing.T) {
+			var requestedFirsts []uint
+			ts := newTestPaginatedGroupsServer(tt, "testdata/groups.json",
+				&requestedFirsts)
+			defer ts.Close()
+			ctx := context.Background()
+			k, err := keycloak.NewClientCredentialsClient(
+				ctx,
+				ts.URL,
+				"test-client-id",
+				"test-client-secret",
+				30*time.Second,
+				tc.groupsPageSize,
+			)
+			if err != nil {
+				tt.Fatal(err)
+			}
+			// override internal client credentials HTTP client for testing
+			k.UseDefaultHTTPClient()
+			// execute test
+			groups, err := k.Groups(ctx)
+			assert.NoError(tt, err, name)
+			assert.Equal(tt, 9, len(groups), name)
+			assert.Equal(tt, tc.expectFirsts, requestedFirsts, name)
+		})
+	}
+}
+
+// TestGroupsPageSizeZero checks that Groups() returns an error rather than
+// looping forever when groupsPageSize is zero.
+func TestGroupsPageSizeZero(t *testing.T) {
+	ts := newTestGroupsServer(t, "testdata/groups.json")
+	defer ts.Close()
+	ctx := context.Background()
+	k, err := keycloak.NewClientCredentialsClient(
+		ctx,
+		ts.URL,
+		"test-client-id",
+		"test-client-secret",
+		30*time.Second,
+		0,
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	k.UseDefaultHTTPClient()
+	_, err = k.Groups(ctx)
+	assert.Error(t, err, "groupsPageSize zero")
 }
