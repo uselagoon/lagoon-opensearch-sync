@@ -29,9 +29,11 @@ type SyncCmd struct {
 	APIDBPassword string `kong:"required,env='API_DB_PASSWORD',help='Lagoon API DB Password'"`
 	APIDBUsername string `kong:"default='api',env='API_DB_USERNAME',help='Lagoon API DB Username'"`
 	// keycloak client fields
-	KeycloakClientID     string `kong:"default='lagoon-opensearch-sync',env='KEYCLOAK_CLIENT_ID',help='Keycloak OAuth2 Client ID'"`
-	KeycloakClientSecret string `kong:"required,env='KEYCLOAK_CLIENT_SECRET',help='Keycloak OAuth2 Client Secret'"`
-	KeycloakBaseURL      string `kong:"required,env='KEYCLOAK_BASE_URL',help='Keycloak Base URL'"`
+	KeycloakClientID       string        `kong:"default='lagoon-opensearch-sync',env='KEYCLOAK_CLIENT_ID',help='Keycloak OAuth2 Client ID'"`
+	KeycloakClientSecret   string        `kong:"required,env='KEYCLOAK_CLIENT_SECRET',help='Keycloak OAuth2 Client Secret'"`
+	KeycloakBaseURL        string        `kong:"required,env='KEYCLOAK_BASE_URL',help='Keycloak Base URL'"`
+	KeycloakClientTimeout  time.Duration `kong:"default='30s',env='KEYCLOAK_CLIENT_TIMEOUT',help='Keycloak HTTP client request timeout'"`
+	KeycloakGroupsPageSize uint          `kong:"default='100',env='KEYCLOAK_GROUPS_PAGE_SIZE',help='Number of groups to fetch per page from the Keycloak Admin API'"`
 	// opensearch client fields
 	OpensearchUsername      string        `kong:"default='admin',env='OPENSEARCH_ADMIN_USERNAME',help='Opensearch admin user'"`
 	OpensearchPassword      string        `kong:"required,env='OPENSEARCH_ADMIN_PASSWORD',help='Opensearch admin password'"`
@@ -62,7 +64,10 @@ func (cmd *SyncCmd) Run(log *zap.Logger) error {
 	// init the keycloak client
 	k, err := keycloak.NewClientCredentialsClient(ctx, cmd.KeycloakBaseURL,
 		cmd.KeycloakClientID,
-		cmd.KeycloakClientSecret)
+		cmd.KeycloakClientSecret,
+		cmd.KeycloakClientTimeout,
+		cmd.KeycloakGroupsPageSize,
+	)
 	if err != nil {
 		return fmt.Errorf("couldn't init keycloak client: %v", err)
 	}

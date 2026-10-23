@@ -38,6 +38,8 @@ The deployment requires:
 | `OPENSEARCH_DASHBOARDS_BASE_URL` | HTTP URL to the internal Dashboards service.               | `http://opensearch-dashboards.opensearch-dashboards.svc.cluster.local:5601` |
 | `KEYCLOAK_CLIENT_ID`             | Client ID of `lagoon-opensearch-sync` Keycloak client.     |                                                                             |
 | `KEYCLOAK_CLIENT_SECRET`         | Client secret of `lagoon-opensearch-sync` Keycloak client. |                                                                             |
+| `KEYCLOAK_CLIENT_TIMEOUT`        | Keycloak HTTP client request timeout (not required, default `30s`). | `30s`                                                              |
+| `KEYCLOAK_GROUPS_PAGE_SIZE`      | Number of groups to fetch per page from the Keycloak Admin API (not required, default `100`). | `100`                                            |
 | `OPENSEARCH_ADMIN_PASSWORD`      | Password for the Opensearch `admin` user.                  |                                                                             |
 
 3. Command `/lagoon-opensearch-sync`.
